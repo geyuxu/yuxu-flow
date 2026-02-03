@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: yxflow-linux-x64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: yxflow-macos-x64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: yxflow-macos-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Compile
+        run: |
+          deno compile -A --target ${{ matrix.target }} -o ${{ matrix.artifact }} scripts/cli.ts
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/yxflow-linux-x64/yxflow-linux-x64
+            artifacts/yxflow-macos-x64/yxflow-macos-x64
+            artifacts/yxflow-macos-arm64/yxflow-macos-arm64
+          generate_release_notes: true

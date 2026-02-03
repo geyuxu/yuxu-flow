@@ -1,11 +1,42 @@
-# Generated
-
 # OS
 .DS_Store
+Thumbs.db
 
-# Node
+# Deno
+deno.lock
+
+# Node (if any)
 node_modules/
 
-__*/
+# Build output
+dist/
+*.wasm
 
-.claude/staticflow
+# Cache
+.cache/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude
+.claude/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Compiled binary (local testing)
+yxflow
+staticflow
+
+# Example site build output
+example/dist/
+docs/

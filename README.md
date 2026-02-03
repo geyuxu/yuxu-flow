@@ -1,221 +1,117 @@
-# Static Flow
+# YXFlow
 
-A modern static site generator built with Deno. Compiles to a single binary (~122MB).
+A modern static site generator built with Deno. Zero runtime dependencies - compiles to a single binary.
 
 ## Features
 
-- **Multi-format Content**: Markdown, Jupyter Notebooks, PDF, Office documents (DOCX/XLSX/PPTX/ODT), LaTeX
-- **Photo Gallery**: HEIC/HEIF conversion, smart compression, AI-generated descriptions
-- **Hybrid Search**: BM25 keyword search + semantic vector search (OpenAI embeddings + Voy WASM)
-- **AI Assistant**: RAG-powered chat widget with streaming responses
-- **Medium Export**: Convert posts to Medium-compatible HTML with GitHub Gists for code blocks
-- **Single Binary**: No runtime dependencies after compilation
-
-## Project Structure
-
-```
-static-flow/
-├── scripts/           # Build tools (TypeScript)
-├── example/           # Example site template
-│   ├── content/       # User content (posts, photos)
-│   ├── themes/        # HTML templates & components
-│   ├── dist/          # Build output
-│   └── staticflow.config.yaml
-├── docs/              # GitHub Pages (built from example)
-├── build.sh           # One-click build script
-└── deno.json          # Deno configuration
-```
+- **Single Binary** - No Node.js, no npm, just one executable
+- **Multi-format Content** - Markdown, Jupyter Notebooks, PDF, LaTeX, Office documents
+- **Hybrid Search** - BM25 keyword + semantic vector search (WASM)
+- **AI Powered** - RAG chat assistant, auto-translation, photo descriptions
+- **Photo Gallery** - HEIC conversion, smart compression
+- **Fast Deploy** - Git worktree integration, 3-second deploys
 
 ## Quick Start
 
 ```bash
-# 1. Build and install
-./build.sh --compile
+# Install
+curl -fsSL https://github.com/geyuxu/yuxu-flow/releases/download/latest/install.sh | sh
 
-# 2. Create your website
-cp -r example ~/my-website
-cd ~/my-website
+# Create site
+yxflow init my-blog
+cd my-blog
 
-# 3. Edit configuration
-vim staticflow.config.yaml
-vim sidebar-config.json
+# Build and preview
+yxflow build
+yxflow serve
 
-# 4. Build and preview
-staticflow build
-staticflow serve
+# Deploy to GitHub Pages
+yxflow deploy
 ```
 
 ## CLI Commands
 
 ```bash
-staticflow build              # Full build (photos + blog + search)
-staticflow build --photos     # Process photos only
-staticflow build --static     # Static HTML only
-staticflow build --medium     # Medium export only
-staticflow build --push       # Build and git push
-staticflow serve              # Dev server at :8080
-staticflow serve --port=3000  # Custom port
-staticflow deploy             # Deploy dist/ to gh-pages branch
-staticflow deploy --build     # Build first, then deploy
-staticflow setup              # Check dependencies
-staticflow clean              # Clean generated files
-staticflow init               # Initialize new project
-```
-
-## Site Structure
-
-```
-my-website/
-├── staticflow.config.yaml    # Site configuration
-├── sidebar-config.json       # Sidebar links & features
-├── home-config.json          # Homepage sections
-├── static/                   # Static files (copied to dist root)
-│   ├── favicon.ico          # Favicon files
-│   ├── apple-touch-icon.png
-│   ├── photo.jpg            # Avatar/profile photo
-│   ├── CNAME                # GitHub Pages custom domain
-│   └── blog/images/         # Blog post images
-├── content/
-│   ├── posts/               # Blog posts (md, ipynb, pdf, tex, odt...)
-│   └── photos/              # Photo albums (YYYY/YYYYMMDD-Location/)
-├── themes/
-│   └── default/             # Theme files
-│       ├── index.html       # Homepage template
-│       ├── blog/            # Blog templates
-│       ├── gallery/         # Gallery template
-│       ├── components/      # JS components (sidebar, search, chat)
-│       └── lib/             # Voy WASM search library
-└── dist/                    # Build output (deploy this)
+yxflow build              # Full build
+yxflow build --static     # Static HTML only
+yxflow build --photos     # Process photos only
+yxflow serve              # Dev server at :8080
+yxflow deploy             # Deploy to gh-pages
+yxflow deploy --build     # Build + deploy
+yxflow setup              # Check dependencies
 ```
 
 ## Configuration
 
-### staticflow.config.yaml
-
 ```yaml
+# staticflow.config.yaml
 site:
   name: "My Blog"
   url: "https://example.com"
-  author: "Your Name"
-  language: ["en"]
 
 paths:
   posts: "content/posts"
   photos: "content/photos"
   output: "dist"
-  theme: "themes/default"
 
 features:
   search: true
-  vectorSearch: true    # Requires OPENAI_API_KEY
+  vectorSearch: true
   gallery: true
-  mediumExport: false
-
-build:
-  imageCompression: true
-  maxImageWidth: 2000
-  imageQuality: 85
+  chat: false
 ```
 
-### sidebar-config.json
+## Project Structure
 
-```json
-{
-  "name": "Your Name",
-  "title": "Your Title",
-  "avatar": "/assets/photo.jpg",
-  "email": "you@example.com",
-  "search": true,
-  "semanticSearch": true,
-  "chat": true,
-  "links": [
-    { "type": "github", "url": "https://github.com/you", "label": "GitHub" },
-    { "type": "blog", "url": "/blog/", "label": "Blog" }
-  ]
-}
+```
+my-blog/
+├── content/
+│   ├── posts/           # Blog posts (md, ipynb, pdf, tex...)
+│   └── photos/          # Photo albums
+├── themes/default/      # HTML templates
+├── static/              # Favicon, CNAME, etc.
+├── dist/                # Build output (gh-pages worktree)
+└── staticflow.config.yaml
 ```
 
-## Environment Variables
+## Supported Formats
 
-```bash
-# Vector search & AI features (OpenAI)
-export OPENAI_API_KEY="sk-..."
-
-# Medium export with GitHub Gists
-export GITHUB_TOKEN_CREATE_GIST="ghp-..."
-```
-
-## External Dependencies
-
-### Required
-
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| **Deno** | >= 1.40 | Runtime & compilation |
-
-### Optional (Feature-dependent)
-
-| Dependency | Purpose | Install |
-|------------|---------|---------|
-| **ImageMagick** | Photo compression, HEIC conversion | `brew install imagemagick` / `apt install imagemagick` |
-| **LibreOffice** | Office docs to PDF (DOCX, XLSX, PPTX, ODT, ODS, ODP) | `brew install --cask libreoffice` / `apt install libreoffice` |
-| **pdflatex** | LaTeX to PDF | `brew install --cask mactex-no-gui` / `apt install texlive-latex-base` |
-| **Chrome/Chromium** | Table to PNG for Medium export | Usually pre-installed |
-
-### External APIs (Optional)
-
-| API | Purpose | Required For |
-|-----|---------|--------------|
-| **OpenAI API** | Embeddings for semantic search, AI descriptions | `vectorSearch`, `chat`, AI photo descriptions |
-| **GitHub API** | Create Gists for long code blocks | `mediumExport` with code blocks > 15 lines |
-
-Run `staticflow setup` to check installed dependencies.
-
-## Supported Content Formats
-
-| Format | Extension | Features |
-|--------|-----------|----------|
-| Markdown | `.md` | Full support with frontmatter |
-| Jupyter Notebook | `.ipynb` | Code cells, outputs, images |
+| Format | Extension | Preview |
+|--------|-----------|---------|
+| Markdown | `.md` | Full render |
+| Jupyter Notebook | `.ipynb` | Full render |
 | PDF | `.pdf` | Embedded viewer |
-| LaTeX | `.tex` | Converts to PDF (requires pdflatex) |
-| Word | `.docx` | Converts to PDF (requires LibreOffice) |
-| Excel | `.xlsx` | Converts to PDF |
-| PowerPoint | `.pptx` | Converts to PDF |
-| OpenDocument | `.odt`, `.ods`, `.odp` | Converts to PDF |
-| Images | `.jpg`, `.png`, `.gif`, `.webp`, `.svg` | Direct display |
-| Code | `.py`, `.js`, `.ts`, `.go`, etc. | Syntax highlighted |
+| LaTeX | `.tex` | PDF preview |
+| Office | `.docx`, `.xlsx`, `.pptx`, `.odt` | PDF preview |
+| Images | `.jpg`, `.png`, `.gif`, `.webp`, `.svg` | Gallery |
+| Video | `.mp4`, `.webm` | Player |
+| Audio | `.mp3`, `.wav`, `.ogg` | Player |
+| Code | `.py`, `.js`, `.ts`, `.go`, etc. | Syntax highlight |
 
 ## Development
 
 ```bash
-# Run from source
-cd example
-deno run -A ../scripts/cli.ts build
-deno run -A ../scripts/cli.ts serve
+# Clone
+git clone https://github.com/geyuxu/yuxu-flow.git
+cd static-flow
 
-# Compile to binary
-deno compile -A --output staticflow scripts/cli.ts
+# Run directly
+deno run -A scripts/cli.ts build
 
-# Or use build script
-./build.sh --compile
+# Compile binary
+deno task compile
 ```
 
-## Deployment
+## External Dependencies (Optional)
 
-### GitHub Pages
+Some features require external programs:
 
-1. Build site: `staticflow build`
-2. Copy `dist/` contents to `docs/` or deploy branch
-3. Enable GitHub Pages from repository settings
-
-### Other Platforms
-
-The `dist/` directory contains static files that can be deployed to any static hosting:
-- Netlify
-- Vercel
-- Cloudflare Pages
-- AWS S3 + CloudFront
+| Feature | Dependency | Install |
+|---------|------------|---------|
+| Image compression | ImageMagick | `brew install imagemagick` |
+| HEIC conversion | ImageMagick | `brew install imagemagick` |
+| Office → PDF | LibreOffice | `brew install --cask libreoffice` |
+| LaTeX → PDF | pdflatex | `brew install --cask mactex-no-gui` |
 
 ## License
 
