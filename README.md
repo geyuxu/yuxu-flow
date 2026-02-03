@@ -55,6 +55,8 @@ staticflow build --medium     # Medium export only
 staticflow build --push       # Build and git push
 staticflow serve              # Dev server at :8080
 staticflow serve --port=3000  # Custom port
+staticflow deploy             # Deploy dist/ to gh-pages branch
+staticflow deploy --build     # Build first, then deploy
 staticflow setup              # Check dependencies
 staticflow clean              # Clean generated files
 staticflow init               # Initialize new project
@@ -67,6 +69,12 @@ my-website/
 ├── staticflow.config.yaml    # Site configuration
 ├── sidebar-config.json       # Sidebar links & features
 ├── home-config.json          # Homepage sections
+├── static/                   # Static files (copied to dist root)
+│   ├── favicon.ico          # Favicon files
+│   ├── apple-touch-icon.png
+│   ├── photo.jpg            # Avatar/profile photo
+│   ├── CNAME                # GitHub Pages custom domain
+│   └── blog/images/         # Blog post images
 ├── content/
 │   ├── posts/               # Blog posts (md, ipynb, pdf, tex, odt...)
 │   └── photos/              # Photo albums (YYYY/YYYYMMDD-Location/)
@@ -76,8 +84,7 @@ my-website/
 │       ├── blog/            # Blog templates
 │       ├── gallery/         # Gallery template
 │       ├── components/      # JS components (sidebar, search, chat)
-│       ├── lib/             # Voy WASM search library
-│       └── assets/          # Favicon, avatar, etc.
+│       └── lib/             # Voy WASM search library
 └── dist/                    # Build output (deploy this)
 ```
 

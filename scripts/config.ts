@@ -30,6 +30,7 @@ export interface PathsConfig {
   output: string;
   theme: string;
   cache: string;
+  static: string;
 }
 
 export interface FeaturesConfig {
@@ -87,6 +88,7 @@ const DEFAULT_CONFIG: StaticFlowConfig = {
     output: "dist",
     theme: "themes/default",
     cache: ".cache",
+    static: "static",
   },
   features: {
     search: true,

@@ -1852,18 +1852,23 @@
             }
         }
 
-        // Initialize after content loads
-        const checkContentLoaded = setInterval(() => {
-            const article = document.getElementById('article');
-            if (article && !article.innerHTML.includes('Loading')) {
-                clearInterval(checkContentLoaded);
-                // Wait a bit for post-processing
-                setTimeout(initLanguageSelector, 100);
-            }
-        }, 100);
+        // Initialize after content loads (only if translation enabled in config)
+        fetch('/features.json')
+            .then(r => r.json())
+            .then(features => {
+                // Only init language selector if translation is enabled
+                if (features.translation !== true) return;
 
-        // Clear check after 10 seconds
-        setTimeout(() => clearInterval(checkContentLoaded), 10000);
+                const checkContentLoaded = setInterval(() => {
+                    const article = document.getElementById('article');
+                    if (article && !article.innerHTML.includes('Loading')) {
+                        clearInterval(checkContentLoaded);
+                        setTimeout(initLanguageSelector, 100);
+                    }
+                }, 100);
+                setTimeout(() => clearInterval(checkContentLoaded), 10000);
+            })
+            .catch(() => console.log('Translation disabled (no config)'));
     </script>
 
 </body>

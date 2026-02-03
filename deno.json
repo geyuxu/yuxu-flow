@@ -16,7 +16,7 @@
     "setup": "deno run -A scripts/cli.ts setup",
     "init": "deno run -A scripts/cli.ts init",
     "clean": "deno run -A scripts/cli.ts clean",
-    "compile": "deno compile --output staticflow --allow-all scripts/cli.ts"
+    "compile": "rm -f /opt/staticflow/bin/yxflow && deno compile -A -o /opt/staticflow/bin/yxflow scripts/cli.ts"
   },
   "compilerOptions": {
     "strict": true

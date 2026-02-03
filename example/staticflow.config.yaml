@@ -14,6 +14,7 @@ paths:
   output: "dist"
   theme: "themes/default"
   cache: ".cache"
+  static: "static"          # Favicon, CNAME, blog images (copied to dist root)
 
 features:
   search: true

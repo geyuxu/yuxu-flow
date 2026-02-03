@@ -1,7 +1,7 @@
 {
   "name": "Your Name",
   "title": "Your Title",
-  "avatar": "/assets/avatar.svg",
+  "avatar": "/avatar.svg",
   "email": "you@example.com",
   "copyright": "2026 Your Name",
   "search": true,

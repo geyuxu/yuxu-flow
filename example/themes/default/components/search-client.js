@@ -196,7 +196,7 @@ export class SearchClient {
         if (!indexResponse.ok) {
             throw new Error('Semantic index not found');
         }
-        const { getVoy } = await import('/public/lib/voy-loader.js');
+        const { getVoy } = await import('/lib/voy-loader.js');
         const voyModule = await getVoy();
         const indexData = await indexResponse.text();
         return voyModule.deserialize(indexData);
