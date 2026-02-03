@@ -1,0 +1,186 @@
+{
+    "title": "Games",
+    "description": "20 browser-based classics, no installation required",
+    "items": [
+        {
+            "id": "2048",
+            "href": "/games/2048.html",
+            "iconClass": "c2048",
+            "icon": "2048",
+            "title": "2048",
+            "desc": "Slide tiles to combine numbers and reach 2048",
+            "controls": "Arrow keys or swipe"
+        },
+        {
+            "id": "snake",
+            "href": "/games/snake.html",
+            "iconClass": "snake",
+            "icon": "\ud83d\udc0d",
+            "title": "Snake",
+            "desc": "Guide the snake to eat food and grow longer",
+            "controls": "Arrow keys"
+        },
+        {
+            "id": "tetris",
+            "href": "/games/tetris.html",
+            "iconClass": "tetris",
+            "icon": "\ud83e\uddf1",
+            "title": "Tetris",
+            "desc": "Stack falling blocks to clear lines",
+            "controls": "Arrows + Space"
+        },
+        {
+            "id": "memory",
+            "href": "/games/memory.html",
+            "iconClass": "memory",
+            "icon": "\ud83c\udfb4",
+            "title": "Memory Match",
+            "desc": "Flip cards to find matching pairs",
+            "controls": "Click cards"
+        },
+        {
+            "id": "minesweeper",
+            "href": "/games/minesweeper.html",
+            "iconClass": "minesweeper",
+            "icon": "\ud83d\udca3",
+            "title": "Minesweeper",
+            "desc": "Reveal cells without hitting mines",
+            "controls": "Left/right click"
+        },
+        {
+            "id": "breakout",
+            "href": "/games/breakout.html",
+            "iconClass": "breakout",
+            "icon": "\ud83e\uddf1",
+            "title": "Breakout",
+            "desc": "Break all the bricks with the ball",
+            "controls": "Mouse or arrows"
+        },
+        {
+            "id": "pong",
+            "href": "/games/pong.html",
+            "iconClass": "pong",
+            "icon": "\ud83c\udfd3",
+            "title": "Pong",
+            "desc": "Classic paddle game vs CPU",
+            "controls": "W/S or arrows"
+        },
+        {
+            "id": "flappy",
+            "href": "/games/flappy.html",
+            "iconClass": "flappy",
+            "icon": "\ud83d\udc26",
+            "title": "Flappy Bird",
+            "desc": "Tap to fly through the pipes",
+            "controls": "Space or click"
+        },
+        {
+            "id": "tictactoe",
+            "href": "/games/tictactoe.html",
+            "iconClass": "tictactoe",
+            "icon": "\u2b55",
+            "title": "Tic Tac Toe",
+            "desc": "Get 3 in a row to win",
+            "controls": "Click cells"
+        },
+        {
+            "id": "connect4",
+            "href": "/games/connect4.html",
+            "iconClass": "connect4",
+            "icon": "\ud83d\udd34",
+            "title": "Connect Four",
+            "desc": "Connect 4 discs in a row",
+            "controls": "Click columns"
+        },
+        {
+            "id": "simon",
+            "href": "/games/simon.html",
+            "iconClass": "simon",
+            "icon": "\ud83c\udfa8",
+            "title": "Simon Says",
+            "desc": "Repeat the color pattern",
+            "controls": "Click colors"
+        },
+        {
+            "id": "whackamole",
+            "href": "/games/whackamole.html",
+            "iconClass": "whack",
+            "icon": "\ud83d\udc39",
+            "title": "Whack-a-Mole",
+            "desc": "Hit the moles as they pop up",
+            "controls": "Click moles"
+        },
+        {
+            "id": "dino",
+            "href": "/games/dino.html",
+            "iconClass": "dino",
+            "icon": "\ud83e\udd96",
+            "title": "Dino Run",
+            "desc": "Jump over obstacles endless runner",
+            "controls": "Space to jump"
+        },
+        {
+            "id": "wordle",
+            "href": "/games/wordle.html",
+            "iconClass": "wordle",
+            "icon": "\ud83d\udcdd",
+            "title": "Wordle",
+            "desc": "Guess the 5-letter word in 6 tries",
+            "controls": "Type letters"
+        },
+        {
+            "id": "hangman",
+            "href": "/games/hangman.html",
+            "iconClass": "hangman",
+            "icon": "\ud83d\udd24",
+            "title": "Hangman",
+            "desc": "Guess the word before running out of tries",
+            "controls": "Click or type letters"
+        },
+        {
+            "id": "puzzle",
+            "href": "/games/puzzle.html",
+            "iconClass": "puzzle",
+            "icon": "\ud83e\udde9",
+            "title": "Sliding Puzzle",
+            "desc": "Arrange numbers in order",
+            "controls": "Click tiles"
+        },
+        {
+            "id": "match3",
+            "href": "/games/match3.html",
+            "iconClass": "match3",
+            "icon": "\ud83d\udc8e",
+            "title": "Match 3",
+            "desc": "Swap gems to match 3 or more",
+            "controls": "Click to swap"
+        },
+        {
+            "id": "space",
+            "href": "/games/space.html",
+            "iconClass": "space",
+            "icon": "\ud83d\udc7e",
+            "title": "Space Invaders",
+            "desc": "Destroy the alien invaders",
+            "controls": "Arrows + Space"
+        },
+        {
+            "id": "sudoku",
+            "href": "/games/sudoku.html",
+            "iconClass": "sudoku",
+            "icon": "9\ufe0f\u20e3",
+            "title": "Sudoku",
+            "desc": "Fill the grid with numbers 1-9",
+            "controls": "Click + numbers"
+        },
+        {
+            "id": "typing",
+            "href": "/games/typing.html",
+            "iconClass": "typing",
+            "icon": "\u2328\ufe0f",
+            "title": "Typing Speed",
+            "desc": "Test your typing speed and accuracy",
+            "controls": "Type the text"
+        }
+    ]
+}

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird | Yuxu Ge</title>
+    <style>
+        :root { --black: #111; --off-white: #f4f4f4; --vermilion: #C41E3A; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--off-white); }
+        a { color: var(--vermilion); text-decoration: none; }
+        a:hover { opacity: 0.75; }
+        .layout { min-height: 100vh; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 320px; height: 100vh; background: var(--black); color: var(--off-white); padding: 3rem 2rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .avatar { display: block; width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--vermilion); margin-bottom: 1.5rem; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar h1 { font-size: 1.8rem; font-weight: 700; color: var(--off-white); }
+        .title-role { font-size: 0.9rem; color: #888; margin-top: 0.25rem; }
+        .contact-block { margin-top: 2.5rem; width: 100%; }
+        .social-links { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+        .social-links a { display: flex; align-items: center; gap: 0.75rem; width: 160px; color: var(--off-white); opacity: 0.7; padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; }
+        .social-links a:hover { color: var(--vermilion); opacity: 1; }
+        .social-links svg { width: 20px; height: 20px; }
+        .social-links .orcid-link { font-size: 0.68rem; gap: 0.5rem; white-space: nowrap; }
+        .sidebar-footer { text-align: center; font-size: 0.75rem; color: #555; }
+        .content { margin-left: 320px; padding: 2rem 3rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; background: linear-gradient(180deg, #87CEEB 0%, #4EC0CA 100%); }
+        .back-link { display: inline-flex; font-size: 0.85rem; margin-bottom: 1rem; color: #333; align-self: flex-start; }
+        .back-link:hover { color: var(--vermilion); }
+        .game-header { width: 100%; max-width: 400px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .game-title { font-size: 2rem; color: #fff; text-shadow: 2px 2px 0 #333; }
+        .score-box { background: #fff; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        canvas { display: block; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
+        button { padding: 0.75rem 1.5rem; font-size: 1rem; background: #FFD93D; color: #333; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        button:hover { background: #FFC107; }
+        .message { margin-top: 1rem; font-size: 1.25rem; font-weight: 600; color: #fff; text-shadow: 1px 1px 0 #333; }
+        .instructions { margin-top: 1.5rem; color: #333; font-size: 0.9rem; text-align: center; background: rgba(255,255,255,0.8); padding: 1rem; border-radius: 8px; }
+        @media (max-width: 900px) {
+            .sidebar { position: relative; width: 100%; height: auto; padding: 2rem 1.5rem 1rem; }
+            .social-links { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .social-links a { width: auto; padding: 0.5rem; font-size: 0; gap: 0; }
+            .social-links svg { width: 24px; height: 24px; }
+            .content { margin-left: 0; padding: 1.5rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js"></script>
+        <main class="content">
+            <a href="/games/" class="back-link">← Back to Games</a>
+            <div class="game-header">
+                <h1 class="game-title">Flappy Bird</h1>
+                <div class="score-box">Score: <span id="score">0</span></div>
+                <div class="score-box">Best: <span id="best">0</span></div>
+            </div>
+            <canvas id="game" width="400" height="600"></canvas>
+            <div class="controls">
+                <button onclick="startGame()">Play</button>
+            </div>
+            <div class="message" id="message">Click or press Space to flap!</div>
+            <div class="instructions">
+                <strong>How to play:</strong> Click, tap, or press Space to flap.<br>
+                Avoid the pipes and don't hit the ground!
+            </div>
+        </main>
+    </div>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const birdSize = 30, gravity = 0.5, jumpForce = -8, pipeWidth = 60, pipeGap = 150, pipeSpeed = 3;
+        let birdY, birdVel, pipes, score, best, gameRunning, gameStarted, animationId;
+
+        best = parseInt(localStorage.getItem('flappy_best') || '0');
+        document.getElementById('best').textContent = best;
+
+        function startGame() {
+            cancelAnimationFrame(animationId);
+            birdY = canvas.height / 2;
+            birdVel = 0;
+            pipes = [];
+            score = 0;
+            gameRunning = true;
+            gameStarted = false;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('message').textContent = 'Click or press Space to start!';
+            draw();
+        }
+
+        function flap() {
+            if (!gameRunning) return;
+            if (!gameStarted) {
+                gameStarted = true;
+                document.getElementById('message').textContent = '';
+                loop();
+            }
+            birdVel = jumpForce;
+        }
+
+        function addPipe() {
+            const minY = 100, maxY = canvas.height - pipeGap - 100;
+            const topHeight = Math.random() * (maxY - minY) + minY;
+            pipes.push({ x: canvas.width, topH: topHeight, passed: false });
+        }
+
+        function draw() {
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#4EC0CA');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Ground
+            ctx.fillStyle = '#DEB887';
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 5);
+            // Pipes
+            pipes.forEach(pipe => {
+                ctx.fillStyle = '#2ECC71';
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topH);
+                ctx.fillRect(pipe.x, pipe.topH + pipeGap, pipeWidth, canvas.height - pipe.topH - pipeGap - 50);
+                ctx.fillStyle = '#27AE60';
+                ctx.fillRect(pipe.x - 5, pipe.topH - 20, pipeWidth + 10, 20);
+                ctx.fillRect(pipe.x - 5, pipe.topH + pipeGap, pipeWidth + 10, 20);
+            });
+            // Bird
+            ctx.fillStyle = '#FFD93D';
+            ctx.beginPath();
+            ctx.ellipse(80, birdY, birdSize / 2, birdSize / 2.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(90, birdY - 5, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(92, birdY - 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#E74C3C';
+            ctx.beginPath();
+            ctx.moveTo(95, birdY);
+            ctx.lineTo(110, birdY + 3);
+            ctx.lineTo(95, birdY + 6);
+            ctx.fill();
+        }
+
+        function update() {
+            birdVel += gravity;
+            birdY += birdVel;
+            // Pipe spawning
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) addPipe();
+            // Move pipes
+            pipes.forEach(pipe => {
+                pipe.x -= pipeSpeed;
+                if (!pipe.passed && pipe.x + pipeWidth < 80) {
+                    pipe.passed = true;
+                    score++;
+                    document.getElementById('score').textContent = score;
+                }
+            });
+            pipes = pipes.filter(p => p.x + pipeWidth > 0);
+            // Collision detection
+            const birdTop = birdY - birdSize / 2.5, birdBottom = birdY + birdSize / 2.5;
+            const birdLeft = 80 - birdSize / 2, birdRight = 80 + birdSize / 2;
+            if (birdBottom > canvas.height - 50 || birdTop < 0) { endGame(); return; }
+            for (const pipe of pipes) {
+                if (birdRight > pipe.x && birdLeft < pipe.x + pipeWidth) {
+                    if (birdTop < pipe.topH || birdBottom > pipe.topH + pipeGap) { endGame(); return; }
+                }
+            }
+        }
+
+        function endGame() {
+            gameRunning = false;
+            if (score > best) {
+                best = score;
+                localStorage.setItem('flappy_best', best);
+                document.getElementById('best').textContent = best;
+                document.getElementById('message').textContent = `New Best: ${score}!`;
+            } else {
+                document.getElementById('message').textContent = `Game Over! Score: ${score}`;
+            }
+        }
+
+        function loop() {
+            if (!gameRunning) return;
+            update();
+            draw();
+            animationId = requestAnimationFrame(loop);
+        }
+
+        document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); flap(); } });
+        canvas.addEventListener('click', flap);
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); flap(); });
+
+        startGame();
+    </script>
+</body>
+</html>

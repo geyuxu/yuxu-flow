@@ -1,0 +1,74 @@
+{
+  "/content/posts/2026/hello-world#0": {
+    "title": "Hello, World!",
+    "url": "/content/posts/2026/hello-world",
+    "date": "2026-01-01",
+    "text": "Hello, World!\n\nWelcome to your new Static Flow blog! This is a demo post to help you get started.\n\nFeatures\n\nStatic Flow supports many content formats"
+  },
+  "/content/posts/2026/hello-world#1": {
+    "title": "Hello, World!",
+    "url": "/content/posts/2026/hello-world",
+    "date": "2026-01-01",
+    "text": "^2$$\n\nGetting Started\n\n1. Edit `staticflow.config.yaml` to configure your site\n2. Add your content to `content/posts/`\n3. Run `staticflow build` to ge"
+  },
+  "/content/posts/2026/static-flow-intro#0": {
+    "title": "Static Flow: 现代化静态网站生成器",
+    "url": "/content/posts/2026/static-flow-intro",
+    "date": "2026-02-03",
+    "text": "Static Flow: 现代化静态网站生成器\n\nStatic Flow 是一个基于 Deno 构建的现代静态网站生成器，编译后仅需一个约 34MB 的二进制文件即可运行。\n\n为什么选择 Static Flow？\n\n多格式内容支持\n\n不同于传统静态网站生成器只支持 Markdown，Static F"
+  },
+  "/content/posts/2026/static-flow-intro#1": {
+    "title": "Static Flow: 现代化静态网站生成器",
+    "url": "/content/posts/2026/static-flow-intro",
+    "date": "2026-02-03",
+    "text": "，保护隐私\n\nAI 助手\n\n集成 AI 聊天助手，基于博客内容回答问题：\n\n- 自动检索相关上下文\n- 流式响应\n- 本地历史记录\n\n相册功能\n\n完整的相册管理：\n\n- HEIC 自动转换\n- 智能压缩\n- AI 生成描述\n- 按日期和地点分组\n\n快速开始\n\n配置说明\n\nsidebar-config"
+  },
+  "/content/posts/2026/migration-to-deno#0": {
+    "title": "从 Shell 脚本到 Deno：Static Flow 的技术迁移",
+    "url": "/content/posts/2026/migration-to-deno",
+    "date": "2026-02-03",
+    "text": "从 Shell 脚本到 Deno：Static Flow 的技术迁移\n\n经过一夜的 vibe coding，我成功将 Static Flow 从混乱的 Shell 脚本迁移到了现代化的 Deno 平台。这篇文章记录了这次技术迁移的过程和思考。\n\n迁移前的状态\n\n最初的 Static Flow 是一个"
+  },
+  "/content/posts/2026/migration-to-deno#1": {
+    "title": "从 Shell 脚本到 Deno：Static Flow 的技术迁移",
+    "url": "/content/posts/2026/migration-to-deno",
+    "date": "2026-02-03",
+    "text": "no 的标准库设计精良：\n\n4. 安全沙箱\n\n默认禁止文件、网络访问，需要显式授权：\n\n迁移过程\n\n第一步：统一配置\n\n创建 `staticflow.config.yaml` 作为单一配置源：\n\n第二步：重构脚本\n\n将所有 Shell 脚本转换为 TypeScript 模块：\n\n第三步：统一入口\n\n"
+  },
+  "/content/posts/2026/roadmap#0": {
+    "title": "Static Flow 发展路线图",
+    "url": "/content/posts/2026/roadmap",
+    "date": "2026-02-03",
+    "text": "Static Flow 发展路线图\n\n本文概述 Static Flow 的未来发展方向和开源计划。\n\n近期目标 (v1.0)\n\n去除外部依赖\n\n目前 Static Flow 仍依赖一些外部程序，我们计划逐步替换为 WASM 方案：\n\n图片处理\n- [ ] 使用 libvips WASM 替代 Ima"
+  },
+  "/content/posts/2026/roadmap#1": {
+    "title": "Static Flow 发展路线图",
+    "url": "/content/posts/2026/roadmap",
+    "date": "2026-02-03",
+    "text": "- [ ] 文件变更检测\n- [ ] 依赖图分析\n- [ ] 并行构建\n- [ ] 缓存优化\n\n国际化 (i18n)\n\n- [ ] 多语言内容管理\n- [ ] 自动翻译集成\n- [ ] 语言切换 UI\n- [ ] SEO 优化\n\nCMS 集成\n\n- [ ] Headless CMS 支持 (Stra"
+  },
+  "/content/posts/2026/roadmap#2": {
+    "title": "Static Flow 发展路线图",
+    "url": "/content/posts/2026/roadmap",
+    "date": "2026-02-03",
+    "text": "区生态\n\n- **模板市场** - 社区贡献的模板和主题\n- **插件仓库** - 官方和社区插件\n- **展示案例** - 使用 Static Flow 的网站展示\n\n开源计划\n\n阶段一：预览版 (当前)\n\n- 核心功能稳定\n- 基础文档完善\n- 收集早期反馈\n\n阶段二：公开测试\n\n- 发布到 G"
+  },
+  "/content/posts/2026/jupyter-demo#0": {
+    "title": "Jupyter Notebook Demo",
+    "url": "/content/posts/2026/jupyter-demo",
+    "date": "2026-02-03",
+    "text": "Jupyter Notebook Demo\n\nThis is a demo Jupyter notebook to showcase Static Flow's notebook support.\n\n**Features:**\n- Code cells with syntax highlightin"
+  },
+  "/content/posts/2026/jupyter-demo#1": {
+    "title": "Jupyter Notebook Demo",
+    "url": "/content/posts/2026/jupyter-demo",
+    "date": "2026-02-03",
+    "text": "ange(2, n):\n        fib.append(fib[-1] + fib[-2])\n    return fib\n\nprint(f\"Fibonacci sequence: {fibonacci(10)}\")\n\nData Analysis Example\n\nNotebooks are "
+  },
+  "/content/posts/2026/jupyter-demo#2": {
+    "title": "Jupyter Notebook Demo",
+    "url": "/content/posts/2026/jupyter-demo",
+    "date": "2026-02-03",
+    "text": "s to HTML, preserving:\n- Code syntax highlighting\n- Cell outputs\n- Markdown formatting\n\nPerfect for technical blogs and tutorials!"
+  }
+}
