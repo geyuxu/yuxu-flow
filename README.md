@@ -14,8 +14,8 @@ A modern static site generator built with Deno. Zero runtime dependencies - comp
 ## Quick Start
 
 ```bash
-# Install
-curl -fsSL https://github.com/geyuxu/yuxu-flow/releases/download/latest/install.sh | sh
+# Install (after first release)
+curl -fsSL https://raw.githubusercontent.com/geyuxu/yuxu-flow/main/install.sh | sh
 
 # Create site
 yxflow init my-blog
