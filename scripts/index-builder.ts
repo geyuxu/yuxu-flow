@@ -12,21 +12,24 @@ import { join, dirname, basename, relative } from "@std/path";
 import { crypto } from "@std/crypto";
 import { encodeHex } from "jsr:@std/encoding@^1/hex";
 import { Voy } from "npm:voy-search@0.6.3/voy_search.js";
+import { getConfig, getPostsDir, getProjectRoot, getCacheDir } from "./config.ts";
 
-const __dirname = dirname(import.meta.filename!);
+const config = getConfig();
+const PROJECT_ROOT = getProjectRoot();
+const POSTS_DIR = getPostsDir();
 
-// Configuration
+// Configuration from config file
 const CONFIG = {
-  postsDir: join(__dirname, "..", "blog", "posts"),
-  outputFile: join(__dirname, "..", "public", "search.dat"),
-  metadataFile: join(__dirname, "..", "public", "search-metadata.json"),
-  invertedIndexFile: join(__dirname, "..", "public", "search-inverted.json"),
-  embeddingCacheFile: join(__dirname, "..", ".cache", "embeddings.json"),
-  chunkSize: 500, // Characters per chunk
-  chunkOverlap: 50, // Overlap between chunks
-  dimensions: 512, // Embedding dimensions (saves ~50% space vs 1536)
-  model: "text-embedding-3-small",
-  batchSize: 20, // Embeddings per API call
+  postsDir: POSTS_DIR,
+  outputFile: join(PROJECT_ROOT, "public", "search.dat"),
+  metadataFile: join(PROJECT_ROOT, "public", "search-metadata.json"),
+  invertedIndexFile: join(PROJECT_ROOT, "public", "search-inverted.json"),
+  embeddingCacheFile: join(getCacheDir(), "embeddings.json"),
+  chunkSize: config.build.search.chunkSize,
+  chunkOverlap: config.build.search.chunkOverlap,
+  dimensions: config.build.search.dimensions,
+  model: config.build.search.model,
+  batchSize: config.build.search.batchSize,
 };
 
 // Check if file exists
@@ -38,6 +41,8 @@ function existsSync(path: string): boolean {
     return false;
   }
 }
+
+// Note: vector search feature check moved to buildIndex() function
 
 // ============================================================
 // CACHING UTILITIES
@@ -260,8 +265,8 @@ function parseMarkdown(content: string, filePath: string): ParsedPost | null {
   const titleMatch = body.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1] : basename(filePath, ".md");
 
-  // Generate URL from file path: blog/posts/2026/foo.md -> /blog/posts/2026/foo
-  const relativePath = relative(join(__dirname, ".."), filePath);
+  // Generate URL from file path: content/posts/2026/foo.md -> /content/posts/2026/foo
+  const relativePath = relative(PROJECT_ROOT, filePath);
   const url = "/" + relativePath.replace(/\.md$/, "");
 
   // Clean content: remove code blocks, images, links
@@ -407,9 +412,10 @@ function parseNotebook(content: string, filePath: string): ParsedPost | null {
               const colonIndex = line.indexOf(":");
               if (colonIndex === -1) continue;
               const key = line.slice(0, colonIndex).trim();
-              let value: string | string[] = line.slice(colonIndex + 1).trim();
-              if (value.startsWith("[") && value.endsWith("]")) {
-                value = value.slice(1, -1).split(",").map((s) => s.trim().replace(/['"]/g, ""));
+              const rawValue = line.slice(colonIndex + 1).trim();
+              let value: string | string[] = rawValue;
+              if (rawValue.startsWith("[") && rawValue.endsWith("]")) {
+                value = rawValue.slice(1, -1).split(",").map((s: string) => s.trim().replace(/['"]/g, ""));
               }
               frontmatter[key] = value;
             }
@@ -438,7 +444,7 @@ function parseNotebook(content: string, filePath: string): ParsedPost | null {
     }
 
     // Generate URL from file path
-    const relativePath = relative(join(__dirname, ".."), filePath);
+    const relativePath = relative(PROJECT_ROOT, filePath);
     const url = "/" + relativePath.replace(/\.ipynb$/, "");
 
     // Clean content: remove markdown formatting
@@ -477,7 +483,17 @@ function parseNotebook(content: string, filePath: string): ParsedPost | null {
 
 // Main build process
 async function buildIndex() {
+  // Skip if vector search is disabled
+  if (!config.features.vectorSearch) {
+    console.log("Vector search is disabled in config. Skipping.");
+    return;
+  }
+
   console.log("=== Building Vector Search Index ===\n");
+  console.log(`Posts directory: ${CONFIG.postsDir}`);
+  console.log(`Chunk size: ${CONFIG.chunkSize}, Overlap: ${CONFIG.chunkOverlap}`);
+  console.log(`Model: ${CONFIG.model}, Dimensions: ${CONFIG.dimensions}`);
+  console.log("");
 
   // 1. Find all posts (markdown and notebooks)
   const postFiles = findPostFiles(CONFIG.postsDir);
@@ -527,7 +543,7 @@ async function buildIndex() {
     });
 
     const suffix = isNotebook ? " (notebook)" : "";
-    console.log(`  ✓ ${parsed.title} (${chunks.length} chunks)${suffix}`);
+    console.log(`  OK ${parsed.title} (${chunks.length} chunks)${suffix}`);
   }
 
   console.log(`\nTotal: ${documents.length} chunks\n`);
@@ -645,19 +661,26 @@ async function buildIndex() {
   const stats = Deno.statSync(CONFIG.outputFile);
   const metaStats = Deno.statSync(CONFIG.metadataFile);
   const invertedStats = Deno.statSync(CONFIG.invertedIndexFile);
-  console.log(`\n✓ Vector index saved: ${CONFIG.outputFile}`);
+  console.log(`\nOK Vector index saved: ${CONFIG.outputFile}`);
   console.log(`  Size: ${(stats.size / 1024).toFixed(1)} KB`);
-  console.log(`✓ Metadata saved: ${CONFIG.metadataFile}`);
+  console.log(`OK Metadata saved: ${CONFIG.metadataFile}`);
   console.log(`  Size: ${(metaStats.size / 1024).toFixed(1)} KB`);
-  console.log(`✓ Inverted index saved: ${CONFIG.invertedIndexFile}`);
+  console.log(`OK Inverted index saved: ${CONFIG.invertedIndexFile}`);
   console.log(`  Size: ${(invertedStats.size / 1024).toFixed(1)} KB`);
   console.log(`  Terms: ${Object.keys(invertedIndex.index).length}`);
   console.log(`  Documents: ${documents.length} chunks, ${invertedIndex.docCount} articles`);
   console.log(`  Dimensions: ${CONFIG.dimensions}`);
 }
 
-// Run
-buildIndex().catch((err) => {
-  console.error("\nError:", err.message);
-  Deno.exit(1);
-});
+// Export main function
+export async function main() {
+  await buildIndex();
+}
+
+// Run if called directly
+if (import.meta.main) {
+  buildIndex().catch((err) => {
+    console.error("\nError:", err.message);
+    Deno.exit(1);
+  });
+}

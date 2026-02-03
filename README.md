@@ -1,229 +1,148 @@
-# yuxu.ge
+# Static Flow
 
-Personal website for Yuxu Ge.
+A modern static site generator built with Deno. Compiles to a single binary (~34MB).
+
+## Features
+
+- **Multi-format Blog**: Markdown, Jupyter Notebooks, PDF, Office documents, LaTeX
+- **Photo Gallery**: HEIC conversion, compression, AI descriptions
+- **Vector Search**: Hybrid semantic + BM25 search (OpenAI embeddings)
+- **Medium Export**: Convert posts to Medium-compatible HTML with GitHub Gists
+- **Single Binary**: No runtime dependencies after compilation
+
+## Project Structure
+
+```
+static-flow/
+├── scripts/           # Tool source code (TypeScript)
+├── public/lib/        # Search library (Voy WASM)
+├── docs/              # Documentation
+├── example/           # Example website (copy to start your own)
+│   ├── content/       # Posts and photos
+│   ├── themes/        # HTML templates
+│   ├── blog/          # Generated output
+│   └── staticflow.config.yaml
+├── staticflow         # Compiled binary
+└── deno.json          # Build configuration
+```
 
 ## Quick Start
 
 ```bash
-# One-click setup (installs dependencies)
-./setup.sh
+# 1. Compile the tool
+deno task compile
 
-# Start local server
-python3 -m http.server 8080
+# 2. Copy example to create your website
+cp -r example ~/my-website
+cd ~/my-website
 
-# Build site
-./build.sh
+# 3. Build and serve
+/path/to/staticflow build
+/path/to/staticflow serve
 ```
 
-## Features
-
-- **Multi-format Blog**: Supports Markdown, Jupyter Notebooks, PDF, Word, Excel, PowerPoint, TXT, CSV
-- **Vector Search**: Hybrid search with semantic + full-text capabilities
-- **Photo Gallery**: Timeline-based gallery with album support
-- **Client-side Rendering**: No server required, works on any static hosting
-
-## Structure
-
+Or add staticflow to your PATH:
+```bash
+sudo cp staticflow /usr/local/bin/
+cd ~/my-website
+staticflow build
+staticflow serve
 ```
-├── index.html              # Home page
-├── blog/                   # Blog system
-│   ├── index.html          # Blog list with search
-│   ├── post.html           # Dynamic post viewer (multi-format)
-│   ├── posts.json          # Post metadata (generated)
-│   ├── posts/              # Post files (any supported format)
-│   ├── build-posts-json.js # Generate posts.json
-│   ├── build-pptx-pdf.js   # Convert PPTX to PDF
-│   ├── static/             # Static HTML (generated)
-│   └── medium/             # Medium-friendly HTML (generated)
-├── gallery/                # Photo gallery
-│   ├── index.html          # Gallery with timeline
-│   └── photos.json         # Album metadata (generated)
-├── photos/                 # Photo albums
-│   └── YYYY/YYYYMMDD-Location/
-│       ├── *.JPG
-│       └── description.md  # Album description (optional)
-├── components/             # Shared components
-│   └── sidebar.js          # Sidebar (injected via JS)
-├── scripts/                # Build scripts
-│   ├── convert-heic.sh     # HEIC to JPG conversion
-│   └── compress-photos.sh  # Image compression
-└── setup.sh                # One-click setup script
+
+## CLI Commands
+
+```bash
+staticflow build              # Full build
+staticflow build --photos     # Process photos only
+staticflow build --static     # Static HTML only
+staticflow build --medium     # Medium export only
+staticflow build --push       # Build and git push
+staticflow serve              # Start dev server (:8080)
+staticflow serve --port=3000  # Custom port
+staticflow setup              # Check dependencies
+staticflow clean              # Clean generated files
+```
+
+## Creating Your Website
+
+### Option 1: Copy Example
+```bash
+cp -r example ~/my-website
+cd ~/my-website
+# Edit staticflow.config.yaml
+staticflow build
+```
+
+### Option 2: From Scratch
+
+Minimal structure:
+```
+my-website/
+├── staticflow.config.yaml    # Required
+├── content/
+│   └── posts/
+│       └── hello.md          # Your first post
+├── themes/
+│   └── default/              # Copy from example/themes/
+└── index.html
+```
+
+## Configuration
+
+Edit `staticflow.config.yaml`:
+
+```yaml
+site:
+  name: "My Blog"
+  url: "https://example.com"
+  author: "Your Name"
+
+features:
+  gallery: true
+  vectorSearch: true    # Requires OPENAI_API_KEY
+  mediumExport: false
+
+build:
+  imageCompression: true
+  maxImageWidth: 2000
+  imageQuality: 85
+```
+
+## Environment Variables
+
+```bash
+export OPENAI_API_KEY="sk-..."           # Vector search
+export GITHUB_TOKEN_CREATE_GIST="ghp-..." # Medium gists
 ```
 
 ## Development
 
 ```bash
-python3 -m http.server 8080
+# Run from source
+deno task build
+deno task serve
+
+# Compile to binary
+deno task compile
 ```
-
-## Build
-
-```bash
-./build.sh           # Build all (photos + blog + gallery + search index)
-./build.sh --static  # Static HTML only
-./build.sh --medium  # Medium HTML only
-./build.sh --photos  # Process photos only (convert HEIC + compress)
-
-./clear.sh           # Clean generated files
-```
-
-### npm Scripts
-
-```bash
-npm run build          # Full build (same as ./build.sh)
-npm run build:blog     # Build blog (PPTX conversion + posts.json)
-npm run build:pptx     # Convert PPTX to PDF only
-npm run build:posts    # Generate posts.json only
-npm run build:photos   # Generate photos.json only
-npm run build:search   # Build vector search index
-```
-
-### Environment Variables
-
-```bash
-OPENAI_API_KEY=xxx ./build.sh           # Enable vector search
-GITHUB_TOKEN_CREATE_GIST=xxx ./build.sh # Enable code gists
-```
-
-## Gallery
-
-Photo albums are organized by date:
-
-```
-photos/2026/20260120-Leeds/
-├── A7C00267.JPG
-├── A7C00274.JPG
-└── description.md    # Optional album description
-```
-
-Run `./build.sh` to regenerate `gallery/photos.json`.
-
-### Convert HEIC/HIF/ARW to JPG
-
-```bash
-./scripts/convert-heic.sh           # Convert all HEIC/HIF/ARW to JPG
-./scripts/convert-heic.sh --dry-run # Preview only
-```
-
-Uses macOS `sips` (built-in) or ImageMagick. ARW (Sony RAW) requires ImageMagick.
-
-### Compress Photos
-
-```bash
-./scripts/compress-photos.sh           # Compress new photos (uses cache)
-./scripts/compress-photos.sh --dry-run # Preview only
-./scripts/compress-photos.sh --force   # Ignore cache, reprocess all
-```
-
-
-Uses cache file (`.compress-cache`) to skip already processed images. Requires ImageMagick: `brew install imagemagick`
-
-## Blog Posts
-
-### Supported Formats
-
-| Format | Extension | Rendering |
-|--------|-----------|-----------|
-| Markdown | `.md` | marked.js + Prism.js + KaTeX |
-| Jupyter Notebook | `.ipynb` | Native renderer with code cells |
-| PDF | `.pdf` | Native browser viewer |
-| Word | `.docx` | mammoth.js |
-| Excel | `.xlsx` | SheetJS (xlsx) |
-| PowerPoint | `.pptx` | PDF preview (via LibreOffice) |
-| CSV | `.csv` | SheetJS table view |
-| Text | `.txt` | Plain text |
-| **Images** | `.jpg`, `.png`, `.gif`, `.webp`, `.svg` | Native `<img>` |
-| **Video** | `.mp4`, `.webm` | HTML5 `<video>` |
-| **Audio** | `.mp3`, `.wav`, `.ogg` | HTML5 `<audio>` |
-| **JSON** | `.json` | Syntax highlighted |
-| **HTML** | `.html` | iframe embed |
-| **Code** | `.py`, `.js`, `.ts`, `.go`, `.java`, `.rs`, `.cpp`, `.c`, `.rb`, `.php`, `.sh` | Prism.js syntax highlighting |
-| **XML/YAML** | `.xml`, `.yaml`, `.yml` | Syntax highlighted |
-| **LaTeX** | `.tex` | Source view with highlighting |
-| **RTF** | `.rtf` | Download only |
-
-### Creating Posts
-
-**Markdown** - Create in `blog/posts/YYYY/` with YAML frontmatter:
-
-```markdown
----
-date: 2026-01-26
-tags: [python, backend]
-description: Optional description
----
-# Post Title
-
-Content...
-```
-
-**Other formats** - Use date prefix in filename: `YYYYMMDD-title.ext`
-
-```
-blog/posts/2026/
-├── my-post.md              # Requires date in frontmatter
-├── 20260126-slides.pptx    # Date from filename
-└── 20260126-data.xlsx      # Date from filename
-```
-
-### PowerPoint Preview
-
-PowerPoint files are converted to PDF for browser preview:
-
-```bash
-# Manual conversion
-npm run build:pptx
-
-# Requires LibreOffice (one-time install)
-# macOS:  brew install --cask libreoffice
-# Linux:  sudo apt install libreoffice
-```
-
-When both `.pptx` and `.pdf` exist, the PDF is used for preview and PPTX for download.
-
-Run `./build.sh` to regenerate `blog/posts.json`.
 
 ## Dependencies
 
-### Required
+**Required:** Deno >= 1.40
 
-- **Node.js** >= 18.0.0
-- **npm** packages (auto-installed):
-  - `voy-search` - Vector search engine
+**Optional:**
+- ImageMagick - Photo compression
+- LibreOffice - Office to PDF
+- pdflatex - LaTeX to PDF
+- Chrome - Table images for Medium
 
-### Optional (for full functionality)
+Run `staticflow setup` to check dependencies.
 
-| Tool | Purpose | Install |
-|------|---------|---------|
-| LibreOffice | PPTX to PDF conversion | `brew install --cask libreoffice` |
-| ImageMagick | Photo compression & RAW conversion | `brew install imagemagick` |
-| OpenAI API | Vector search embeddings | Set `OPENAI_API_KEY` |
-| GitHub Token | Code gists in static HTML | Set `GITHUB_TOKEN_CREATE_GIST` |
+## Documentation
 
-### CDN Libraries (loaded at runtime)
+- [Full Documentation](docs/README.md)
+- [Installation Guide](docs/INSTALL.md)
 
-- marked.js - Markdown rendering
-- Prism.js - Code syntax highlighting
-- KaTeX - Math rendering
-- mammoth.js - Word document rendering
-- SheetJS (xlsx) - Excel/CSV rendering
+## License
 
-## SVG to PNG
-
-```bash
-# ImageMagick
-magick input.svg output.png
-magick -density 300 input.svg -resize 512x512 output.png
-
-# Inkscape
-inkscape input.svg -o output.png -w 512
-
-# librsvg
-rsvg-convert -w 512 -h 512 input.svg -o output.png
-```
-
-Install: `brew install imagemagick inkscape librsvg`
-# static-flow
-# static-flow
-# static-flow
-# static-flow
+MIT

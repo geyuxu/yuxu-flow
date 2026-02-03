@@ -4,20 +4,21 @@
     "@std/path": "jsr:@std/path@^1",
     "@std/fs": "jsr:@std/fs@^1",
     "@std/crypto": "jsr:@std/crypto@^1",
+    "@std/yaml": "jsr:@std/yaml@^1",
     "marked": "npm:marked@^17"
   },
   "tasks": {
-    "build": "./build.sh",
-    "build:posts": "deno run --allow-read --allow-write blog/build-posts-json.ts",
-    "build:office": "deno run --allow-read --allow-write --allow-run blog/build-office-pdf.ts",
-    "build:latex": "deno run --allow-read --allow-write --allow-run blog/build-tex-pdf.ts",
-    "build:photos": "deno run --allow-read --allow-write gallery/build-photos-json.ts",
-    "build:static": "deno run --allow-read --allow-write blog/build-static.ts",
-    "build:medium": "deno run -A blog/build-medium.ts",
-    "build:search": "deno run --allow-read --allow-write --allow-env --allow-net scripts/index-builder.ts",
-    "build:blog": "deno task build:office && deno task build:latex && deno task build:posts",
-    "convert:heic": "deno run --allow-read --allow-write --allow-run scripts/convert-heic.ts",
-    "compress:photos": "deno run --allow-read --allow-write --allow-run scripts/compress-photos.ts",
-    "generate:descriptions": "deno run --allow-read --allow-write --allow-run --allow-env --allow-net scripts/generate-descriptions.ts"
+    "build": "deno run -A scripts/cli.ts build",
+    "build:photos": "deno run -A scripts/cli.ts build --photos",
+    "build:static": "deno run -A scripts/cli.ts build --static",
+    "build:medium": "deno run -A scripts/cli.ts build --medium",
+    "serve": "deno run -A scripts/cli.ts serve",
+    "setup": "deno run -A scripts/cli.ts setup",
+    "init": "deno run -A scripts/cli.ts init",
+    "clean": "deno run -A scripts/cli.ts clean",
+    "compile": "deno compile --output staticflow --allow-all scripts/cli.ts"
+  },
+  "compilerOptions": {
+    "strict": true
   }
 }

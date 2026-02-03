@@ -5,13 +5,14 @@
  * With timeout and error handling for graceful fallback
  *
  * Usage:
- *   deno run --allow-read --allow-write --allow-run --allow-env --allow-net scripts/generate-descriptions.ts
+ *   deno task generate:descriptions
  */
 
-import { join, dirname, basename } from "@std/path";
+import { join } from "@std/path";
+import { getConfig, getPhotosDir } from "./config.ts";
 
-const __dirname = dirname(import.meta.filename!);
-const PHOTOS_DIR = join(__dirname, "..", "photos");
+const config = getConfig();
+const PHOTOS_DIR = getPhotosDir();
 const TIMEOUT_MS = 60000; // 60 seconds
 
 // Check if file exists
@@ -251,6 +252,14 @@ function parseFolderName(folder: string): { date: string; location: string } | n
 // Main
 async function main() {
   console.log("=== Generating Missing Descriptions ===");
+  console.log(`Photos directory: ${PHOTOS_DIR}`);
+  console.log("");
+
+  // Skip if gallery feature is disabled
+  if (!config.features.gallery) {
+    console.log("Gallery feature is disabled in config. Skipping.");
+    return;
+  }
 
   if (!hasClaude && !hasGemini && !hasOpenAI) {
     console.log("No AI tools available (need claude CLI, gemini CLI, or OPENAI_API_KEY)");
@@ -303,7 +312,7 @@ async function main() {
       // Parse folder name
       const parsed = parseFolderName(album);
       if (!parsed) {
-        console.log(`⚠ Skip: ${year}/${album} (invalid format)`);
+        console.log(`Warning: Skip: ${year}/${album} (invalid format)`);
         continue;
       }
 
@@ -312,10 +321,10 @@ async function main() {
       const description = await generateDescription(parsed.location, parsed.date);
       if (description) {
         Deno.writeTextFileSync(join(albumDir, "description.md"), description);
-        console.log(`✓ Created: ${albumDir}/description.md`);
+        console.log(`OK Created: ${albumDir}/description.md`);
         generated++;
       } else {
-        console.log(`✗ Failed: ${year}/${album} (all tools failed)`);
+        console.log(`FAIL: ${year}/${album} (all tools failed)`);
         failed++;
       }
       console.log("");
@@ -325,4 +334,10 @@ async function main() {
   console.log(`Done! Generated: ${generated}, Skipped: ${skipped}, Failed: ${failed}`);
 }
 
-main();
+// Export main function
+export { main };
+
+// Run if called directly
+if (import.meta.main) {
+  main();
+}

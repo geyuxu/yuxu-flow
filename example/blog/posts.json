@@ -1,0 +1,67 @@
+[
+  {
+    "slug": "posts/2026/pdf-demo",
+    "title": "pdf demo",
+    "date": "2026-01-05",
+    "type": "pdf",
+    "ext": "pdf",
+    "tags": [
+      "pdf",
+      "demo"
+    ],
+    "description": "A demo PDF document showing direct PDF support"
+  },
+  {
+    "slug": "posts/2026/office-demo",
+    "title": "office demo",
+    "date": "2026-01-04",
+    "type": "opendocument-text",
+    "ext": "odt",
+    "pdfPreview": true,
+    "tags": [
+      "office",
+      "odt",
+      "demo"
+    ],
+    "description": "A demo ODT document showing office format support"
+  },
+  {
+    "slug": "posts/2026/latex-demo",
+    "title": "latex demo",
+    "date": "2026-01-03",
+    "type": "latex",
+    "ext": "tex",
+    "pdfPreview": true,
+    "tags": [
+      "latex",
+      "math",
+      "demo"
+    ],
+    "description": "A demo LaTeX document with mathematical equations"
+  },
+  {
+    "slug": "posts/2026/jupyter-demo",
+    "title": "Jupyter Notebook Demo",
+    "date": "2026-01-02",
+    "type": "notebook",
+    "ext": "ipynb",
+    "tags": [
+      "python",
+      "jupyter",
+      "demo"
+    ],
+    "description": "A demo Jupyter notebook showing code cells and outputs"
+  },
+  {
+    "slug": "posts/2026/hello-world",
+    "title": "Hello, World!",
+    "date": "2026-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "demo",
+      "static-flow"
+    ],
+    "description": "Welcome to Static Flow - a modern static site generator"
+  }
+]

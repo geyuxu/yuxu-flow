@@ -1,22 +1,23 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write --allow-run
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-run --allow-env
 /**
  * Compress photos for web
  * Requires: ImageMagick (brew install imagemagick)
  *
  * Usage:
- *   deno run --allow-read --allow-write --allow-run scripts/compress-photos.ts
- *   deno run --allow-read --allow-write --allow-run scripts/compress-photos.ts --dry-run
- *   deno run --allow-read --allow-write --allow-run scripts/compress-photos.ts --force
+ *   deno task compress:photos
+ *   deno task compress:photos --dry-run
+ *   deno task compress:photos --force
  */
 
-import { join, dirname, basename } from "@std/path";
+import { join, basename } from "@std/path";
 import { walk } from "@std/fs/walk";
+import { getConfig, getPhotosDir, getCacheDir } from "./config.ts";
 
-const __dirname = dirname(import.meta.filename!);
-const PHOTOS_DIR = join(__dirname, "..", "photos");
+const config = getConfig();
+const PHOTOS_DIR = getPhotosDir();
 const CACHE_FILE = join(PHOTOS_DIR, ".compress-cache");
-const MAX_WIDTH = 2000;
-const QUALITY = 85;
+const MAX_WIDTH = config.build.maxImageWidth;
+const QUALITY = config.build.imageQuality;
 
 // Check if file exists
 function existsSync(path: string): boolean {
@@ -38,6 +39,8 @@ if (DRY_RUN) {
 } else if (FORCE) {
   console.log("=== FORCE MODE (ignoring cache) ===");
 }
+
+// Note: image compression feature check moved to main() function
 
 // Find ImageMagick command
 function findImageMagick(): string | null {
@@ -150,6 +153,16 @@ function compressImage(imagePath: string, tmpPath: string): boolean {
 
 // Main
 async function main() {
+  // Skip if image compression is disabled
+  if (!config.build.imageCompression) {
+    console.log("Image compression is disabled in config. Skipping.");
+    return;
+  }
+
+  console.log(`Photos directory: ${PHOTOS_DIR}`);
+  console.log(`Settings: max ${MAX_WIDTH}px width, ${QUALITY}% quality`);
+  console.log("");
+
   if (!existsSync(PHOTOS_DIR)) {
     console.log("No photos directory found");
     return;
@@ -168,10 +181,6 @@ async function main() {
   if (!FORCE) {
     console.log(`Loaded cache: ${cache.size} files`);
   }
-
-  console.log(`Scanning photos in: ${PHOTOS_DIR}`);
-  console.log(`Settings: max ${MAX_WIDTH}px width, ${QUALITY}% quality`);
-  console.log("");
 
   // Find all images
   const images: string[] = [];
@@ -210,7 +219,7 @@ async function main() {
 
     // Skip if already small enough and well compressed
     if (width <= MAX_WIDTH && sizeBeforeKB < 500) {
-      console.log(`✓ Skip (optimized): ${basename(img)} (${sizeBeforeKB}KB)`);
+      console.log(`OK Skip (optimized): ${basename(img)} (${sizeBeforeKB}KB)`);
       appendToCache(img);
       continue;
     }
@@ -227,7 +236,7 @@ async function main() {
 
     // Compress
     if (!compressImage(img, tmpFile)) {
-      console.log(`✗ Failed: ${basename(img)}`);
+      console.log(`FAIL: ${basename(img)}`);
       continue;
     }
 
@@ -241,15 +250,15 @@ async function main() {
         Deno.renameSync(tmpFile, img);
         const saved = sizeBeforeKB - sizeAfterKB;
         console.log(
-          `✓ Compressed: ${basename(img)} ${sizeBeforeKB}KB → ${sizeAfterKB}KB (-${saved}KB)`
+          `OK Compressed: ${basename(img)} ${sizeBeforeKB}KB -> ${sizeAfterKB}KB (-${saved}KB)`
         );
       } catch {
         Deno.removeSync(tmpFile);
-        console.log(`✗ Failed to rename: ${basename(img)}`);
+        console.log(`FAIL to rename: ${basename(img)}`);
       }
     } else {
       Deno.removeSync(tmpFile);
-      console.log(`✓ Skip (optimal): ${basename(img)} (${sizeBeforeKB}KB)`);
+      console.log(`OK Skip (optimal): ${basename(img)} (${sizeBeforeKB}KB)`);
     }
 
     // Add to cache
@@ -260,4 +269,10 @@ async function main() {
   console.log("Done!");
 }
 
-main();
+// Export main function
+export { main };
+
+// Run if called directly
+if (import.meta.main) {
+  main();
+}

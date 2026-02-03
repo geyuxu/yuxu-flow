@@ -1,26 +1,17 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write --allow-run
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-run --allow-env
 /**
  * Convert HEIC/HIF/ARW images to JPG
  * Uses macOS sips (built-in) or ImageMagick
  * ARW (Sony RAW) requires ImageMagick with raw delegate
  *
  * Usage:
- *   deno run --allow-read --allow-write --allow-run scripts/convert-heic.ts
- *   deno run --allow-read --allow-write --allow-run scripts/convert-heic.ts --dry-run
+ *   deno task convert:heic
+ *   deno task convert:heic --dry-run
  */
 
-import { join, dirname, basename, extname } from "@std/path";
+import { join, basename, extname } from "@std/path";
 import { walk } from "@std/fs/walk";
-
-const __dirname = dirname(import.meta.filename!);
-const PHOTOS_DIR = join(__dirname, "..", "photos");
-
-// Parse command line arguments
-const DRY_RUN = Deno.args.includes("--dry-run");
-
-if (DRY_RUN) {
-  console.log("=== DRY RUN MODE ===");
-}
+import { getConfig, getPhotosDir } from "./config.ts";
 
 // Check if file exists
 function existsSync(path: string): boolean {
@@ -57,17 +48,6 @@ function findConverter(): ConverterType {
   return null;
 }
 
-const CONVERTER = findConverter();
-
-if (!CONVERTER) {
-  console.error("Error: No HEIC converter found. Need sips (macOS) or ImageMagick");
-  Deno.exit(1);
-}
-
-console.log(`Using converter: ${CONVERTER}`);
-console.log(`Scanning for HEIC/HIF/ARW files in: ${PHOTOS_DIR}`);
-console.log("");
-
 // Convert using sips (macOS)
 function convertWithSips(heic: string, jpg: string): boolean {
   try {
@@ -84,13 +64,13 @@ function convertWithSips(heic: string, jpg: string): boolean {
 }
 
 // Convert using ImageMagick
-function convertWithImageMagick(heic: string, jpg: string, withAutoOrient = true): boolean {
+function convertWithImageMagick(heic: string, jpg: string, converter: string, withAutoOrient = true): boolean {
   try {
     const args = withAutoOrient
       ? [heic, "-auto-orient", "-quality", "95", jpg]
       : [heic, "-auto-orient", jpg];
 
-    const cmd = new Deno.Command(CONVERTER!, {
+    const cmd = new Deno.Command(converter, {
       args,
       stdout: "piped",
       stderr: "piped",
@@ -103,16 +83,16 @@ function convertWithImageMagick(heic: string, jpg: string, withAutoOrient = true
 }
 
 // Main conversion function
-function convertFile(heic: string, jpg: string): boolean {
+function convertFile(heic: string, jpg: string, converter: ConverterType): boolean {
   const ext = extname(heic).toLowerCase();
   const isARW = ext === ".arw";
 
   // ARW (Sony RAW) requires ImageMagick
   if (isARW) {
-    if (CONVERTER === "sips") {
+    if (converter === "sips") {
       // Try to use ImageMagick for ARW even if sips is preferred
       if (commandExists("magick")) {
-        return convertWithImageMagick(heic, jpg, true);
+        return convertWithImageMagick(heic, jpg, "magick", true);
       } else if (commandExists("convert")) {
         const cmd = new Deno.Command("convert", {
           args: [heic, "-auto-orient", "-quality", "95", jpg],
@@ -121,21 +101,40 @@ function convertFile(heic: string, jpg: string): boolean {
         });
         return cmd.outputSync().success;
       }
-      console.log(`  ✗ Skip (ARW needs ImageMagick): ${basename(heic)}`);
+      console.log(`  SKIP (ARW needs ImageMagick): ${basename(heic)}`);
       return false;
     }
-    return convertWithImageMagick(heic, jpg, true);
+    return convertWithImageMagick(heic, jpg, converter!, true);
   }
 
   // HEIC/HIF
-  if (CONVERTER === "sips") {
+  if (converter === "sips") {
     return convertWithSips(heic, jpg);
   }
-  return convertWithImageMagick(heic, jpg);
+  return convertWithImageMagick(heic, jpg, converter!, true);
 }
 
 // Main
 async function main() {
+  const config = getConfig();
+  const PHOTOS_DIR = getPhotosDir();
+  const DRY_RUN = Deno.args.includes("--dry-run");
+
+  if (DRY_RUN) {
+    console.log("=== DRY RUN MODE ===");
+  }
+
+  const CONVERTER = findConverter();
+
+  if (!CONVERTER) {
+    console.log("Warning: No HEIC converter found. Need sips (macOS) or ImageMagick. Skipping.");
+    return;
+  }
+
+  console.log(`Using converter: ${CONVERTER}`);
+  console.log(`Scanning for HEIC/HIF/ARW files in: ${PHOTOS_DIR}`);
+  console.log("");
+
   if (!existsSync(PHOTOS_DIR)) {
     console.log("No photos directory found");
     return;
@@ -157,32 +156,32 @@ async function main() {
 
     // Skip if JPG already exists
     if (existsSync(jpg)) {
-      console.log(`✓ Skip (JPG exists): ${basename(heic)}`);
+      console.log(`OK Skip (JPG exists): ${basename(heic)}`);
       continue;
     }
 
     if (DRY_RUN) {
-      console.log(`Would convert: ${basename(heic)} → ${basename(jpg)}`);
+      console.log(`Would convert: ${basename(heic)} -> ${basename(jpg)}`);
       continue;
     }
 
     console.log(`Converting: ${basename(heic)}`);
 
-    if (convertFile(heic, jpg)) {
+    if (convertFile(heic, jpg, CONVERTER)) {
       // Remove original HEIC after successful conversion
       if (existsSync(jpg)) {
         try {
           Deno.removeSync(heic);
-          console.log(`✓ Converted: ${basename(heic)} → ${basename(jpg)}`);
+          console.log(`OK Converted: ${basename(heic)} -> ${basename(jpg)}`);
           count++;
         } catch {
-          console.log(`✗ Failed to remove original: ${basename(heic)}`);
+          console.log(`FAIL to remove original: ${basename(heic)}`);
         }
       } else {
-        console.log(`✗ Failed: ${basename(heic)}`);
+        console.log(`FAIL: ${basename(heic)}`);
       }
     } else {
-      console.log(`✗ Failed: ${basename(heic)}`);
+      console.log(`FAIL: ${basename(heic)}`);
     }
   }
 
@@ -190,4 +189,10 @@ async function main() {
   console.log(`Done! Converted: ${count} files`);
 }
 
-main();
+// Export main function
+export { main };
+
+// Run if called directly
+if (import.meta.main) {
+  main();
+}

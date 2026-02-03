@@ -1,0 +1,122 @@
+/**
+ * Search Component Styles
+ * Minimal, clean design matching yuxu.ge aesthetic
+ */
+
+.search-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #C41E3A;
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-results {
+    margin-top: 1rem;
+}
+
+.search-loading,
+.search-empty,
+.search-error {
+    padding: 1rem;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.search-error {
+    color: #C41E3A;
+}
+
+.search-result {
+    display: block;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+.search-result:hover {
+    border-color: #C41E3A;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.search-result-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 0.25rem;
+}
+
+.search-result:hover .search-result-title {
+    color: #C41E3A;
+}
+
+.search-result-text {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.search-result-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.search-result-rank {
+    color: #888;
+    font-weight: 500;
+}
+
+.search-result-score {
+    color: #C41E3A;
+    font-weight: 500;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .search-input {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.95rem;
+    }
+
+    .search-result {
+        padding: 0.8rem;
+    }
+
+    .search-result-title {
+        font-size: 1rem;
+    }
+}
