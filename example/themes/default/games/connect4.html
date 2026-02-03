@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Four | Yuxu Ge</title>
+    <style>
+        :root { --black: #111; --off-white: #f4f4f4; --vermilion: #C41E3A; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--off-white); }
+        a { color: var(--vermilion); text-decoration: none; }
+        a:hover { opacity: 0.75; }
+        .layout { min-height: 100vh; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 320px; height: 100vh; background: var(--black); color: var(--off-white); padding: 3rem 2rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .avatar { display: block; width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--vermilion); margin-bottom: 1.5rem; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar h1 { font-size: 1.8rem; font-weight: 700; color: var(--off-white); }
+        .title-role { font-size: 0.9rem; color: #888; margin-top: 0.25rem; }
+        .contact-block { margin-top: 2.5rem; width: 100%; }
+        .social-links { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+        .social-links a { display: flex; align-items: center; gap: 0.75rem; width: 160px; color: var(--off-white); opacity: 0.7; padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; }
+        .social-links a:hover { color: var(--vermilion); opacity: 1; }
+        .social-links svg { width: 20px; height: 20px; }
+        .social-links .orcid-link { font-size: 0.68rem; gap: 0.5rem; white-space: nowrap; }
+        .sidebar-footer { text-align: center; font-size: 0.75rem; color: #555; }
+        .content { margin-left: 320px; padding: 2rem 3rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); }
+        .back-link { display: inline-flex; font-size: 0.85rem; margin-bottom: 1rem; color: rgba(255,255,255,0.8); align-self: flex-start; }
+        .back-link:hover { color: #fff; }
+        .game-header { margin-bottom: 1.5rem; text-align: center; }
+        .game-title { font-size: 2.5rem; color: #fff; }
+        .board { background: #2980b9; padding: 15px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .row { display: flex; }
+        .cell { width: 60px; height: 60px; background: #3498db; margin: 3px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .cell:hover { background: #5dade2; }
+        .cell.red { background: #e74c3c; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3); }
+        .cell.yellow { background: #f1c40f; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3); }
+        .cell.win { animation: pulse 0.5s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        .turn-indicator { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; color: #fff; font-size: 1.25rem; }
+        .turn-disc { width: 30px; height: 30px; border-radius: 50%; }
+        .turn-disc.red { background: #e74c3c; }
+        .turn-disc.yellow { background: #f1c40f; }
+        .controls { margin-top: 1.5rem; display: flex; gap: 0.5rem; }
+        button { padding: 0.75rem 1.5rem; font-size: 1rem; background: #fff; color: #2c3e50; border: none; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #ecf0f1; }
+        button.active { background: #2ecc71; color: #fff; }
+        .message { margin-top: 1rem; font-size: 1.5rem; font-weight: 600; color: #fff; min-height: 2rem; }
+        .mode-select { margin-top: 1rem; display: flex; gap: 0.5rem; }
+        .instructions { margin-top: 1.5rem; color: rgba(255,255,255,0.8); font-size: 0.9rem; text-align: center; }
+        @media (max-width: 900px) {
+            .sidebar { position: relative; width: 100%; height: auto; padding: 2rem 1.5rem 1rem; }
+            .social-links { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .social-links a { width: auto; padding: 0.5rem; font-size: 0; gap: 0; }
+            .social-links svg { width: 24px; height: 24px; }
+            .content { margin-left: 0; padding: 1.5rem 1rem; }
+            .cell { width: 45px; height: 45px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js"></script>
+        <main class="content">
+            <a href="/games/" class="back-link">← Back to Games</a>
+            <div class="game-header">
+                <h1 class="game-title">Connect Four</h1>
+            </div>
+            <div class="board" id="board"></div>
+            <div class="turn-indicator">
+                <span>Current Turn:</span>
+                <div class="turn-disc red" id="turn-disc"></div>
+            </div>
+            <div class="message" id="message"></div>
+            <div class="mode-select">
+                <button class="active" id="pvp-btn" onclick="setMode('pvp')">2 Players</button>
+                <button id="cpu-btn" onclick="setMode('cpu')">vs CPU</button>
+            </div>
+            <div class="controls">
+                <button onclick="startGame()">New Game</button>
+            </div>
+            <div class="instructions">
+                <strong>How to play:</strong> Click a column to drop your disc.<br>
+                Connect 4 in a row to win!
+            </div>
+        </main>
+    </div>
+    <script>
+        const ROWS = 6, COLS = 7;
+        let board, currentPlayer, gameOver, mode = 'pvp';
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('pvp-btn').classList.toggle('active', m === 'pvp');
+            document.getElementById('cpu-btn').classList.toggle('active', m === 'cpu');
+            startGame();
+        }
+
+        function startGame() {
+            board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            currentPlayer = 1;
+            gameOver = false;
+            document.getElementById('message').textContent = '';
+            document.getElementById('turn-disc').className = 'turn-disc red';
+            render();
+        }
+
+        function render() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell' + (board[r][c] === 1 ? ' red' : board[r][c] === 2 ? ' yellow' : '');
+                    cell.onclick = () => dropDisc(c);
+                    row.appendChild(cell);
+                }
+                boardEl.appendChild(row);
+            }
+        }
+
+        function dropDisc(col) {
+            if (gameOver) return;
+            for (let r = ROWS - 1; r >= 0; r--) {
+                if (board[r][col] === 0) {
+                    board[r][col] = currentPlayer;
+                    render();
+                    const winner = checkWinner(r, col);
+                    if (winner) {
+                        gameOver = true;
+                        highlightWin(winner);
+                        document.getElementById('message').textContent = (currentPlayer === 1 ? 'Red' : 'Yellow') + ' Wins!';
+                        return;
+                    }
+                    if (board[0].every(c => c !== 0)) {
+                        gameOver = true;
+                        document.getElementById('message').textContent = "It's a Draw!";
+                        return;
+                    }
+                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                    document.getElementById('turn-disc').className = 'turn-disc ' + (currentPlayer === 1 ? 'red' : 'yellow');
+                    if (mode === 'cpu' && currentPlayer === 2) setTimeout(cpuMove, 500);
+                    return;
+                }
+            }
+        }
+
+        function cpuMove() {
+            if (gameOver) return;
+            // Try to win or block
+            for (let c = 0; c < COLS; c++) {
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (board[r][c] === 0) {
+                        board[r][c] = 2;
+                        if (checkWinner(r, c)) { board[r][c] = 0; dropDisc(c); return; }
+                        board[r][c] = 1;
+                        if (checkWinner(r, c)) { board[r][c] = 0; dropDisc(c); return; }
+                        board[r][c] = 0;
+                        break;
+                    }
+                }
+            }
+            // Center preference
+            const validCols = [];
+            for (let c = 0; c < COLS; c++) if (board[0][c] === 0) validCols.push(c);
+            validCols.sort((a, b) => Math.abs(a - 3) - Math.abs(b - 3));
+            if (validCols.length) dropDisc(validCols[0]);
+        }
+
+        function checkWinner(r, c) {
+            const directions = [[0,1], [1,0], [1,1], [1,-1]];
+            const player = board[r][c];
+            for (const [dr, dc] of directions) {
+                let count = 1, cells = [[r, c]];
+                for (let i = 1; i < 4; i++) {
+                    const nr = r + dr * i, nc = c + dc * i;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && board[nr][nc] === player) {
+                        count++; cells.push([nr, nc]);
+                    } else break;
+                }
+                for (let i = 1; i < 4; i++) {
+                    const nr = r - dr * i, nc = c - dc * i;
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && board[nr][nc] === player) {
+                        count++; cells.push([nr, nc]);
+                    } else break;
+                }
+                if (count >= 4) return cells;
+            }
+            return null;
+        }
+
+        function highlightWin(cells) {
+            const allCells = document.querySelectorAll('.cell');
+            cells.forEach(([r, c]) => allCells[r * COLS + c].classList.add('win'));
+        }
+
+        startGame();
+    </script>
+</body>
+</html>

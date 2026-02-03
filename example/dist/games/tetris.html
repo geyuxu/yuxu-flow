@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris | Yuxu Ge</title>
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        /* ===== SPLIT LAYOUT ===== */
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* ===== LEFT SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            width: 160px;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* ===== RIGHT CONTENT AREA ===== */
+        .content {
+            margin-left: 320px;
+            padding: 2rem 3rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: #aaa;
+            align-self: flex-start;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+
+        /* Game Styles */
+        .game-header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #9C27B0, #673AB7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .game-area {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        canvas {
+            display: block;
+            background: #0f0f23;
+            border-radius: 4px;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .next-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .next-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        #next-canvas {
+            background: #0f0f23;
+        }
+
+        .controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background: linear-gradient(135deg, #9C27B0, #673AB7);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .message {
+            margin-top: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .mobile-controls {
+            display: none;
+            margin-top: 1rem;
+            gap: 0.5rem;
+        }
+
+        .mobile-controls button {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            padding: 0;
+        }
+
+        .mobile-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .instructions {
+            margin-top: 1.5rem;
+            color: #aaa;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .sidebar-top {
+                gap: 0;
+            }
+
+            .contact-block {
+                margin-top: 1.5rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            .sidebar h1 {
+                font-size: 1.4rem;
+            }
+
+            .title-role {
+                font-size: 0.8rem;
+            }
+
+            .mobile-controls { display: flex; flex-direction: column; align-items: center; }
+            .side-panel { display: none; }
+            #game { width: 250px; height: 500px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js"></script>
+
+        <main class="content">
+            <a href="/games/" class="back-link">← Back to Games</a>
+
+            <div class="game-header">
+                <h1 class="game-title">Tetris</h1>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Lines</div>
+                        <div class="stat-value" id="lines">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div class="game-container">
+                    <canvas id="game" width="300" height="600"></canvas>
+                </div>
+                <div class="side-panel">
+                    <div class="next-box">
+                        <div class="next-label">Next</div>
+                        <canvas id="next-canvas" width="100" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button onclick="startGame()">New Game</button>
+                <button onclick="togglePause()" id="pause-btn">Pause</button>
+            </div>
+
+            <div class="message" id="message"></div>
+
+            <div class="mobile-controls">
+                <div class="mobile-row">
+                    <button onclick="rotate()">↻</button>
+                </div>
+                <div class="mobile-row">
+                    <button onclick="moveLeft()">←</button>
+                    <button onclick="moveDown()">↓</button>
+                    <button onclick="moveRight()">→</button>
+                </div>
+                <div class="mobile-row">
+                    <button onclick="hardDrop()">⬇</button>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <strong>Controls:</strong> ← → Move | ↑ Rotate | ↓ Soft drop | Space Hard drop
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const nextCanvas = document.getElementById('next-canvas');
+        const nextCtx = nextCanvas.getContext('2d');
+
+        const COLS = 10;
+        const ROWS = 20;
+        const BLOCK_SIZE = canvas.width / COLS;
+        const NEXT_BLOCK = 20;
+
+        const COLORS = [
+            null,
+            '#00f0f0', // I - cyan
+            '#0000f0', // J - blue
+            '#f0a000', // L - orange
+            '#f0f000', // O - yellow
+            '#00f000', // S - green
+            '#a000f0', // T - purple
+            '#f00000', // Z - red
+        ];
+
+        const PIECES = [
+            [[1,1,1,1]],                          // I
+            [[2,0,0],[2,2,2]],                    // J
+            [[0,0,3],[3,3,3]],                    // L
+            [[4,4],[4,4]],                        // O
+            [[0,5,5],[5,5,0]],                    // S
+            [[0,6,0],[6,6,6]],                    // T
+            [[7,7,0],[0,7,7]],                    // Z
+        ];
+
+        let board = [];
+        let currentPiece = null;
+        let nextPiece = null;
+        let pieceX = 0, pieceY = 0;
+        let score = 0;
+        let lines = 0;
+        let gameRunning = false;
+        let paused = false;
+        let dropInterval;
+        let dropTime = 1000;
+
+        function init() {
+            board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            score = 0;
+            lines = 0;
+            dropTime = 1000;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('lines').textContent = '0';
+            document.getElementById('message').textContent = '';
+            nextPiece = randomPiece();
+            spawnPiece();
+            draw();
+        }
+
+        function randomPiece() {
+            const idx = Math.floor(Math.random() * PIECES.length);
+            return PIECES[idx].map(row => [...row]);
+        }
+
+        function spawnPiece() {
+            currentPiece = nextPiece;
+            nextPiece = randomPiece();
+            pieceX = Math.floor((COLS - currentPiece[0].length) / 2);
+            pieceY = 0;
+            drawNext();
+
+            if (collision()) {
+                gameOver();
+            }
+        }
+
+        function collision(px = pieceX, py = pieceY, piece = currentPiece) {
+            for (let y = 0; y < piece.length; y++) {
+                for (let x = 0; x < piece[y].length; x++) {
+                    if (piece[y][x]) {
+                        const newX = px + x;
+                        const newY = py + y;
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) return true;
+                        if (newY >= 0 && board[newY][newX]) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function merge() {
+            for (let y = 0; y < currentPiece.length; y++) {
+                for (let x = 0; x < currentPiece[y].length; x++) {
+                    if (currentPiece[y][x]) {
+                        if (pieceY + y >= 0) {
+                            board[pieceY + y][pieceX + x] = currentPiece[y][x];
+                        }
+                    }
+                }
+            }
+        }
+
+        function clearLines() {
+            let cleared = 0;
+            for (let y = ROWS - 1; y >= 0; y--) {
+                if (board[y].every(cell => cell !== 0)) {
+                    board.splice(y, 1);
+                    board.unshift(Array(COLS).fill(0));
+                    cleared++;
+                    y++;
+                }
+            }
+            if (cleared > 0) {
+                lines += cleared;
+                score += [0, 100, 300, 500, 800][cleared];
+                document.getElementById('score').textContent = score;
+                document.getElementById('lines').textContent = lines;
+                // Speed up
+                dropTime = Math.max(100, 1000 - lines * 20);
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = '#0f0f23';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = '#1a1a3a';
+            ctx.lineWidth = 0.5;
+            for (let x = 0; x <= COLS; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * BLOCK_SIZE, 0);
+                ctx.lineTo(x * BLOCK_SIZE, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= ROWS; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * BLOCK_SIZE);
+                ctx.lineTo(canvas.width, y * BLOCK_SIZE);
+                ctx.stroke();
+            }
+
+            // Draw board
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    if (board[y][x]) {
+                        drawBlock(ctx, x, y, COLORS[board[y][x]], BLOCK_SIZE);
+                    }
+                }
+            }
+
+            // Draw current piece
+            if (currentPiece) {
+                for (let y = 0; y < currentPiece.length; y++) {
+                    for (let x = 0; x < currentPiece[y].length; x++) {
+                        if (currentPiece[y][x]) {
+                            drawBlock(ctx, pieceX + x, pieceY + y, COLORS[currentPiece[y][x]], BLOCK_SIZE);
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawBlock(context, x, y, color, size) {
+            context.fillStyle = color;
+            context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+            context.fillStyle = 'rgba(255,255,255,0.3)';
+            context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+            context.fillRect(x * size + 1, y * size + 1, 4, size - 2);
+        }
+
+        function drawNext() {
+            nextCtx.fillStyle = '#0f0f23';
+            nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+            const offsetX = (nextCanvas.width - nextPiece[0].length * NEXT_BLOCK) / 2;
+            const offsetY = (nextCanvas.height - nextPiece.length * NEXT_BLOCK) / 2;
+
+            for (let y = 0; y < nextPiece.length; y++) {
+                for (let x = 0; x < nextPiece[y].length; x++) {
+                    if (nextPiece[y][x]) {
+                        nextCtx.fillStyle = COLORS[nextPiece[y][x]];
+                        nextCtx.fillRect(
+                            offsetX + x * NEXT_BLOCK + 1,
+                            offsetY + y * NEXT_BLOCK + 1,
+                            NEXT_BLOCK - 2,
+                            NEXT_BLOCK - 2
+                        );
+                    }
+                }
+            }
+        }
+
+        function moveLeft() {
+            if (!collision(pieceX - 1, pieceY)) {
+                pieceX--;
+                draw();
+            }
+        }
+
+        function moveRight() {
+            if (!collision(pieceX + 1, pieceY)) {
+                pieceX++;
+                draw();
+            }
+        }
+
+        function moveDown() {
+            if (!collision(pieceX, pieceY + 1)) {
+                pieceY++;
+                draw();
+            } else {
+                merge();
+                clearLines();
+                spawnPiece();
+                draw();
+            }
+        }
+
+        function hardDrop() {
+            while (!collision(pieceX, pieceY + 1)) {
+                pieceY++;
+                score += 2;
+            }
+            document.getElementById('score').textContent = score;
+            merge();
+            clearLines();
+            spawnPiece();
+            draw();
+        }
+
+        function rotate() {
+            const rotated = currentPiece[0].map((_, i) =>
+                currentPiece.map(row => row[i]).reverse()
+            );
+            if (!collision(pieceX, pieceY, rotated)) {
+                currentPiece = rotated;
+                draw();
+            }
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            clearInterval(dropInterval);
+            document.getElementById('message').textContent = `Game Over! Score: ${score}`;
+        }
+
+        function startGame() {
+            if (dropInterval) clearInterval(dropInterval);
+            init();
+            gameRunning = true;
+            paused = false;
+            document.getElementById('pause-btn').textContent = 'Pause';
+            dropInterval = setInterval(() => {
+                if (!paused) moveDown();
+            }, dropTime);
+        }
+
+        function togglePause() {
+            if (!gameRunning) return;
+            paused = !paused;
+            document.getElementById('pause-btn').textContent = paused ? 'Resume' : 'Pause';
+            document.getElementById('message').textContent = paused ? 'Paused' : '';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (!gameRunning || paused) return;
+            switch (e.key) {
+                case 'ArrowLeft': e.preventDefault(); moveLeft(); break;
+                case 'ArrowRight': e.preventDefault(); moveRight(); break;
+                case 'ArrowDown': e.preventDefault(); moveDown(); break;
+                case 'ArrowUp': e.preventDefault(); rotate(); break;
+                case ' ': e.preventDefault(); hardDrop(); break;
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

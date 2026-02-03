@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku | Yuxu Ge</title>
+    <style>
+        :root { --black: #111; --off-white: #f4f4f4; --vermilion: #C41E3A; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--off-white); }
+        a { color: var(--vermilion); text-decoration: none; }
+        a:hover { opacity: 0.75; }
+        .layout { min-height: 100vh; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 320px; height: 100vh; background: var(--black); color: var(--off-white); padding: 3rem 2rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .avatar { display: block; width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--vermilion); margin-bottom: 1.5rem; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar h1 { font-size: 1.8rem; font-weight: 700; color: var(--off-white); }
+        .title-role { font-size: 0.9rem; color: #888; margin-top: 0.25rem; }
+        .contact-block { margin-top: 2.5rem; width: 100%; }
+        .social-links { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+        .social-links a { display: flex; align-items: center; gap: 0.75rem; width: 160px; color: var(--off-white); opacity: 0.7; padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; }
+        .social-links a:hover { color: var(--vermilion); opacity: 1; }
+        .social-links svg { width: 20px; height: 20px; }
+        .social-links .orcid-link { font-size: 0.68rem; gap: 0.5rem; white-space: nowrap; }
+        .sidebar-footer { text-align: center; font-size: 0.75rem; color: #555; }
+        .content { margin-left: 320px; padding: 2rem 3rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; background: linear-gradient(135deg, #e0e5ec 0%, #f5f5f5 100%); }
+        .back-link { display: inline-flex; font-size: 0.85rem; margin-bottom: 1rem; color: #666; align-self: flex-start; }
+        .back-link:hover { color: var(--vermilion); }
+        .game-title { font-size: 2.5rem; color: #333; margin-bottom: 1rem; }
+        .board { display: grid; grid-template-columns: repeat(9, 1fr); background: #333; gap: 1px; padding: 3px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .cell { width: 45px; height: 45px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .cell:hover { background: #e3f2fd; }
+        .cell.selected { background: #bbdefb; }
+        .cell.fixed { color: #333; font-weight: 700; cursor: default; }
+        .cell.user { color: #1976d2; }
+        .cell.error { background: #ffcdd2; color: #c62828; }
+        .cell.highlight { background: #fff9c4; }
+        .cell:nth-child(3n) { border-right: 2px solid #333; }
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #333; }
+        .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 1.5rem; }
+        .numpad button { width: 50px; height: 50px; font-size: 1.5rem; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; background: #fff; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.2s; }
+        .numpad button:hover { transform: scale(1.1); background: #e3f2fd; }
+        .numpad button.clear { background: #ffcdd2; color: #c62828; }
+        .difficulty { margin-top: 1rem; display: flex; gap: 0.5rem; }
+        .difficulty button { padding: 0.5rem 1rem; font-size: 0.9rem; border: none; border-radius: 20px; cursor: pointer; background: #fff; color: #666; }
+        .difficulty button.active { background: #1976d2; color: #fff; }
+        .controls { margin-top: 1rem; display: flex; gap: 0.5rem; }
+        button.main-btn { padding: 0.75rem 1.5rem; font-size: 1rem; background: #1976d2; color: #fff; border: none; border-radius: 25px; cursor: pointer; font-weight: 600; }
+        button.main-btn:hover { background: #1565c0; }
+        .message { margin-top: 1rem; font-size: 1.25rem; font-weight: 600; color: #333; min-height: 1.5rem; }
+        .instructions { margin-top: 1rem; color: #666; font-size: 0.85rem; text-align: center; }
+        @media (max-width: 900px) {
+            .sidebar { position: relative; width: 100%; height: auto; padding: 2rem 1.5rem 1rem; }
+            .social-links { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .social-links a { width: auto; padding: 0.5rem; font-size: 0; gap: 0; }
+            .social-links svg { width: 24px; height: 24px; }
+            .content { margin-left: 0; padding: 1.5rem 1rem; }
+            .cell { width: 38px; height: 38px; font-size: 1.2rem; }
+            .numpad button { width: 45px; height: 45px; font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js"></script>
+        <main class="content">
+            <a href="/games/" class="back-link">← Back to Games</a>
+            <h1 class="game-title">Sudoku</h1>
+            <div class="board" id="board"></div>
+            <div class="numpad" id="numpad"></div>
+            <div class="difficulty">
+                <button class="active" onclick="setDifficulty(40)">Easy</button>
+                <button onclick="setDifficulty(50)">Medium</button>
+                <button onclick="setDifficulty(55)">Hard</button>
+            </div>
+            <div class="controls">
+                <button class="main-btn" onclick="newGame()">New Game</button>
+                <button class="main-btn" onclick="checkSolution()">Check</button>
+            </div>
+            <div class="message" id="message"></div>
+            <div class="instructions">
+                Click a cell and use numbers to fill. Each row, column, and 3×3 box must contain 1-9.
+            </div>
+        </main>
+    </div>
+    <script>
+        let solution = [], puzzle = [], userBoard = [], selected = null, difficulty = 40;
+
+        function setDifficulty(d) {
+            difficulty = d;
+            document.querySelectorAll('.difficulty button').forEach((btn, i) => {
+                btn.classList.toggle('active', [40, 50, 55][i] === d);
+            });
+            newGame();
+        }
+
+        function generateSudoku() {
+            const board = Array(9).fill(null).map(() => Array(9).fill(0));
+            fillBoard(board);
+            return board;
+        }
+
+        function fillBoard(board) {
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (board[r][c] === 0) {
+                        const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+                        for (const n of nums) {
+                            if (isValid(board, r, c, n)) {
+                                board[r][c] = n;
+                                if (fillBoard(board)) return true;
+                                board[r][c] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function isValid(board, row, col, num) {
+            for (let i = 0; i < 9; i++) {
+                if (board[row][i] === num || board[i][col] === num) return false;
+            }
+            const br = Math.floor(row / 3) * 3, bc = Math.floor(col / 3) * 3;
+            for (let r = br; r < br + 3; r++) {
+                for (let c = bc; c < bc + 3; c++) {
+                    if (board[r][c] === num) return false;
+                }
+            }
+            return true;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function newGame() {
+            solution = generateSudoku();
+            puzzle = solution.map(row => [...row]);
+            let removed = 0;
+            while (removed < difficulty) {
+                const r = Math.floor(Math.random() * 9), c = Math.floor(Math.random() * 9);
+                if (puzzle[r][c] !== 0) { puzzle[r][c] = 0; removed++; }
+            }
+            userBoard = puzzle.map(row => [...row]);
+            selected = null;
+            document.getElementById('message').textContent = '';
+            render();
+        }
+
+        function render() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (puzzle[r][c] !== 0) {
+                        cell.textContent = puzzle[r][c];
+                        cell.classList.add('fixed');
+                    } else if (userBoard[r][c] !== 0) {
+                        cell.textContent = userBoard[r][c];
+                        cell.classList.add('user');
+                        if (userBoard[r][c] !== solution[r][c]) cell.classList.add('error');
+                    }
+                    if (selected && selected.row === r && selected.col === c) cell.classList.add('selected');
+                    if (selected && (selected.row === r || selected.col === c)) cell.classList.add('highlight');
+                    cell.onclick = () => { if (puzzle[r][c] === 0) { selected = { row: r, col: c }; render(); } };
+                    board.appendChild(cell);
+                }
+            }
+            // Numpad
+            const numpad = document.getElementById('numpad');
+            numpad.innerHTML = '';
+            for (let n = 1; n <= 9; n++) {
+                const btn = document.createElement('button');
+                btn.textContent = n;
+                btn.onclick = () => setNumber(n);
+                numpad.appendChild(btn);
+            }
+            const clearBtn = document.createElement('button');
+            clearBtn.textContent = '×';
+            clearBtn.className = 'clear';
+            clearBtn.onclick = () => setNumber(0);
+            numpad.appendChild(clearBtn);
+        }
+
+        function setNumber(n) {
+            if (!selected) return;
+            userBoard[selected.row][selected.col] = n;
+            render();
+            checkWin();
+        }
+
+        function checkSolution() {
+            let correct = true;
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (userBoard[r][c] !== solution[r][c]) correct = false;
+                }
+            }
+            document.getElementById('message').textContent = correct ? '🎉 Perfect!' : 'Some cells are incorrect';
+        }
+
+        function checkWin() {
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (userBoard[r][c] !== solution[r][c]) return;
+                }
+            }
+            document.getElementById('message').textContent = '🎉 Congratulations! You solved it!';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (!selected) return;
+            const n = parseInt(e.key);
+            if (n >= 1 && n <= 9) setNumber(n);
+            if (e.key === 'Backspace' || e.key === 'Delete') setNumber(0);
+        });
+
+        newGame();
+    </script>
+</body>
+</html>

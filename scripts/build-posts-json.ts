@@ -20,7 +20,8 @@ import { getConfig, getPostsDir, getProjectRoot } from "./config.ts";
 const config = getConfig();
 const POSTS_DIR = getPostsDir();
 const PROJECT_ROOT = getProjectRoot();
-const OUTPUT_FILE = join(PROJECT_ROOT, "blog", "posts.json");
+const OUTPUT_DIR = join(PROJECT_ROOT, config.paths.output);
+const OUTPUT_FILE = join(OUTPUT_DIR, "blog", "posts.json");
 
 interface Frontmatter {
   date?: string;

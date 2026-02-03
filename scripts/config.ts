@@ -9,11 +9,8 @@ import { join, dirname } from "@std/path";
 import { parse as parseYaml } from "@std/yaml";
 
 // Get project root
-// When running from compiled binary, use current working directory
-// When running from source, use parent of scripts directory
-const __dirname = dirname(import.meta.filename!);
-const isCompiledBinary = __dirname.includes("deno-compile");
-const PROJECT_ROOT = isCompiledBinary ? Deno.cwd() : join(__dirname, "..");
+// Always use current working directory - user should run from their site root
+const PROJECT_ROOT = Deno.cwd();
 
 // ============================================================
 // TYPE DEFINITIONS
@@ -40,6 +37,8 @@ export interface FeaturesConfig {
   vectorSearch: boolean;
   gallery: boolean;
   mediumExport: boolean;
+  translation: boolean;
+  chat: boolean;
 }
 
 export interface SearchBuildConfig {
@@ -94,6 +93,8 @@ const DEFAULT_CONFIG: StaticFlowConfig = {
     vectorSearch: true,
     gallery: true,
     mediumExport: false,
+    translation: false,
+    chat: false,
   },
   build: {
     imageCompression: true,

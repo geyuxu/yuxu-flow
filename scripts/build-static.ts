@@ -12,9 +12,10 @@ import { getConfig, getPostsDir, getThemeDir, getProjectRoot } from "./config.ts
 const config = getConfig();
 const PROJECT_ROOT = getProjectRoot();
 const POSTS_DIR = getPostsDir();
+const DIST_DIR = join(PROJECT_ROOT, config.paths.output);
 const TEMPLATE_PATH = join(getThemeDir(), "blog", "post.html");
-const POSTS_JSON = join(PROJECT_ROOT, "blog", "posts.json");
-const OUTPUT_DIR = join(PROJECT_ROOT, "blog", "static");
+const POSTS_JSON = join(DIST_DIR, "blog", "posts.json");
+const OUTPUT_DIR = join(DIST_DIR, "blog", "static");
 
 // Check if file exists
 function existsSync(path: string): boolean {

@@ -1,0 +1,53 @@
+{
+    "hero": {
+        "subtitle": "Your tagline here.",
+        "bio": "A brief introduction about yourself or your site. Edit this in home-config.json.",
+        "greeting": "Welcome to my site!"
+    },
+    "sections": [
+        {
+            "type": "blog",
+            "title": "Latest Posts",
+            "cols": 2,
+            "rows": 4
+        },
+        {
+            "type": "games",
+            "title": "Mini Games",
+            "cols": 4,
+            "rows": 1
+        },
+        {
+            "type": "stack",
+            "title": "Skills",
+            "cols": 3,
+            "rows": 2,
+            "items": [
+                {
+                    "label": "Frontend",
+                    "value": "React, Vue, TypeScript"
+                },
+                {
+                    "label": "Backend",
+                    "value": "Node.js, Python, Go"
+                },
+                {
+                    "label": "DevOps",
+                    "value": "Docker, Kubernetes, CI/CD"
+                },
+                {
+                    "label": "Database",
+                    "value": "PostgreSQL, MongoDB, Redis"
+                },
+                {
+                    "label": "Cloud",
+                    "value": "AWS, GCP, Azure"
+                },
+                {
+                    "label": "Tools",
+                    "value": "Git, VS Code, Linux"
+                }
+            ]
+        }
+    ]
+}

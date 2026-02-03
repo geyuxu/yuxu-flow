@@ -151,12 +151,72 @@ function setup() {
 }
 
 // ============================================================
+// COPY THEME TO DIST
+// ============================================================
+
+async function copyThemeToDist() {
+  const config = getConfig();
+  const themeDir = join(PROJECT_ROOT, config.paths.theme);
+  const distDir = join(PROJECT_ROOT, config.paths.output);
+
+  // Ensure dist directory exists
+  if (!existsSync(distDir)) {
+    Deno.mkdirSync(distDir, { recursive: true });
+  }
+
+  // Copy directory recursively
+  async function copyDir(src: string, dest: string) {
+    if (!existsSync(dest)) {
+      Deno.mkdirSync(dest, { recursive: true });
+    }
+    for await (const entry of Deno.readDir(src)) {
+      const srcPath = join(src, entry.name);
+      const destPath = join(dest, entry.name);
+      if (entry.isDirectory) {
+        await copyDir(srcPath, destPath);
+      } else {
+        await Deno.copyFile(srcPath, destPath);
+      }
+    }
+  }
+
+  // 1. Copy theme files to dist
+  await copyDir(themeDir, distDir);
+
+  // 2. Copy user config files to dist
+  const configFiles = ["sidebar-config.json", "home-config.json"];
+  for (const file of configFiles) {
+    const src = join(PROJECT_ROOT, file);
+    const dest = join(distDir, file);
+    if (existsSync(src)) {
+      await Deno.copyFile(src, dest);
+    }
+  }
+
+  // 3. Generate features.json from staticflow.config.yaml for frontend use
+  const featuresJson = JSON.stringify(config.features, null, 2);
+  await Deno.writeTextFile(join(distDir, "features.json"), featuresJson);
+
+  // 4. Copy content directory to dist (for runtime content loading)
+  const contentSrc = join(PROJECT_ROOT, config.paths.posts.split("/")[0]); // "content"
+  const contentDest = join(distDir, config.paths.posts.split("/")[0]);
+  if (existsSync(contentSrc)) {
+    await copyDir(contentSrc, contentDest);
+  }
+
+  console.log(`Copied theme to ${config.paths.output}/`);
+}
+
+// ============================================================
 // SERVE COMMAND (Deno HTTP Server)
 // ============================================================
 
 function serve(port: number = 8080) {
+  const config = getConfig();
+  const distDir = join(PROJECT_ROOT, config.paths.output);
+
   console.log(`=== Static Flow Dev Server ===\n`);
-  console.log(`Serving: ${PROJECT_ROOT}`);
+  console.log(`Serving: ${distDir}`);
   console.log(`URL: http://localhost:${port}`);
   console.log("");
   console.log("Press Ctrl+C to stop.\n");
@@ -194,7 +254,7 @@ function serve(port: number = 8080) {
       pathname += "index.html";
     }
 
-    const filePath = join(PROJECT_ROOT, pathname);
+    const filePath = join(distDir, pathname);
 
     try {
       const stat = await Deno.stat(filePath);
@@ -245,6 +305,11 @@ async function build(options: {
 
   console.log("=== Static Flow Build ===\n");
 
+  // Copy theme to dist first
+  console.log("--- Copying Theme to Output ---");
+  await copyThemeToDist();
+  console.log("");
+
   // Photos only mode
   if (options.photos) {
     console.log("--- Processing Photos ---\n");
@@ -269,7 +334,8 @@ async function build(options: {
   // Full build or specific targets
   const buildPhotos = !options.static && !options.medium;
   const buildStaticHtml = !options.medium || options.static;
-  const buildMediumExport = !options.static || options.medium;
+  // Medium export only if enabled in config AND requested (or full build with feature enabled)
+  const buildMediumExport = config.features.mediumExport && (!options.static || options.medium);
 
   if (buildPhotos) {
     console.log("--- Converting HEIC to JPG ---");
@@ -418,21 +484,26 @@ async function gitPush(customMessage?: string) {
 // ============================================================
 
 function clean(all: boolean = false) {
+  const config = getConfig();
+  const distDir = join(PROJECT_ROOT, config.paths.output);
+
   console.log("=== Cleaning Generated Files ===\n");
 
   const dirsToRemove = [
-    join(PROJECT_ROOT, "blog", "static"),
-    join(PROJECT_ROOT, "blog", "medium"),
-    join(PROJECT_ROOT, "blog", "images", "tables"),
+    join(distDir, "blog", "static"),
+    join(distDir, "blog", "medium"),
+    join(distDir, "blog", "images", "tables"),
   ];
 
   const filesToRemove = [
-    join(PROJECT_ROOT, "blog", ".table-cache.json"),
+    join(distDir, "blog", ".table-cache.json"),
   ];
 
   // Add gist cache only with --all flag
   if (all) {
-    filesToRemove.push(join(PROJECT_ROOT, "blog", ".gist-cache.json"));
+    filesToRemove.push(join(distDir, "blog", ".gist-cache.json"));
+    // Also remove entire dist directory
+    dirsToRemove.push(distDir);
   }
 
   for (const dir of dirsToRemove) {

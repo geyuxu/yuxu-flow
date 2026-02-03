@@ -1,0 +1,38 @@
+# Static Flow Configuration
+# Copy this file to your website root and customize
+
+site:
+  name: "My Blog"
+  url: "https://example.com"
+  description: "A personal blog and portfolio"
+  author: "Your Name"
+  language: ["en"]
+
+paths:
+  posts: "content/posts"
+  photos: "content/photos"
+  output: "dist"
+  theme: "themes/default"
+  cache: ".cache"
+
+features:
+  search: true
+  vectorSearch: true   # Requires OPENAI_API_KEY for semantic search
+  gallery: true        # Photo gallery enabled
+  mediumExport: false
+  translation: false   # Multi-language translation
+  chat: false          # AI chat widget
+
+build:
+  imageCompression: true
+  maxImageWidth: 2000
+  imageQuality: 85
+  staticHtml: true
+  search:
+    chunkSize: 500
+    chunkOverlap: 50
+    dimensions: 512
+    model: "text-embedding-3-small"
+    batchSize: 20
+  medium:
+    maxCodeLines: 15

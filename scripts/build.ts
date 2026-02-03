@@ -45,8 +45,8 @@ export async function main(argsOverride?: string[]) {
 
   console.log("\n═══════════════════════════════════════");
   console.log("Build complete!");
-  if (buildStatic && config.build.staticHtml) console.log("   Static: blog/static/");
-  if (buildMedium && config.features.mediumExport) console.log("   Medium: blog/medium/");
+  if (buildStatic && config.build.staticHtml) console.log(`   Static: ${config.paths.output}/blog/static/`);
+  if (buildMedium && config.features.mediumExport) console.log(`   Medium: ${config.paths.output}/blog/medium/`);
   console.log("═══════════════════════════════════════");
 }
 

@@ -17,13 +17,14 @@ import { getConfig, getPostsDir, getProjectRoot, getCacheDir } from "./config.ts
 const config = getConfig();
 const PROJECT_ROOT = getProjectRoot();
 const POSTS_DIR = getPostsDir();
+const OUTPUT_DIR = join(PROJECT_ROOT, config.paths.output);
 
 // Configuration from config file
 const CONFIG = {
   postsDir: POSTS_DIR,
-  outputFile: join(PROJECT_ROOT, "public", "search.dat"),
-  metadataFile: join(PROJECT_ROOT, "public", "search-metadata.json"),
-  invertedIndexFile: join(PROJECT_ROOT, "public", "search-inverted.json"),
+  outputFile: join(OUTPUT_DIR, "public", "search.dat"),
+  metadataFile: join(OUTPUT_DIR, "public", "search-metadata.json"),
+  invertedIndexFile: join(OUTPUT_DIR, "public", "search-inverted.json"),
   embeddingCacheFile: join(getCacheDir(), "embeddings.json"),
   chunkSize: config.build.search.chunkSize,
   chunkOverlap: config.build.search.chunkOverlap,

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog | Blog</title>
+    <title>Blog | Yuxu Ge</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <style>
@@ -840,11 +840,9 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script>
-        // Get post name from URL: /blog/post.html?p=posts/2026/hello-world
+        // Get post name from URL: /blog/post.html?p=ddd-geocoding-client
         const params = new URLSearchParams(window.location.search);
         const postName = params.get('p');
-        // Content files are stored in /content/ directory
-        const contentPath = postName ? `/content/${postName}` : null;
 
         // Translation variables (declared early for use in content loading)
         let originalMarkdown = null;
@@ -1065,8 +1063,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>`;
 
-            const pptxUrl = `${contentPath}.pptx`;
-            const pdfUrl = `${contentPath}.pdf`;
+            const pptxUrl = `${postName}.pptx`;
+            const pdfUrl = `${postName}.pdf`;
 
             // Check if PDF preview exists
             try {
@@ -1252,8 +1250,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>`;
 
-            const texUrl = `${contentPath}.tex`;
-            const pdfUrl = `${contentPath}.pdf`;
+            const texUrl = `${postName}.tex`;
+            const pdfUrl = `${postName}.pdf`;
 
             // Check if PDF preview exists
             try {
@@ -1297,8 +1295,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>`;
 
-            const rtfUrl = `${contentPath}.rtf`;
-            const pdfUrl = `${contentPath}.pdf`;
+            const rtfUrl = `${postName}.rtf`;
+            const pdfUrl = `${postName}.pdf`;
 
             // Check if PDF preview exists
             try {
@@ -1340,8 +1338,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>`;
 
-            const odtUrl = `${contentPath}.odt`;
-            const pdfUrl = `${contentPath}.pdf`;
+            const odtUrl = `${postName}.odt`;
+            const pdfUrl = `${postName}.pdf`;
 
             // Check if PDF preview exists
             try {
@@ -1382,8 +1380,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>`;
 
-            const odsUrl = `${contentPath}.ods`;
-            const pdfUrl = `${contentPath}.pdf`;
+            const odsUrl = `${postName}.ods`;
+            const pdfUrl = `${postName}.pdf`;
 
             // Check if PDF preview exists
             try {
@@ -1424,8 +1422,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
         </svg>`;
 
-            const odpUrl = `${contentPath}.odp`;
-            const pdfUrl = `${contentPath}.pdf`;
+            const odpUrl = `${postName}.odp`;
+            const pdfUrl = `${postName}.pdf`;
 
             // Check if PDF preview exists
             try {
@@ -1467,9 +1465,10 @@
         }
 
         if (postName) {
+            // Try different file types in order: md -> ipynb -> pptx -> rtf -> odt -> ods -> odp -> tex -> pdf -> txt -> docx -> xlsx -> csv -> images -> video -> audio -> json -> html -> code -> xml/yaml
             const article = document.getElementById('article');
             const filename = postName.split('/').pop();
-            const defaultTitle = titleFromFilename(filename);
+            const title = titleFromFilename(filename);
 
             // Global variable to store post metadata (description, etc.)
             let postMeta = null;
@@ -1481,6 +1480,7 @@
                     descDiv.className = 'post-description';
                     descDiv.textContent = postMeta.description;
                     descDiv.style.cssText = 'color: #666; font-size: 1.1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #ddd;';
+                    // Insert after h1 or at the beginning
                     const h1 = article.querySelector('h1');
                     if (h1 && h1.nextSibling) {
                         h1.parentNode.insertBefore(descDiv, h1.nextSibling);
@@ -1492,181 +1492,199 @@
                 }
             }
 
-            // Load content based on file extension from metadata
-            async function loadContent(ext, title) {
-                const fileUrl = `${contentPath}.${ext}`;
-
-                switch (ext) {
-                    case 'md':
-                        const mdResponse = await fetch(fileUrl);
-                        if (!mdResponse.ok) throw new Error('not found');
-                        const md = await mdResponse.text();
-                        const frontmatterMatch = md.match(/^---\n[\s\S]*?\n---\n/);
-                        const content = frontmatterMatch ? md.slice(frontmatterMatch[0].length) : md;
-                        originalMarkdown = content;
-                        article.innerHTML = marked.parse(content);
-                        const h1 = document.querySelector('article h1');
-                        if (h1) document.title = h1.textContent + ' | Blog';
-                        postProcessArticle();
-                        break;
-
-                    case 'ipynb':
-                        const nbResponse = await fetch(fileUrl);
-                        if (!nbResponse.ok) throw new Error('not found');
-                        const notebook = await nbResponse.json();
-                        article.innerHTML = renderNotebook(notebook, fileUrl);
-                        const nbH1 = document.querySelector('article h1');
-                        if (nbH1) document.title = nbH1.textContent + ' | Blog';
-                        postProcessArticle();
-                        break;
-
-                    case 'pdf':
-                        article.innerHTML = renderPdf(fileUrl, title);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'tex':
-                        await renderLatex(postName, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'odt':
-                        await renderOdt(postName, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'ods':
-                        await renderOds(postName, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'odp':
-                        await renderOdp(postName, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'docx':
-                        await renderWord(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'xlsx':
-                        await renderExcel(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'pptx':
-                        await renderPowerPoint(postName, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'rtf':
-                        await renderRtf(postName, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'csv':
-                        await renderCsv(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'txt':
-                        const txtResponse = await fetch(fileUrl);
-                        if (!txtResponse.ok) throw new Error('not found');
-                        const text = await txtResponse.text();
-                        article.innerHTML = renderText(text, fileUrl, title);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'json':
-                        await renderJson(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'html':
-                        renderHtml(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'jpg': case 'jpeg': case 'png': case 'gif': case 'webp': case 'svg':
-                        renderImage(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'mp4': case 'webm':
-                        renderVideo(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'mp3': case 'wav': case 'ogg':
-                        renderAudio(fileUrl, title, article);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    case 'py': case 'js': case 'ts': case 'go': case 'java': case 'rs':
-                    case 'cpp': case 'c': case 'rb': case 'php': case 'sh':
-                    case 'xml': case 'yaml': case 'yml':
-                        await renderCode(fileUrl, title, article, ext);
-                        document.title = title + ' | Blog';
-                        break;
-
-                    default:
-                        throw new Error('Unsupported file type: ' + ext);
-                }
-            }
-
-            // First fetch posts.json to get metadata and file type
+            // First fetch posts.json to get metadata
+            console.log('Fetching post:', postName);
             fetch('/blog/posts.json')
                 .then(r => r.json())
-                .then(async posts => {
+                .then(posts => {
+                    // Find current post by slug
                     postMeta = posts.find(p => p.slug === postName);
-
-                    if (postMeta && postMeta.ext) {
-                        // Use known extension from metadata
-                        const title = postMeta.title || defaultTitle;
-                        await loadContent(postMeta.ext, title);
-                    } else {
-                        // Fallback: try markdown first, then a few common formats
-                        const commonExts = ['md', 'ipynb', 'pdf'];
-                        let loaded = false;
-
-                        for (const ext of commonExts) {
-                            try {
-                                await loadContent(ext, defaultTitle);
-                                loaded = true;
-                                break;
-                            } catch (e) {
-                                // Try next extension
-                            }
-                        }
-
-                        if (!loaded) {
-                            article.innerHTML = '<p class="error">Post not found.</p>';
-                        }
-                    }
+                    console.log('Post metadata:', postMeta);
                 })
-                .catch(async err => {
-                    console.warn('Could not load posts.json, trying markdown:', err);
-                    // Fallback to markdown if posts.json fails
-                    try {
-                        await loadContent('md', defaultTitle);
-                    } catch (e) {
+                .catch(err => console.log('Could not load posts.json:', err))
+                .finally(() => {
+                    // Now try to load the actual post content
+                    const mdUrl = `${postName}.md`;
+                    console.log('Fetching MD from:', new URL(mdUrl, window.location.href).href);
+
+                    fetch(mdUrl)
+                .then(r => {
+                    console.log('MD Fetch response:', r.status, r.statusText);
+                    if (!r.ok) throw new Error('not found');
+                    return r.text();
+                })
+                .then(md => {
+                    const frontmatterMatch = md.match(/^---\n[\s\S]*?\n---\n/);
+                    const content = frontmatterMatch ? md.slice(frontmatterMatch[0].length) : md;
+                    if (typeof marked === 'undefined') {
+                        console.error('marked library not loaded');
+                        article.innerHTML = '<p class="error">Error: Markdown library not loaded. Please check your internet connection.</p>';
+                        throw new Error('done');
+                    }
+                    // Store original markdown for translation
+                    originalMarkdown = content;
+                    article.innerHTML = marked.parse(content);
+                    const h1 = document.querySelector('article h1');
+                    if (h1) document.title = h1.textContent + ' | Yuxu Ge';
+                    postProcessArticle();
+                    throw new Error('done'); // Stop chain
+                })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.ipynb`); })
+                .then(r => { if (r && !r.ok) throw new Error('not found'); return r?.json(); })
+                .then(notebook => {
+                    if (!notebook) return;
+                    article.innerHTML = renderNotebook(notebook, `${postName}.ipynb`);
+                    const h1 = document.querySelector('article h1');
+                    if (h1) document.title = h1.textContent + ' | Yuxu Ge';
+                    postProcessArticle();
+                })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.pptx`, { method: 'HEAD' }); })
+                .then(async r => {
+                    if (r && r.ok) {
+                        await renderPowerPoint(postName, title, article);
+                        document.title = title + ' | Yuxu Ge';
+                        throw new Error('done');
+                    }
+                    throw new Error('not found');
+                })
+                // RTF (before PDF to enable dual download)
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.rtf`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderRtf(postName, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // OpenDocument formats (before PDF to enable dual download)
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.odt`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderOdt(postName, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.ods`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderOds(postName, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.odp`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderOdp(postName, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // LaTeX (before PDF to enable dual download)
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.tex`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderLatex(postName, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // PDF (standalone, without source file)
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.pdf`, { method: 'HEAD' }); })
+                .then(r => {
+                    if (r && r.ok) {
+                        article.innerHTML = renderPdf(`${postName}.pdf`, title);
+                        document.title = title + ' | Yuxu Ge';
+                        throw new Error('done'); // Stop chain
+                    }
+                    throw new Error('not found');
+                })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.txt`); })
+                .then(r => { if (r && !r.ok) throw new Error('not found'); return r?.text(); })
+                .then(text => {
+                    if (!text) return;
+                    article.innerHTML = renderText(text, `${postName}.txt`, title);
+                    document.title = title + ' | Yuxu Ge';
+                })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.docx`, { method: 'HEAD' }); })
+                .then(async r => {
+                    if (r && r.ok) {
+                        await renderWord(`${postName}.docx`, title, article);
+                        document.title = title + ' | Yuxu Ge';
+                        throw new Error('done');
+                    }
+                    throw new Error('not found');
+                })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.xlsx`, { method: 'HEAD' }); })
+                .then(async r => {
+                    if (r && r.ok) {
+                        await renderExcel(`${postName}.xlsx`, title, article);
+                        document.title = title + ' | Yuxu Ge';
+                        throw new Error('done');
+                    }
+                    throw new Error('not found');
+                })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.csv`, { method: 'HEAD' }); })
+                .then(async r => {
+                    if (r && r.ok) {
+                        await renderCsv(`${postName}.csv`, title, article);
+                        document.title = title + ' | Yuxu Ge';
+                        throw new Error('done');
+                    }
+                    throw new Error('not found');
+                })
+                // Images
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.jpg`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderImage(`${postName}.jpg`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.jpeg`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderImage(`${postName}.jpeg`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.png`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderImage(`${postName}.png`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.gif`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderImage(`${postName}.gif`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.webp`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderImage(`${postName}.webp`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.svg`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderImage(`${postName}.svg`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // Video
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.mp4`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderVideo(`${postName}.mp4`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.webm`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderVideo(`${postName}.webm`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // Audio
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.mp3`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderAudio(`${postName}.mp3`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.wav`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderAudio(`${postName}.wav`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.ogg`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderAudio(`${postName}.ogg`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // JSON
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.json`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderJson(`${postName}.json`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // HTML
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.html`, { method: 'HEAD' }); })
+                .then(r => { if (r && r.ok) { renderHtml(`${postName}.html`, title, article); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // Code files
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.py`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.py`, title, article, 'py'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.js`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.js`, title, article, 'js'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.ts`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.ts`, title, article, 'ts'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.go`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.go`, title, article, 'go'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.java`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.java`, title, article, 'java'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.rs`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.rs`, title, article, 'rs'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.cpp`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.cpp`, title, article, 'cpp'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.c`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.c`, title, article, 'c'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.rb`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.rb`, title, article, 'rb'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.php`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.php`, title, article, 'php'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.sh`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.sh`, title, article, 'sh'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // XML/YAML
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.xml`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.xml`, title, article, 'xml'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.yaml`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.yaml`, title, article, 'yaml'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                .catch(e => { if (e.message === 'done') throw e; return fetch(`${postName}.yml`, { method: 'HEAD' }); })
+                .then(async r => { if (r && r.ok) { await renderCode(`${postName}.yml`, title, article, 'yml'); document.title = title + ' | Yuxu Ge'; throw new Error('done'); } throw new Error('not found'); })
+                // Final catch
+                .catch(e => {
+                    if (e.message !== 'done' && article.innerHTML.includes('Loading')) {
                         article.innerHTML = '<p class="error">Post not found.</p>';
                     }
                 })
                 .finally(() => {
+                    // Inject description for non-markdown posts
                     injectDescription();
                 });
+                }); // End of finally from posts.json fetch
         } else {
             document.getElementById('article').innerHTML = '<p class="error">No post specified.</p>';
         }
 
         // ============================================================
-        // TRANSLATION FEATURE (controlled by sidebar-config.json)
+        // TRANSLATION FEATURE
         // ============================================================
-        let TRANSLATE_CONFIG = {
-            enabled: false,
-            apiUrl: '/api/translate',
+        const TRANSLATE_CONFIG = {
+            apiUrl: 'https://yuxu.ge/api/translate',
             cacheKey: 'translation_cache',
             cacheTTL: 7 * 24 * 60 * 60 * 1000, // 7 days
         };
@@ -1674,20 +1692,6 @@
         // Translation state variables (originalMarkdown, savedArticleHtml declared at script start)
         let currentLang = 'en';
         let isTranslating = false;
-
-        // Load config from sidebar-config.json
-        async function loadTranslationConfig() {
-            try {
-                const response = await fetch('/sidebar-config.json');
-                const config = await response.json();
-                TRANSLATE_CONFIG.enabled = config.translation === true;
-                TRANSLATE_CONFIG.apiUrl = config.translateApi || '/api/translate';
-                return TRANSLATE_CONFIG.enabled;
-            } catch (e) {
-                console.log('[Translation] Config not found, disabled');
-                return false;
-            }
-        }
 
         // Detect original language from content
         function detectLanguage(text) {
@@ -1848,18 +1852,13 @@
             }
         }
 
-        // Initialize after content loads (only if translation enabled)
-        const checkContentLoaded = setInterval(async () => {
+        // Initialize after content loads
+        const checkContentLoaded = setInterval(() => {
             const article = document.getElementById('article');
             if (article && !article.innerHTML.includes('Loading')) {
                 clearInterval(checkContentLoaded);
-                // Check if translation is enabled in config
-                const translationEnabled = await loadTranslationConfig();
-                if (translationEnabled) {
-                    setTimeout(initLanguageSelector, 100);
-                } else {
-                    console.log('[Translation] Disabled in config');
-                }
+                // Wait a bit for post-processing
+                setTimeout(initLanguageSelector, 100);
             }
         }, 100);
 

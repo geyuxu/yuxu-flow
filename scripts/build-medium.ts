@@ -15,10 +15,11 @@ import { getConfig, getPostsDir, getProjectRoot } from "./config.ts";
 const config = getConfig();
 const PROJECT_ROOT = getProjectRoot();
 const POSTS_DIR = getPostsDir();
-const POSTS_JSON = join(PROJECT_ROOT, "blog", "posts.json");
-const OUTPUT_DIR = join(PROJECT_ROOT, "blog", "medium");
-const GIST_CACHE_FILE = join(PROJECT_ROOT, "blog", ".gist-cache.json");
-const TABLE_CACHE_FILE = join(PROJECT_ROOT, "blog", ".table-cache.json");
+const DIST_DIR = join(PROJECT_ROOT, config.paths.output);
+const POSTS_JSON = join(DIST_DIR, "blog", "posts.json");
+const OUTPUT_DIR = join(DIST_DIR, "blog", "medium");
+const GIST_CACHE_FILE = join(DIST_DIR, "blog", ".gist-cache.json");
+const TABLE_CACHE_FILE = join(DIST_DIR, "blog", ".table-cache.json");
 const MAX_CODE_LINES = config.build.medium.maxCodeLines;
 
 // GitHub API for Gist creation

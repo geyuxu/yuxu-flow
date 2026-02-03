@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino Run | Yuxu Ge</title>
+    <style>
+        :root { --black: #111; --off-white: #f4f4f4; --vermilion: #C41E3A; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--off-white); }
+        a { color: var(--vermilion); text-decoration: none; }
+        a:hover { opacity: 0.75; }
+        .layout { min-height: 100vh; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 320px; height: 100vh; background: var(--black); color: var(--off-white); padding: 3rem 2rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .avatar { display: block; width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--vermilion); margin-bottom: 1.5rem; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar h1 { font-size: 1.8rem; font-weight: 700; color: var(--off-white); }
+        .title-role { font-size: 0.9rem; color: #888; margin-top: 0.25rem; }
+        .contact-block { margin-top: 2.5rem; width: 100%; }
+        .social-links { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+        .social-links a { display: flex; align-items: center; gap: 0.75rem; width: 160px; color: var(--off-white); opacity: 0.7; padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; }
+        .social-links a:hover { color: var(--vermilion); opacity: 1; }
+        .social-links svg { width: 20px; height: 20px; }
+        .social-links .orcid-link { font-size: 0.68rem; gap: 0.5rem; white-space: nowrap; }
+        .sidebar-footer { text-align: center; font-size: 0.75rem; color: #555; }
+        .content { margin-left: 320px; padding: 2rem 3rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; background: #f7f7f7; }
+        .back-link { display: inline-flex; font-size: 0.85rem; margin-bottom: 1rem; color: #666; align-self: flex-start; }
+        .back-link:hover { color: var(--vermilion); }
+        .game-header { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .game-title { font-size: 2rem; color: #535353; }
+        .score-box { font-family: 'Courier New', monospace; font-size: 1.5rem; color: #535353; }
+        canvas { display: block; border: 1px solid #ccc; background: #fff; }
+        .controls { margin-top: 1rem; }
+        button { padding: 0.75rem 1.5rem; font-size: 1rem; background: #535353; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #333; }
+        .message { margin-top: 1rem; font-size: 1.25rem; font-weight: 600; color: #535353; }
+        .instructions { margin-top: 1.5rem; color: #666; font-size: 0.9rem; text-align: center; }
+        @media (max-width: 900px) {
+            .sidebar { position: relative; width: 100%; height: auto; padding: 2rem 1.5rem 1rem; }
+            .social-links { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .social-links a { width: auto; padding: 0.5rem; font-size: 0; gap: 0; }
+            .social-links svg { width: 24px; height: 24px; }
+            .content { margin-left: 0; padding: 1.5rem 1rem; }
+            canvas { max-width: 100%; height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js"></script>
+        <main class="content">
+            <a href="/games/" class="back-link">← Back to Games</a>
+            <div class="game-header">
+                <h1 class="game-title">🦖 Dino Run</h1>
+                <div class="score-box">HI <span id="best">00000</span> <span id="score">00000</span></div>
+            </div>
+            <canvas id="game" width="600" height="200"></canvas>
+            <div class="controls">
+                <button onclick="startGame()">Play Again</button>
+            </div>
+            <div class="message" id="message">Press Space or tap to jump!</div>
+            <div class="instructions">
+                <strong>Controls:</strong> Space, Up Arrow, or click to jump.<br>
+                Avoid the cacti and survive as long as possible!
+            </div>
+        </main>
+    </div>
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const GROUND = 170, GRAVITY = 0.6, JUMP = -12;
+        let dino = { x: 50, y: GROUND, vy: 0, w: 40, h: 50, ducking: false };
+        let obstacles = [], score = 0, best = 0, speed = 6, gameRunning = false, animationId;
+        let frameCount = 0;
+
+        best = parseInt(localStorage.getItem('dino_best') || '0');
+        document.getElementById('best').textContent = String(best).padStart(5, '0');
+
+        function startGame() {
+            cancelAnimationFrame(animationId);
+            dino = { x: 50, y: GROUND, vy: 0, w: 40, h: 50, ducking: false };
+            obstacles = [];
+            score = 0;
+            speed = 6;
+            gameRunning = true;
+            frameCount = 0;
+            document.getElementById('score').textContent = '00000';
+            document.getElementById('message').textContent = '';
+            loop();
+        }
+
+        function jump() {
+            if (!gameRunning) { startGame(); return; }
+            if (dino.y >= GROUND) dino.vy = JUMP;
+        }
+
+        function draw() {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Ground
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(0, GROUND + 50, canvas.width, 2);
+            // Dino
+            ctx.fillStyle = '#535353';
+            const legOffset = Math.floor(frameCount / 5) % 2 * 5;
+            ctx.fillRect(dino.x, dino.y, dino.w - 10, dino.h);
+            ctx.fillRect(dino.x + dino.w - 15, dino.y - 15, 15, 20); // head
+            ctx.fillRect(dino.x + 5, dino.y + dino.h, 8, 10 + legOffset);
+            ctx.fillRect(dino.x + 20, dino.y + dino.h, 8, 10 - legOffset);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(dino.x + dino.w - 8, dino.y - 10, 4, 4); // eye
+            // Obstacles
+            ctx.fillStyle = '#535353';
+            obstacles.forEach(obs => {
+                if (obs.type === 'cactus') {
+                    ctx.fillRect(obs.x, GROUND + 50 - obs.h, obs.w, obs.h);
+                    if (obs.w > 15) {
+                        ctx.fillRect(obs.x - 5, GROUND + 50 - obs.h + 10, 5, obs.h - 20);
+                        ctx.fillRect(obs.x + obs.w, GROUND + 50 - obs.h + 15, 5, obs.h - 25);
+                    }
+                } else {
+                    // Bird
+                    const wingY = Math.sin(frameCount * 0.3) * 5;
+                    ctx.fillRect(obs.x, obs.y + wingY, 30, 10);
+                    ctx.fillRect(obs.x + 25, obs.y + wingY - 5, 15, 8);
+                }
+            });
+            // Score
+            ctx.fillStyle = '#535353';
+            ctx.font = '16px Courier New';
+        }
+
+        function update() {
+            frameCount++;
+            // Dino physics
+            dino.vy += GRAVITY;
+            dino.y += dino.vy;
+            if (dino.y > GROUND) { dino.y = GROUND; dino.vy = 0; }
+            // Spawn obstacles
+            if (frameCount % Math.floor(100 - speed * 5) === 0 || obstacles.length === 0) {
+                if (Math.random() > 0.3 || obstacles.length === 0) {
+                    const h = 30 + Math.random() * 30;
+                    const w = 15 + Math.random() * 15;
+                    obstacles.push({ type: 'cactus', x: canvas.width, w, h });
+                } else if (score > 200) {
+                    obstacles.push({ type: 'bird', x: canvas.width, y: GROUND - 30 - Math.random() * 40, w: 40, h: 20 });
+                }
+            }
+            // Move obstacles
+            obstacles.forEach(obs => obs.x -= speed);
+            obstacles = obstacles.filter(obs => obs.x + (obs.w || 40) > 0);
+            // Collision
+            obstacles.forEach(obs => {
+                const obsLeft = obs.x, obsRight = obs.x + (obs.w || 40);
+                const obsTop = obs.type === 'cactus' ? GROUND + 50 - obs.h : obs.y;
+                const obsBottom = obs.type === 'cactus' ? GROUND + 50 : obs.y + 20;
+                if (dino.x + dino.w - 5 > obsLeft && dino.x + 5 < obsRight &&
+                    dino.y + dino.h > obsTop && dino.y < obsBottom) {
+                    endGame();
+                }
+            });
+            // Score
+            score++;
+            if (score % 100 === 0) speed = Math.min(15, speed + 0.5);
+            document.getElementById('score').textContent = String(score).padStart(5, '0');
+        }
+
+        function endGame() {
+            gameRunning = false;
+            if (score > best) {
+                best = score;
+                localStorage.setItem('dino_best', best);
+                document.getElementById('best').textContent = String(best).padStart(5, '0');
+            }
+            document.getElementById('message').textContent = 'GAME OVER - Press Space to restart';
+        }
+
+        function loop() {
+            if (!gameRunning) return;
+            update();
+            draw();
+            animationId = requestAnimationFrame(loop);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); jump(); }
+        });
+        canvas.addEventListener('click', jump);
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); jump(); });
+
+        draw();
+    </script>
+</body>
+</html>

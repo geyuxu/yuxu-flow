@@ -18,7 +18,8 @@ import { getConfig, getPhotosDir, getProjectRoot } from "./config.ts";
 const config = getConfig();
 const PHOTOS_DIR = getPhotosDir();
 const PROJECT_ROOT = getProjectRoot();
-const OUTPUT_FILE = join(PROJECT_ROOT, "gallery", "photos.json");
+const OUTPUT_DIR = join(PROJECT_ROOT, config.paths.output);
+const OUTPUT_FILE = join(OUTPUT_DIR, "gallery", "photos.json");
 
 // Check if file exists
 function existsSync(path: string): boolean {

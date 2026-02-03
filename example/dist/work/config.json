@@ -1,0 +1,20 @@
+{
+    "title": "Projects",
+    "description": "Showcase your projects here",
+    "items": [
+        {
+            "title": "Example Project",
+            "description": "A sample project to demonstrate the work section. Replace this with your own projects.",
+            "link": "https://github.com/example/project",
+            "tag": "Open Source",
+            "year": "2026"
+        },
+        {
+            "title": "Portfolio Website",
+            "description": "Your personal portfolio built with Static Flow.",
+            "link": "#",
+            "tag": "Personal",
+            "year": "2026"
+        }
+    ]
+}
