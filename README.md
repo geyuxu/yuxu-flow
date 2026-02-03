@@ -17,7 +17,7 @@ static-flow/
 ├── scripts/           # Tool source code (TypeScript)
 ├── public/lib/        # Search library (Voy WASM)
 ├── docs/              # Documentation
-├── example/           # Example website (copy to start your own)
+├── docs/              # Documentation site (GitHub Pages)
 │   ├── content/       # Posts and photos
 │   ├── themes/        # HTML templates
 │   ├── blog/          # Generated output
@@ -65,9 +65,9 @@ staticflow clean              # Clean generated files
 
 ## Creating Your Website
 
-### Option 1: Copy Example
+### Option 1: Copy Docs Template
 ```bash
-cp -r example ~/my-website
+cp -r docs ~/my-website
 cd ~/my-website
 # Edit staticflow.config.yaml
 staticflow build
