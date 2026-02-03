@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Production-Ready Geocoding Client: Coordinate Hacks, Connection Pools, and Rate Limiting</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2026-01-26
+tags: [python, backend, geospatial]
+description: A deep dive into coordinate transformation (WGS84/GCJ02), connection pooling, rate limiting with token bucket, and retry strategies for geocoding APIs.</h2>
+<h1>Building a Production-Ready Geocoding Client: Coordinate Hacks, Connection Pools, and Rate Limiting</h1>
+<p>Geocoding looks simple: send an address, get coordinates back. But at scale, three hidden problems emerge that tutorials never mention:</p>
+<ol>
+<li><strong>In China, coordinates lie—by design</strong></li>
+<li><strong>HTTP connections don&#39;t clean up after themselves</strong></li>
+<li><strong>API quotas disappear faster than you&#39;d expect</strong></li>
+</ol>
+<p>I&#39;ve seen each of these take down production systems. This article shows how to build a geocoding client that handles all three.</p>
+<hr>
+<h2>Architecture Overview</h2>
+<p>Before diving into details, here&#39;s how the pieces fit together:</p>
+<p><img src="/blog/images/geocoding-client/architecture-diagram.png" alt="architecture-diagram"></p>
+<p>Three modules, three problems solved. Let&#39;s examine each one.</p>
+<hr>
+<h2>Problem #1: The 300-Meter Coordinate Drift</h2>
+<p>In China, consumer-facing maps don&#39;t use raw GPS coordinates (WGS-84). Instead, they use GCJ-02—nicknamed &quot;Mars Coordinates&quot;—which applies a non-linear offset to every point. This isn&#39;t a simple translation; it&#39;s a deliberate obfuscation involving trigonometric functions that shift coordinates by 50–500 meters depending on location.</p>
+<p>If your backend receives WGS-84 coordinates from GPS devices but passes them directly to a Chinese mapping API, your pins will land in the wrong place. Delivery zones break. Geofences fail. Users complain that &quot;the map is wrong.&quot;</p>
+<h3>The Solution: Iterative Inversion</h3>
+<p>The GCJ-02 transformation has no closed-form inverse. We solve it numerically:</p>
+<ol>
+<li>Guess that WGS-84 ≈ GCJ-02 (good enough to start)</li>
+<li>Apply the forward transformation to get a predicted GCJ-02</li>
+<li>Measure the error and adjust</li>
+<li>Repeat until error &lt; 10⁻⁶ degrees (~0.1 meter)</li>
+</ol>
+<blockquote><code>import math</code><br>
+<code></code><br>
+<code>_A = 6378245.0  # Semi-major axis</code><br>
+<code>_EE = 0.00669342162296594323  # First eccentricity squared</code><br>
+<code></code><br>
+<code></code><br>
+<code>def _out_of_china(lng: float, lat: float) -&gt; bool:</code><br>
+<code>    &quot;&quot;&quot;Check if point is outside China (skip transformation).&quot;&quot;&quot;</code><br>
+<code># ... (64 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/e95d2434ac89d63562b063733d2cbacb">GitHub Gist</a></em></p><p>The iteration converges in 2–3 steps for typical coordinates.</p>
+<hr>
+<h2>Problem #2: The TIME_WAIT Storm</h2>
+<p>Every naive geocoding request creates a new TCP connection:</p>
+<p><code>connect() → send HTTP request → receive response → close()</code></p><p>At 500 QPS, this creates 500 connections per second. Each closed connection enters TIME_WAIT state for 60 seconds (Linux default). Do the math: 500 × 60 = 30,000 sockets stuck in TIME_WAIT, competing for the ~28,000 ephemeral ports available on a typical system.</p>
+<p>Result: <code>OSError: [Errno 99] Cannot assign requested address</code></p>
+<h3>The Solution: Connection Pooling + Exponential Backoff</h3>
+<p>Replace stateless requests with a persistent session that reuses TCP connections:</p>
+<blockquote><code>import requests</code><br>
+<code>from requests.adapters import HTTPAdapter</code><br>
+<code>from urllib3.util.retry import Retry</code><br>
+<code></code><br>
+<code></code><br>
+<code>def create_resilient_session(pool_size: int = 50) -&gt; requests.Session:</code><br>
+<code>    &quot;&quot;&quot;</code><br>
+<code>    Create an HTTP session with connection pooling and retry logic.</code><br>
+<code># ... (23 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/e547b9e4d96624d83e1fa2e204a174a2">GitHub Gist</a></em></p><p><strong>Connection pool sizing</strong>: Use <code>pool_size = expected_QPS × average_latency</code>. At 500 QPS with 100ms latency, that&#39;s 50 connections.</p>
+<hr>
+<h2>Problem #3: Quota Burnout</h2>
+<p>Commercial geocoding APIs have strict rate limits. Without client-side throttling, a traffic spike can exhaust your daily quota in minutes—then return HTTP 429 for the rest of the day.</p>
+<h3>The Solution: Token Bucket Rate Limiting</h3>
+<p>The token bucket algorithm enforces average rate while tolerating short bursts:</p>
+<blockquote><code>import threading</code><br>
+<code>import time</code><br>
+<code>from dataclasses import dataclass, field</code><br>
+<code></code><br>
+<code></code><br>
+<code>@dataclass</code><br>
+<code>class TokenBucket:</code><br>
+<code>    &quot;&quot;&quot;</code><br>
+<code># ... (27 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/cdf8101406845469d1bd0b0de09dd71a">GitHub Gist</a></em></p><p>Set <code>capacity = rate × 2</code> to allow 2 seconds of burst without risking quota exhaustion.</p>
+<hr>
+<h2>Complete Implementation</h2>
+<p>Here&#39;s everything combined into a production-ready class:</p>
+<blockquote><code>import math</code><br>
+<code>import threading</code><br>
+<code>import time</code><br>
+<code>from dataclasses import dataclass, field</code><br>
+<code>from typing import Any</code><br>
+<code></code><br>
+<code>import requests</code><br>
+<code>from requests.adapters import HTTPAdapter</code><br>
+<code># ... (142 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/2ee53759034c532a7b8795df70526b6a">GitHub Gist</a></em></p><hr>
+<h2>Key Takeaways</h2>
+<p><img src="__TABLE_226e3423__" alt="Table"></p><p>Each layer is invisible until it fails. The code above handles all three.</p>
+<hr>
+<h2>Next Steps</h2>
+<ul>
+<li><strong>Multi-provider failover</strong>: Route to backup API on errors</li>
+<li><strong>Response caching</strong>: Addresses rarely move; cache aggressively  </li>
+<li><strong>Async processing</strong>: Use <code>asyncio</code> + <code>aiohttp</code> for bulk geocoding</li>
+<li><strong>Observability</strong>: Export latency, error rates, token utilization to your monitoring stack</li>
+</ul>
+<p><em>#geocoding #python #distributed-systems #rate-limiting #geospatial #backend-engineering</em></p>
+
+</body>
+</html>

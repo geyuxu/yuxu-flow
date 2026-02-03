@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro-News-Bot：构建 AI 驱动的自动化新闻聚合与发布系统</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai]
+legacy: true</h2>
+<h1>Astro-News-Bot：构建 AI 驱动的自动化新闻聚合与发布系统</h1>
+<p>在架构设计之初，我遵循了几个核心原则：</p>
+<ol>
+<li><strong>模块化</strong>：每个功能（抓取、去重、AI 处理、发布）都是独立模块，易于维护和替换</li>
+<li><strong>自动化</strong>：整个流程无需人工干预，实现&quot;一次设置，永远运行&quot;</li>
+<li><strong>幂等性</strong>：重复运行任务不产生副作用</li>
+<li><strong>可扩展性</strong>：方便增加新的新闻源或处理步骤</li>
+</ol>
+<h3>技术架构</h3>
+<p>基于这些原则，我设计了一个线性的数据处理管道：</p>
+<p><code>RSS源 → 抓取器 → 向量去重 → AI摘要 → Markdown生成 → Git发布 → 博客部署</code></p><p>核心模块结构：</p>
+<blockquote><code>astro-news-bot/</code><br>
+<code>├── news_bot/</code><br>
+<code>│   ├── fetcher.py      # 新闻获取</code><br>
+<code>│   ├── dedup.py        # 向量去重</code><br>
+<code>│   ├── summarizer.py   # AI 摘要</code><br>
+<code>│   ├── writer.py       # Markdown 生成</code><br>
+<code>│   ├── selector.py     # 新闻筛选</code><br>
+<code>│   ├── publisher.py    # Git 发布</code><br>
+<code>│   └── job.py          # 工作流调度</code><br>
+<code>├── config.json         # 配置文件</code><br>
+<code>├── requirements.txt    # 依赖包</code><br>
+<code>└── run_daily_news.sh  # 执行脚本</code></blockquote><h3>数据流程设计</h3>
+<ol>
+<li><strong>新闻获取</strong> → 多源抓取 → <code>raw_{date}.json</code></li>
+<li><strong>向量去重</strong> → 语义相似度过滤 → <code>dedup_{date}.json</code>  </li>
+<li><strong>AI 摘要</strong> → GPT-4o 生成中文摘要 → <code>summary_{date}.json</code></li>
+<li><strong>Markdown 生成</strong> → 按类别组织 → <code>news_{date}.md</code></li>
+<li><strong>Git 发布</strong> → 推送到博客仓库 → 触发自动部署</li>
+</ol>
+<h2>核心技术实现</h2>
+<h3>1. 向量去重：告别简单的标题匹配</h3>
+<p>项目初期，我使用文章标题或 URL 进行去重，但很快发现问题：</p>
+<ul>
+<li>不同新闻源对同一事件的报道标题不同</li>
+<li>URL 可能因包含追踪参数而不同</li>
+</ul>
+<p>解决方案是<strong>基于语义的向量去重</strong>：</p>
+<blockquote><code># dedup.py 核心实现</code><br>
+<code>from sentence_transformers import SentenceTransformer</code><br>
+<code>import numpy as np</code><br>
+<code>from sklearn.metrics.pairwise import cosine_similarity</code><br>
+<code></code><br>
+<code>class NewsDeduplicator:</code><br>
+<code>    def __init__(self, similarity_threshold=0.85):</code><br>
+<code>        self.model = SentenceTransformer(&#039;all-MiniLM-L6-v2&#039;)</code><br>
+<code># ... (27 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/c904cc7d2940cdb9353fadb8547da68f">GitHub Gist</a></em></p><p>这种方法能有效识别&quot;换了个说法但内容一样&quot;的文章，远比关键词匹配精准。</p>
+<h3>2. AI 摘要与分类：Prompt Engineering 的艺术</h3>
+<p>AI 摘要和分类的质量直接决定最终产出价值。关键不是选择哪个 LLM，而是如何设计 <strong>Prompt</strong>：</p>
+<blockquote><code># summarizer.py 核心 Prompt</code><br>
+<code>SUMMARY_PROMPT = &quot;&quot;&quot;</code><br>
+<code>你是一个专业的科技新闻编辑，专门为开发者整理新闻摘要。</code><br>
+<code></code><br>
+<code>请为以下新闻生成：</code><br>
+<code>1. 一段不超过100字的中文摘要，概括核心信息</code><br>
+<code>2. 从以下分类中选择最合适的一个：人工智能、移动技术、自动驾驶、云计算、芯片技术、创业投资、网络安全、区块链、科学研究、其他科技</code><br>
+<code></code><br>
+<code># ... (28 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/b3d7f37539fba5d484514ff68ee6fb54">GitHub Gist</a></em></p><p>通过明确的角色、详细指令和输出格式要求，获得稳定高质量的 AI 输出。</p>
+<h3>3. GitOps 发布：稳定可靠的自动化部署</h3>
+<p>为什么选择 Git 而不是 API 操作博客后台？</p>
+<ul>
+<li><strong>原子性和可追溯性</strong>：每次内容更新都是一次 Git Commit，可以清晰看到变更记录</li>
+<li><strong>解耦和安全</strong>：机器人只需要 Git 仓库写权限，无需暴露博客后台凭证</li>
+<li><strong>利用现有 CI/CD</strong>：复用 Vercel/Netlify 等平台的 Git-Triggered CI/CD</li>
+</ul>
+<blockquote><code># publisher.py 核心实现</code><br>
+<code>import subprocess</code><br>
+<code>import os</code><br>
+<code></code><br>
+<code>class NewsPublisher:</code><br>
+<code>    def __init__(self, blog_repo_path):</code><br>
+<code>        self.repo_path = blog_repo_path</code><br>
+<code>        </code><br>
+<code># ... (26 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/a2fb09197668742ba8429198e7048d22">GitHub Gist</a></em></p><h2>Astro 博客配套修改</h2>
+<p>要让 <code>astro-news-bot</code> 与 Astro 博客无缝集成，需要对博客工程做少量但关键的修改：</p>
+<h3>1. 定义 news 内容集合</h3>
+<blockquote><code>// src/content/config.ts</code><br>
+<code>import { defineCollection, z } from &#039;astro:content&#039;;</code><br>
+<code>import { glob } from &#039;astro/loaders&#039;;</code><br>
+<code></code><br>
+<code>const news = defineCollection({</code><br>
+<code>  loader: glob({ base: &#039;./src/content/news&#039;, pattern: &#039;**/*.md&#039; }),</code><br>
+<code>  schema: z.object({</code><br>
+<code>    title: z.string(),</code><br>
+<code># ... (12 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/421579442a912dc8c0d64e516bd48c91">GitHub Gist</a></em></p><h3>2. 创建 LatestNews 组件</h3>
+<blockquote><code>---</code><br>
+<code>// src/components/LatestNews.astro</code><br>
+<code>import { getCollection } from &#039;astro:content&#039;;</code><br>
+<code></code><br>
+<code>const newsEntries = await getCollection(&#039;news&#039;);</code><br>
+<code></code><br>
+<code>let latestNews = null;</code><br>
+<code>if (newsEntries &amp;&amp; newsEntries.length &gt; 0) {</code><br>
+<code># ... (49 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/aa8e5729ce1cd1ec1fbc52e8febc88b3">GitHub Gist</a></em></p><h3>3. 修复动态路由渲染</h3>
+<p>由于 Astro 5.x 版本使用 glob loader，entry 对象结构发生变化，需要适配：</p>
+<blockquote><code>---</code><br>
+<code>// src/pages/news/[date].astro</code><br>
+<code>import { getCollection, getEntry } from &#039;astro:content&#039;;</code><br>
+<code></code><br>
+<code>export async function getStaticPaths() {</code><br>
+<code>  const newsEntries = await getCollection(&#039;news&#039;);</code><br>
+<code>  </code><br>
+<code>  return newsEntries</code><br>
+<code># ... (29 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/1e4967948fb860d26dbed42e20e5f976">GitHub Gist</a></em></p><p>关键修改点：</p>
+<ul>
+<li>使用 <code>entry.id</code> 而不是 <code>entry.slug</code>（glob loader 中 slug 为 undefined）</li>
+<li>使用 <code>post.rendered.html</code> 获取预渲染内容</li>
+<li>通过 <code>getEntry</code> 在页面渲染时获取完整 entry 对象</li>
+</ul>
+<h2>多样化的执行方式</h2>
+<p>为了适应不同的部署环境，我设计了多种执行方式：</p>
+<h3>1. 直接运行（开发调试）</h3>
+<blockquote><code># 完整工作流</code><br>
+<code>python -m news_bot.job --date $(date +%Y-%m-%d)</code><br>
+<code></code><br>
+<code># 干跑模式（跳过发布）</code><br>
+<code>python -m news_bot.job --date 2025-07-25 --dry-run</code></blockquote><h3>2. Shell 脚本执行</h3>
+<blockquote><code>#!/bin/bash</code><br>
+<code># run_daily_news.sh</code><br>
+<code></code><br>
+<code>cd &quot;$(dirname &quot;$0&quot;)&quot;</code><br>
+<code>source .env</code><br>
+<code></code><br>
+<code># 创建日志目录</code><br>
+<code>mkdir -p ~/logs</code><br>
+<code># ... (8 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/5e060ce12d43a2f3f5b4acc98cbc0401">GitHub Gist</a></em></p><h3>3. 守护进程模式（推荐）</h3>
+<blockquote><code># 启动守护进程（完全后台运行）</code><br>
+<code>./start_daemon.sh start</code><br>
+<code></code><br>
+<code># 查看运行状态  </code><br>
+<code>./start_daemon.sh status</code><br>
+<code></code><br>
+<code># 查看日志</code><br>
+<code>./start_daemon.sh logs</code><br>
+<code></code><br>
+<code># 优雅停止</code><br>
+<code>./stop_daemon.sh</code></blockquote><h3>4. Cron 定时任务</h3>
+<blockquote><code># 编辑 crontab</code><br>
+<code>crontab -e</code><br>
+<code></code><br>
+<code># 每天 8:05 执行</code><br>
+<code>5 8 * * * /Users/geyuxu/repo/astro-news-bot/run_daily_news.sh</code></blockquote><h2>运维经验与最佳实践</h2>
+<h3>配置文件管理</h3>
+<blockquote><code>{</code><br>
+<code>  &quot;output_config&quot;: {</code><br>
+<code>    &quot;blog_content_dir&quot;: &quot;/Users/geyuxu/repo/blog/geyuxu.com/src/content/news&quot;,</code><br>
+<code>    &quot;filename_format&quot;: &quot;news_{date}.md&quot;,</code><br>
+<code>    &quot;use_blog_dir&quot;: true</code><br>
+<code>  },</code><br>
+<code>  &quot;git_config&quot;: {</code><br>
+<code>    &quot;target_branch&quot;: &quot;gh-pages&quot;,</code><br>
+<code># ... (19 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/9926fae5354699a4a03b3b7be7daeddc">GitHub Gist</a></em></p><h3>成本控制</h3>
+<ul>
+<li>每日处理约 6 篇文章</li>
+<li>预计 Token 消耗：~4000 tokens/天</li>
+<li>OpenAI 成本：约 $0.01-0.05/天</li>
+</ul>
+<h3>日志管理</h3>
+<blockquote><code># 查看实时日志</code><br>
+<code>tail -f logs/daemon.log</code><br>
+<code></code><br>
+<code># 查看调度器日志</code><br>
+<code>tail -f logs/scheduler.log</code><br>
+<code></code><br>
+<code># 查看今天的执行记录</code><br>
+<code>grep &quot;$(date +%Y-%m-%d)&quot; ~/logs/news_bot.log</code></blockquote><h2>项目价值与成果</h2>
+<h3>测试验证结果</h3>
+<p>最新测试（2025-07-26）：</p>
+<ul>
+<li>✅ <strong>Fetcher</strong>：获取 31 篇科技新闻（RSS 源）</li>
+<li>✅ <strong>Deduplicator</strong>：向量去重，保留 31 篇唯一文章</li>
+<li>✅ <strong>Summarizer</strong>：AI 摘要生成，使用 10,681 tokens</li>
+<li>✅ <strong>Writer</strong>：生成 188 行 Markdown，包含 7 个科技分类</li>
+<li>✅ <strong>Publisher</strong>：成功提交并推送到博客仓库</li>
+</ul>
+<h3>新闻分类体系</h3>
+<p>系统自动将新闻归类到 9 个科技领域：</p>
+<ul>
+<li>🤖 人工智能</li>
+<li>📱 移动技术  </li>
+<li>🚗 自动驾驶</li>
+<li>☁️ 云计算</li>
+<li>💾 芯片技术</li>
+<li>💰 创业投资</li>
+<li>🔒 网络安全</li>
+<li>⛓️ 区块链</li>
+<li>🔬 科学研究</li>
+</ul>
+<h3>输出格式示例</h3>
+<blockquote><code>---</code><br>
+<code>title: 每日新闻速览 · 2025-07-26</code><br>
+<code>pubDate: &#039;2025-07-26&#039;</code><br>
+<code>description: 2025年，美国半导体市场经历了重要变革...</code><br>
+<code>tags: [News, Daily, 芯片技术, 自动驾驶, 移动技术]</code><br>
+<code>layout: news</code><br>
+<code>---</code><br>
+<code></code><br>
+<code># ... (13 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/a305bc6fe68e731fd6c2e6b4e4d4195a">GitHub Gist</a></em></p><h2>未来规划</h2>
+<ol>
+<li><strong>更智能的信源发现</strong>：让机器人自动发现和推荐新的高质量新闻源</li>
+<li><strong>趋势分析与主题聚合</strong>：识别特定时间段内的热点话题，聚合相关文章</li>
+<li><strong>用户反馈闭环</strong>：收集用户反馈数据，用于微调 AI 模型</li>
+<li><strong>开源计划</strong>：整理代码后开源，让更多人搭建自己的 AI 新闻机器人</li>
+</ol>
+<h2>总结</h2>
+<p><code>astro-news-bot</code> 是一个&quot;用技术解决自己问题&quot;的典型项目。它将 AI、自动化脚本、现代 Web 开发框架（Astro）和 DevOps 理念（GitOps）有机结合，构建了一个小而美的自动化系统。</p>
+<p>这个项目不仅解决了我的信息过载问题，也是实践 LLM 应用、向量数据库、GitOps 等新技术的绝佳试验田。如果你也想构建类似的系统，希望这篇文章能给你一些启发和参考。</p>
+<p>关键技术栈：</p>
+<ul>
+<li><strong>后端</strong>：Python + OpenAI API + SentenceTransformers</li>
+<li><strong>前端</strong>：Astro + TypeScript + Content Collections</li>
+<li><strong>部署</strong>：GitOps + Shell Scripts + Cron Jobs</li>
+<li><strong>数据</strong>：JSON + Markdown + Git</li>
+</ul>
+<p>整个系统体现了现代 AI 应用开发的最佳实践：模块化设计、向量化处理、自动化部署和持续运维。</p>
+
+</body>
+</html>

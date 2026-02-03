@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商搜索店铺评分加权实践 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2022-04-01
+tags: [search]
+legacy: true</h2>
+<h1>电商搜索店铺评分加权实践</h1>
+<p>为实现上述目标，我们在搜索系统中新增了一个店铺评分相关的字段，并建立了一套数据同步和排序加权机制，整体方案如下：</p>
+<ul>
+<li>数据来源：店铺评分数据由平台的大数据团队离线计算产生，存储在独立的店铺得分表中（例如每日更新的店铺评分数据库表）。评分取值0~5分，小数点一位精度。为了让搜索系统及时获取更新，我们通过 <strong>消息队列（Kafka）</strong> 将评分变化推送到搜索系统，实现近实时同步。同时也保留批处理方案定期全量更新数据，确保数据一致性。</li>
+<li>索引扩展：在商品的搜索索引中新增“店铺评分”字段（例如store_score），用于存储每个商品所属店铺的评分。这个字段在建立索引时从店铺得分表获取，对于已有索引的数据通过批处理或增量更新方式补充。</li>
+<li>排序加权：搜索查询时，引擎会先根据文本相关度、商品属性匹配等计算基础分数。在二次排序阶段，引入店铺评分权重：如果商品所属店铺评分低于阈值（如2.5），则将该商品的基础得分乘以一个惩罚系数（如0.95，即降低5%）；如果评分高于阈值则不受影响（系数为1）。阈值和惩罚系数均做成可配置，以便日后根据效果调优。</li>
+</ul>
+<p>下面我们分别介绍数据接入、索引更新和排序加权的具体实现，并给出对应的python代码示例。</p>
+<h2>Kafka消息消费实现</h2>
+<p>为了实现店铺评分数据的实时同步，我们搭建了Kafka消费者来订阅评分更新主题。例如，大数据计算完成店铺评分后，将变化的店铺评分以消息形式发送到Kafka主题（如store-rating-topic）。搜索系统的消费模块订阅该主题，持续监听新消息并处理更新。</p>
+<p>下面是Kafka消息消费的代码示例：</p>
+<pre><code class="language-python"><span class="line">from kafka import KafkaConsumer</span>
+<span class="line"></span>
+<span class="line">def consume_shop_ratings():</span>
+<span class="line">    consumer = KafkaConsumer(</span>
+<span class="line">        &#39;shop-rating-updates&#39;,</span>
+<span class="line">        bootstrap_servers=[&#39;kafka1:9092&#39;, &#39;kafka2:9092&#39;],</span>
+<span class="line">        auto_offset_reset=&#39;latest&#39;,</span>
+<span class="line">        group_id=&#39;shop-rating-group&#39;,</span>
+<span class="line">        enable_auto_commit=True,</span>
+<span class="line">        consumer_timeout_ms=1000</span>
+<span class="line">    )</span>
+<span class="line"></span>
+<span class="line">    for message in consumer:</span>
+<span class="line">        shop_id, rating = message.value.decode(&#39;utf-8&#39;).split(&quot;,&quot;)</span>
+<span class="line">        rating = float(rating)</span>
+<span class="line">        update_shop_rating(shop_id, rating)</span>
+<span class="line"></span>
+<span class="line">def update_shop_rating(shop_id, rating):</span>
+<span class="line">    # 示例更新缓存或数据库，这里用简单打印代替</span>
+<span class="line">    print(f&quot;Shop {shop_id} rating updated to {rating}&quot;)</span>
+<span class="line"></span>
+<span class="line">if __name__ == &quot;__main__&quot;:</span>
+<span class="line">    consume_shop_ratings()</span></code></pre>
+<p>上述代码中，Kafka消费者订阅了store-rating-topic主题，不断轮询获取店铺评分更新消息。收到消息后，解析出店铺ID和新的评分值，随后调用updateStoreScore方法进行处理。这里我们可以将更新后的店铺评分暂存在内存缓存或队列中，然后异步触发对搜索索引中相关商品的更新（例如调用索引更新接口，更新这些商品的店铺评分字段）。</p>
+<p>需要注意的是，实际应用中应考虑消费者的容错和效率：例如确保消费过程是幂等的（重复消息不会造成数据不一致），处理异常情况（Kafka连接中断重试等），以及对更新频率较高的店铺进行批量合并更新等优化。上述代码仅作为示例，省略了完整的错误处理和批量控制逻辑。</p>
+<h2>批处理店铺评分同步</h2>
+<p>除了实时消息，我们也实现了批处理方式来定期同步全量的店铺评分数据。这通常在以下情况下使用：初次上线该功能时需要给所有商品补充店铺评分字段，或者作为一种兜底方案定期纠正可能遗漏的更新。批处理通过直接读取店铺得分表（例如存储在MySQL或Hive中的离线计算结果）来获取所有店铺的评分，然后更新搜索索引。</p>
+<p>批处理任务可以每日凌晨运行，执行以下步骤：
+1.	从店铺评分数据库表中读取所有店铺的当前评分。
+2.	将店铺ID和评分加载到内存（如Map结构）或者生成更新指令列表。
+3.	调用索引更新模块，将每个店铺对应商品的索引字段更新为最新评分。</p>
+<p>下面是批量读取店铺评分数据的代码示例：</p>
+<pre><code class="language-py"><span class="line">import pymysql</span>
+<span class="line"></span>
+<span class="line">def fetch_shop_ratings():</span>
+<span class="line">    connection = pymysql.connect(</span>
+<span class="line">        host=&#39;your-db-host&#39;,</span>
+<span class="line">        user=&#39;your-username&#39;,</span>
+<span class="line">        password=&#39;your-password&#39;,</span>
+<span class="line">        database=&#39;shop_rating_db&#39;</span>
+<span class="line">    )</span>
+<span class="line"></span>
+<span class="line">    shop_rating_map = {}</span>
+<span class="line">    try:</span>
+<span class="line">        with connection.cursor() as cursor:</span>
+<span class="line">            cursor.execute(&quot;SELECT shop_id, rating FROM daily_shop_ratings&quot;)</span>
+<span class="line">            for shop_id, rating in cursor.fetchall():</span>
+<span class="line">                shop_rating_map[shop_id] = rating</span>
+<span class="line">    finally:</span>
+<span class="line">        connection.close()</span>
+<span class="line"></span>
+<span class="line">    return shop_rating_map</span>
+<span class="line"></span>
+<span class="line">if __name__ == &quot;__main__&quot;:</span>
+<span class="line">    ratings = fetch_shop_ratings()</span>
+<span class="line">    print(f&quot;Total shops loaded: {len(ratings)}&quot;)</span>
+<span class="line">    # 后续调用索引更新函数</span></code></pre>
+<p>上述批处理代码通过pymysql连接到数据库，执行SQL查询批量获取所有店铺的评分数据，并存入mysql。拿到全量数据后，接下来就可以遍历该Map，对搜索索引中的每个店铺相关商品执行更新（下面的索引更新模块会详细介绍）。批处理过程需要关注性能和资源占用，可以考虑分页读取或流式处理以避免一次性加载过多数据到内存。另外，应确保在批量更新索引时对搜索服务影响最小，可使用低峰期执行并合理控制提交频率。</p>
+<h2>索引字段扩展与更新</h2>
+<p>有了店铺评分数据，我们需要将其写入搜索索引，以便在查询排序时使用。首先，我们在索引架构中新增了一个字段，例如store_score，类型可以选择数值类型（如float）以存储评分值。对于已经存在的商品索引数据，需要进行一次更新以填充这个字段。我们采用两种方式更新索引：全量重建或增量更新。全量重建即重新索引所有商品数据时，将店铺评分一起写入（推荐在初次上线或数据量可控时采用）。增量更新则指对已有索引执行部分更新，这里可以利用前述Kafka消息或批处理结果，对变化的店铺逐一更新其商品文档。</p>
+<p>为了演示索引更新，这里提供一个利用pysolr进行索引原子更新的代码示例。pysolr支持对已有文档的特定字段进行原子更新，而无需重建整个文档。假设我们已经获取了需要更新的店铺及其新的评分值，以及该店铺下所有商品的ID列表，我们可以如下更新Solr索引：</p>
+<pre><code class="language-py"><span class="line">import pysolr</span>
+<span class="line"></span>
+<span class="line">solr_url = &#39;http://your-solr-host:8983/solr/product_core&#39;</span>
+<span class="line">solr_client = pysolr.Solr(solr_url, always_commit=True)</span>
+<span class="line"></span>
+<span class="line">def update_shop_rating_index(shop_id, rating, product_ids):</span>
+<span class="line">    docs = []</span>
+<span class="line">    for pid in product_ids:</span>
+<span class="line">        doc = {</span>
+<span class="line">            &quot;id&quot;: pid,</span>
+<span class="line">            &quot;shop_rating&quot;: {&quot;set&quot;: rating}</span>
+<span class="line">        }</span>
+<span class="line">        docs.append(doc)</span>
+<span class="line">    solr_client.add(docs)</span>
+<span class="line">    print(f&quot;Updated shop {shop_id} products with rating {rating}&quot;)</span>
+<span class="line"></span>
+<span class="line">if __name__ == &quot;__main__&quot;:</span>
+<span class="line">    example_shop_id = &#39;shop789&#39;</span>
+<span class="line">    example_rating = 4.2</span>
+<span class="line">    example_products = [&#39;prod001&#39;, &#39;prod002&#39;, &#39;prod003&#39;]</span>
+<span class="line">    update_shop_rating_index(example_shop_id, example_rating, example_products)</span></code></pre>
+<p>上述代码通过pysolr连接到Solr服务器，然后构建字典来进行字段更新。</p>
+<p>对于使用Elasticsearch等其他搜索引擎的情况，实现方式略有不同，但思路类似：先确保索引有店铺评分字段，然后批量更新文档的该字段值。无论采用何种搜索引擎，目的都是让每个商品文档都携带其店铺评分，方便后续的排序计算。</p>
+<h2>搜索排序加权实现</h2>
+<p>当索引中包含了店铺评分字段后，就可以在查询时应用我们的加权策略了。在搜索服务的二次排序阶段，我们获取每个结果商品的基础分值以及店铺评分，根据阈值判断是否需要降权。基础分值通常由多种相关度因素构成，例如商品与关键词的匹配度分数、商品是否属于用户偏好的品牌加分、品类匹配加分等，这里可以将这些分数加总得到一个初始得分。然后，引入店铺评分权重：如果店铺评分低于设定阈值，则乘以惩罚系数；反之则维持不变（系数为1）。</p>
+<p>例如，我们设定店铺评分阈值为2.5分，惩罚系数为0.95（即扣除5%得分）。当某商品所属店铺评分为2.0时（低于2.5），其最终得分将 = 基础分 * 0.95；如果店铺评分为3.5（高于阈值），最终得分 = 基础分 * 1.0（不变）。通过这种方式，低评分店铺的商品得分略微降低，在整体排序中会略微靠后。</p>
+<p>下面给出二次排序加权的简化代码示例：</p>
+<pre><code class="language-py"><span class="line">THRESHOLD_RATING = 2.5</span>
+<span class="line">PENALTY_FACTOR = 0.95</span>
+<span class="line"></span>
+<span class="line">def calculate_final_score(base_score, shop_rating):</span>
+<span class="line">    if shop_rating &lt; THRESHOLD_RATING:</span>
+<span class="line">        return base_score * PENALTY_FACTOR</span>
+<span class="line">    return base_score</span>
+<span class="line"></span>
+<span class="line">if __name__ == &quot;__main__&quot;:</span>
+<span class="line">    products = [</span>
+<span class="line">        {&quot;id&quot;: &quot;prod001&quot;, &quot;base_score&quot;: 80.0, &quot;shop_rating&quot;: 2.0},</span>
+<span class="line">        {&quot;id&quot;: &quot;prod002&quot;, &quot;base_score&quot;: 75.0, &quot;shop_rating&quot;: 3.0},</span>
+<span class="line">        {&quot;id&quot;: &quot;prod003&quot;, &quot;base_score&quot;: 90.0, &quot;shop_rating&quot;: 4.5},</span>
+<span class="line">    ]</span>
+<span class="line"></span>
+<span class="line">    for product in products:</span>
+<span class="line">        final_score = calculate_final_score(product[&quot;base_score&quot;], product[&quot;shop_rating&quot;])</span>
+<span class="line">        print(f&quot;Product {product[&#39;id&#39;]} final score: {final_score}&quot;)</span></code></pre>
+<p>在真实的搜索排序代码中，我们会对每一条候选商品结果应用类似逻辑，计算其最终排序分数。通常这是在内存中完成的，可通过自定义比较器或者在排序评分公式中直接乘以权重实现。如果使用Solr/ES等引擎的功能，也可以考虑在查询时利用函数查询或脚本实现同样效果，例如Solr的if函数或ES的脚本评分(script score)将店铺评分作为条件纳入评分计算。但在我们的实现中，为了直观和灵活控制，我们选择在搜索服务层面进行计算。</p>
+<p>通过上述加权策略，搜索结果会对低评分店铺的商品有所抑制，提升用户在前几页看到的商品整体质量。当然，具体的阈值和扣分比例可以根据实际效果调整。如果未来希望对高评分店铺商品进行加权提高分数，也可以引入类似机制（如评分高于4.5分的店铺商品提高若干百分比得分），以鼓励优质卖家。</p>
+<h2>总结</h2>
+<p>在本次实践中，我们针对电商搜索引擎引入了店铺评分维度的排序优化。通过数据同步+索引更新+排序调整的方案，成功实现了对低评分店铺商品的降权，提升了搜索结果的可靠性和用户体验。实施过程中，我们采用了Kafka实时消息和定时批处理相结合的方式确保数据及时准确，并在搜索索引中增加新字段以支持复杂的排序逻辑。整个改造遵循可配置、可扩展的原则，使运营团队能够根据业务需要调整阈值或权重比例。</p>
+<p>上线后经过验证，店铺评分加权机制有效避免了少数低信誉店铺商品占据搜索前列的情况，搜索结果的点击率和转化率也有所提升。这一实践表明，在搜索排序中融入更多业务质量指标（如店铺评分）是提高结果相关性和用户满意度的重要手段。展望未来，我们可以进一步结合其他信号（如商家响应时间、库存周转率等）丰富排序策略，不断优化电商搜索的体验。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

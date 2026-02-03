@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>构建Obsidian到Notion的智能内容管理流水线：三层架构实现知识自动化处理 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [general_notes]
+legacy: true</h2>
+<h1>构建Obsidian到Notion的智能内容管理流水线：三层架构实现知识自动化处理</h1>
+<pre><code><span class="line">┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐</span>
+<span class="line">│   内容源层      │───▶│   AI处理层      │───▶│   同步目标层    │</span>
+<span class="line">│   Obsidian      │    │ Claude/Gemini   │    │    Notion       │</span>
+<span class="line">│                 │    │                 │    │                 │</span>
+<span class="line">│ • 统一存储.md   │    │ • 内容摘要     │    │ • 发布平台      │</span>
+<span class="line">│ • 本地编辑      │    │ • 智能分析     │    │ • 团队协作      │</span>
+<span class="line">│ • 版本控制      │    │ • 格式转换     │    │ • 数据库视图    │</span>
+<span class="line">└─────────────────┘    └─────────────────┘    └─────────────────┘</span></code></pre>
+<h3>层次职责分析</h3>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>作用</th>
+<th>关键技术/插件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 内容源层</td>
+<td>统一把所有 .md 放进 Obsidian Vault，并让外部脚本能读/写</td>
+<td>• 文件系统直写（最简单）<br>• Local REST API 插件：HTTPS 端点，支持读取/创建/PATCH 更新笔记等<br>• Advanced URI 插件：通过 obsidian://advanced-uri?...mode=append 等参数追加内容</td>
+</tr>
+<tr>
+<td>② AI摘要层</td>
+<td>让 Claude Code 或 Gemini CLI 批量读取笔记→生成摘要</td>
+<td>• Claude Code + MCP：把 Obsidian REST 端点封成工具，Claude 可以用 list_notes / read_note / patch_note<br>• Gemini CLI：CLI 本身已内置 MCP 扩展点，可在脚本里用 gemini run --prompt <file> 生成摘要，支持 1M token 上下文、脚本自动化调用</td>
+</tr>
+<tr>
+<td>③ 同步目标层</td>
+<td>把摘要写入 Notion（单页或数据库条目）</td>
+<td>• 官方 Notion API：POST /v1/pages 可一次携带 children 块创建含内容的页面；仅需给集成分配&quot;Add connections&quot;权限<br>• Auto-GPT-Notion 插件：已封装 notion_create_page / notion_append_page 等命令，能让代理直接写 Notion</td>
+</tr>
+</tbody></table>
+<h2>详细技术实现方案</h2>
+<h3>1. 内容源层：Obsidian 配置</h3>
+<h4>安装必要插件</h4>
+<p><strong>Local REST API 插件</strong></p>
+<pre><code class="language-bash"><span class="line"># 在 Obsidian 插件市场搜索 &quot;Local REST API&quot; 并启用</span>
+<span class="line"># Settings → Local REST API → Generate Key</span>
+<span class="line"># 默认端口：27123，建议 127.0.0.1 绑定 + 强密码</span></code></pre>
+<p><strong>Advanced URI 插件</strong></p>
+<pre><code class="language-bash"><span class="line"># 插件市场搜索 &quot;Advanced URI&quot; 并启用</span>
+<span class="line"># 支持通过 URL 参数操作笔记：</span>
+<span class="line"># obsidian://advanced-uri?vault=MyVault&amp;mode=append&amp;file=Note.md&amp;data=New%20content</span></code></pre>
+<h4>API 端点配置</h4>
+<p>安装 Local REST API 插件后，你将获得以下端点：</p>
+<pre><code class="language-javascript"><span class="line">// 获取笔记列表</span>
+<span class="line">GET https://localhost:27123/notes?key=API_KEY</span>
+<span class="line"></span>
+<span class="line">// 读取特定笔记</span>
+<span class="line">GET https://localhost:27123/notes/{path}?key=API_KEY</span>
+<span class="line"></span>
+<span class="line">// 创建新笔记</span>
+<span class="line">POST https://localhost:27123/notes?key=API_KEY</span>
+<span class="line">{</span>
+<span class="line">  &quot;path&quot;: &quot;新笔记.md&quot;,</span>
+<span class="line">  &quot;content&quot;: &quot;笔记内容&quot;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// 更新笔记</span>
+<span class="line">PATCH https://localhost:27123/notes/{path}?key=API_KEY</span>
+<span class="line">{</span>
+<span class="line">  &quot;content&quot;: &quot;更新后的内容&quot;</span>
+<span class="line">}</span></code></pre>
+<h3>2. AI处理层：Claude Code / Gemini CLI 集成</h3>
+<h4>Claude Code 集成方案</h4>
+<p><strong>MCP 工具配置</strong></p>
+<pre><code class="language-yaml"><span class="line"># obsidian_rest.yaml</span>
+<span class="line">name: obsidian_rest</span>
+<span class="line">description: Obsidian REST API integration</span>
+<span class="line">endpoints:</span>
+<span class="line">  - name: list_notes</span>
+<span class="line">    url: &quot;https://localhost:27123/notes&quot;</span>
+<span class="line">    method: GET</span>
+<span class="line">    headers:</span>
+<span class="line">      Authorization: &quot;Bearer ${OBSIDIAN_API_KEY}&quot;</span>
+<span class="line">  - name: read_note</span>
+<span class="line">    url: &quot;https://localhost:27123/notes/{path}&quot;</span>
+<span class="line">    method: GET</span>
+<span class="line">    headers:</span>
+<span class="line">      Authorization: &quot;Bearer ${OBSIDIAN_API_KEY}&quot;</span>
+<span class="line">  - name: update_note</span>
+<span class="line">    url: &quot;https://localhost:27123/notes/{path}&quot;</span>
+<span class="line">    method: PATCH</span>
+<span class="line">    headers:</span>
+<span class="line">      Authorization: &quot;Bearer ${OBSIDIAN_API_KEY}&quot;</span>
+<span class="line">      Content-Type: &quot;application/json&quot;</span></code></pre>
+<p><strong>使用示例</strong></p>
+<pre><code class="language-bash"><span class="line"># 注册工具</span>
+<span class="line">claude tools add obsidian_rest.yaml</span>
+<span class="line"></span>
+<span class="line"># 让 Claude 处理笔记</span>
+<span class="line">claude chat &quot;请读取我的所有笔记，为每个笔记生成200字摘要&quot;</span></code></pre>
+<h4>Gemini CLI 集成方案</h4>
+<p><strong>安装配置</strong></p>
+<pre><code class="language-bash"><span class="line"># 安装 Gemini CLI</span>
+<span class="line">brew install gemini-cli  # 或 go install</span>
+<span class="line"></span>
+<span class="line"># 配置 API Key</span>
+<span class="line">export GEMINI_API_KEY=your_api_key_here</span></code></pre>
+<p><strong>批处理脚本示例</strong></p>
+<pre><code class="language-python"><span class="line">import os</span>
+<span class="line">import requests</span>
+<span class="line">import subprocess</span>
+<span class="line">import json</span>
+<span class="line"></span>
+<span class="line">def process_notes_with_gemini(vault_path, api_key):</span>
+<span class="line">    &quot;&quot;&quot;使用 Gemini CLI 批量处理笔记&quot;&quot;&quot;</span>
+<span class="line">    </span>
+<span class="line">    # 获取所有 markdown 文件</span>
+<span class="line">    md_files = []</span>
+<span class="line">    for root, dirs, files in os.walk(vault_path):</span>
+<span class="line">        for file in files:</span>
+<span class="line">            if file.endswith(&#39;.md&#39;):</span>
+<span class="line">                md_files.append(os.path.join(root, file))</span>
+<span class="line">    </span>
+<span class="line">    summaries = []</span>
+<span class="line">    </span>
+<span class="line">    for md_file in md_files:</span>
+<span class="line">        # 读取文件内容</span>
+<span class="line">        with open(md_file, &#39;r&#39;, encoding=&#39;utf-8&#39;) as f:</span>
+<span class="line">            content = f.read()</span>
+<span class="line">        </span>
+<span class="line">        # 使用 Gemini CLI 生成摘要</span>
+<span class="line">        prompt = f&quot;请为以下内容生成一个200字的中文摘要，重点提取关键信息和核心观点：\n\n{content}&quot;</span>
+<span class="line">        </span>
+<span class="line">        try:</span>
+<span class="line">            result = subprocess.run([</span>
+<span class="line">                &#39;gemini&#39;, &#39;chat&#39;, </span>
+<span class="line">                &#39;-i&#39;, prompt,</span>
+<span class="line">                &#39;-p&#39;, &#39;用中文摘要&#39;</span>
+<span class="line">            ], capture_output=True, text=True, timeout=30)</span>
+<span class="line">            </span>
+<span class="line">            if result.returncode == 0:</span>
+<span class="line">                summary = result.stdout.strip()</span>
+<span class="line">                summaries.append({</span>
+<span class="line">                    &#39;file&#39;: md_file,</span>
+<span class="line">                    &#39;original_content&#39;: content,</span>
+<span class="line">                    &#39;summary&#39;: summary</span>
+<span class="line">                })</span>
+<span class="line">                print(f&quot;✅ 已处理: {os.path.basename(md_file)}&quot;)</span>
+<span class="line">            else:</span>
+<span class="line">                print(f&quot;❌ 处理失败: {md_file} - {result.stderr}&quot;)</span>
+<span class="line">                </span>
+<span class="line">        except subprocess.TimeoutExpired:</span>
+<span class="line">            print(f&quot;⏱️ 处理超时: {md_file}&quot;)</span>
+<span class="line">        except Exception as e:</span>
+<span class="line">            print(f&quot;🚫 处理异常: {md_file} - {str(e)}&quot;)</span>
+<span class="line">    </span>
+<span class="line">    return summaries</span></code></pre>
+<h3>3. 同步目标层：Notion 集成</h3>
+<h4>Notion API 配置</h4>
+<p><strong>创建集成</strong></p>
+<pre><code class="language-bash"><span class="line"># 1. 访问 https://www.notion.com/my-integrations</span>
+<span class="line"># 2. 点击 &quot;New integration&quot;</span>
+<span class="line"># 3. 获取 Internal Integration Secret</span>
+<span class="line"># 4. 在目标页面 → ... → Add connections → 勾选你的集成</span></code></pre>
+<p><strong>权限配置</strong></p>
+<pre><code class="language-json"><span class="line">{</span>
+<span class="line">  &quot;capabilities&quot;: [</span>
+<span class="line">    &quot;read_content&quot;,</span>
+<span class="line">    &quot;update_content&quot;, </span>
+<span class="line">    &quot;insert_content&quot;</span>
+<span class="line">  ]</span>
+<span class="line">}</span></code></pre>
+<h4>Notion SDK 使用示例</h4>
+<p><strong>Python 实现</strong></p>
+<pre><code class="language-python"><span class="line">import os</span>
+<span class="line">from notion_client import Client</span>
+<span class="line"></span>
+<span class="line">def sync_to_notion(summaries, notion_token, database_id):</span>
+<span class="line">    &quot;&quot;&quot;将摘要同步到 Notion 数据库&quot;&quot;&quot;</span>
+<span class="line">    </span>
+<span class="line">    notion = Client(auth=notion_token)</span>
+<span class="line">    </span>
+<span class="line">    for item in summaries:</span>
+<span class="line">        file_name = os.path.basename(item[&#39;file&#39;])</span>
+<span class="line">        summary = item[&#39;summary&#39;]</span>
+<span class="line">        </span>
+<span class="line">        try:</span>
+<span class="line">            # 创建新页面</span>
+<span class="line">            new_page = notion.pages.create(</span>
+<span class="line">                parent={&quot;database_id&quot;: database_id},</span>
+<span class="line">                properties={</span>
+<span class="line">                    &quot;Name&quot;: {</span>
+<span class="line">                        &quot;title&quot;: [</span>
+<span class="line">                            {</span>
+<span class="line">                                &quot;text&quot;: {</span>
+<span class="line">                                    &quot;content&quot;: file_name.replace(&#39;.md&#39;, &#39;&#39;)</span>
+<span class="line">                                }</span>
+<span class="line">                            }</span>
+<span class="line">                        ]</span>
+<span class="line">                    },</span>
+<span class="line">                    &quot;Source&quot;: {</span>
+<span class="line">                        &quot;rich_text&quot;: [</span>
+<span class="line">                            {</span>
+<span class="line">                                &quot;text&quot;: {</span>
+<span class="line">                                    &quot;content&quot;: &quot;Obsidian&quot;</span>
+<span class="line">                                }</span>
+<span class="line">                            }</span>
+<span class="line">                        ]</span>
+<span class="line">                    },</span>
+<span class="line">                    &quot;Status&quot;: {</span>
+<span class="line">                        &quot;select&quot;: {</span>
+<span class="line">                            &quot;name&quot;: &quot;已处理&quot;</span>
+<span class="line">                        }</span>
+<span class="line">                    }</span>
+<span class="line">                },</span>
+<span class="line">                children=[</span>
+<span class="line">                    {</span>
+<span class="line">                        &quot;object&quot;: &quot;block&quot;,</span>
+<span class="line">                        &quot;type&quot;: &quot;paragraph&quot;,</span>
+<span class="line">                        &quot;paragraph&quot;: {</span>
+<span class="line">                            &quot;rich_text&quot;: [</span>
+<span class="line">                                {</span>
+<span class="line">                                    &quot;text&quot;: {</span>
+<span class="line">                                        &quot;content&quot;: summary</span>
+<span class="line">                                    }</span>
+<span class="line">                                }</span>
+<span class="line">                            ]</span>
+<span class="line">                        }</span>
+<span class="line">                    }</span>
+<span class="line">                ]</span>
+<span class="line">            )</span>
+<span class="line">            </span>
+<span class="line">            print(f&quot;✅ 已同步到 Notion: {file_name}&quot;)</span>
+<span class="line">            </span>
+<span class="line">        except Exception as e:</span>
+<span class="line">            print(f&quot;❌ 同步失败: {file_name} - {str(e)}&quot;)</span></code></pre>
+<p><strong>Node.js 实现</strong></p>
+<pre><code class="language-javascript"><span class="line">const { Client } = require(&#39;@notionhq/client&#39;);</span>
+<span class="line"></span>
+<span class="line">const notion = new Client({</span>
+<span class="line">  auth: process.env.NOTION_TOKEN,</span>
+<span class="line">});</span>
+<span class="line"></span>
+<span class="line">async function syncToNotionDatabase(summaries, databaseId) {</span>
+<span class="line">  for (const item of summaries) {</span>
+<span class="line">    const fileName = path.basename(item.file, &#39;.md&#39;);</span>
+<span class="line">    </span>
+<span class="line">    try {</span>
+<span class="line">      await notion.pages.create({</span>
+<span class="line">        parent: { database_id: databaseId },</span>
+<span class="line">        properties: {</span>
+<span class="line">          &#39;Name&#39;: {</span>
+<span class="line">            title: [{ text: { content: fileName } }]</span>
+<span class="line">          },</span>
+<span class="line">          &#39;Summary&#39;: {</span>
+<span class="line">            rich_text: [{ text: { content: item.summary } }]</span>
+<span class="line">          },</span>
+<span class="line">          &#39;Created&#39;: {</span>
+<span class="line">            date: { start: new Date().toISOString() }</span>
+<span class="line">          }</span>
+<span class="line">        },</span>
+<span class="line">        children: [</span>
+<span class="line">          {</span>
+<span class="line">            object: &#39;block&#39;,</span>
+<span class="line">            type: &#39;paragraph&#39;,</span>
+<span class="line">            paragraph: {</span>
+<span class="line">              rich_text: [{ text: { content: item.summary } }]</span>
+<span class="line">            }</span>
+<span class="line">          }</span>
+<span class="line">        ]</span>
+<span class="line">      });</span>
+<span class="line">      </span>
+<span class="line">      console.log(`✅ 已同步: ${fileName}`);</span>
+<span class="line">    } catch (error) {</span>
+<span class="line">      console.error(`❌ 同步失败: ${fileName}`, error);</span>
+<span class="line">    }</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+<h2>端到端工作流程示例</h2>
+<h3>完整自动化脚本</h3>
+<pre><code class="language-python"><span class="line">#!/usr/bin/env python3</span>
+<span class="line">&quot;&quot;&quot;</span>
+<span class="line">Obsidian -&gt; AI -&gt; Notion 自动化处理流水线</span>
+<span class="line">&quot;&quot;&quot;</span>
+<span class="line"></span>
+<span class="line">import os</span>
+<span class="line">import sys</span>
+<span class="line">import json</span>
+<span class="line">import time</span>
+<span class="line">import requests</span>
+<span class="line">import subprocess</span>
+<span class="line">from datetime import datetime</span>
+<span class="line">from notion_client import Client</span>
+<span class="line"></span>
+<span class="line">class ContentPipeline:</span>
+<span class="line">    def __init__(self, config):</span>
+<span class="line">        self.obsidian_api_key = config[&#39;obsidian_api_key&#39;]</span>
+<span class="line">        self.obsidian_base_url = config[&#39;obsidian_base_url&#39;]</span>
+<span class="line">        self.notion_token = config[&#39;notion_token&#39;]</span>
+<span class="line">        self.notion_database_id = config[&#39;notion_database_id&#39;]</span>
+<span class="line">        self.ai_model = config.get(&#39;ai_model&#39;, &#39;gemini&#39;)  # &#39;gemini&#39; or &#39;claude&#39;</span>
+<span class="line">        </span>
+<span class="line">        self.notion = Client(auth=self.notion_token)</span>
+<span class="line">    </span>
+<span class="line">    def get_updated_notes(self, since_hours=24):</span>
+<span class="line">        &quot;&quot;&quot;获取最近更新的笔记&quot;&quot;&quot;</span>
+<span class="line">        try:</span>
+<span class="line">            response = requests.get(</span>
+<span class="line">                f&quot;{self.obsidian_base_url}/notes&quot;,</span>
+<span class="line">                params={&#39;key&#39;: self.obsidian_api_key}</span>
+<span class="line">            )</span>
+<span class="line">            response.raise_for_status()</span>
+<span class="line">            </span>
+<span class="line">            all_notes = response.json()</span>
+<span class="line">            </span>
+<span class="line">            # 过滤最近更新的笔记</span>
+<span class="line">            cutoff_time = time.time() - (since_hours * 3600)</span>
+<span class="line">            updated_notes = []</span>
+<span class="line">            </span>
+<span class="line">            for note in all_notes:</span>
+<span class="line">                if note.get(&#39;mtime&#39;, 0) &gt; cutoff_time:</span>
+<span class="line">                    updated_notes.append(note)</span>
+<span class="line">            </span>
+<span class="line">            return updated_notes</span>
+<span class="line">            </span>
+<span class="line">        except Exception as e:</span>
+<span class="line">            print(f&quot;❌ 获取笔记失败: {str(e)}&quot;)</span>
+<span class="line">            return []</span>
+<span class="line">    </span>
+<span class="line">    def read_note_content(self, note_path):</span>
+<span class="line">        &quot;&quot;&quot;读取笔记内容&quot;&quot;&quot;</span>
+<span class="line">        try:</span>
+<span class="line">            response = requests.get(</span>
+<span class="line">                f&quot;{self.obsidian_base_url}/notes/{note_path}&quot;,</span>
+<span class="line">                params={&#39;key&#39;: self.obsidian_api_key}</span>
+<span class="line">            )</span>
+<span class="line">            response.raise_for_status()</span>
+<span class="line">            return response.text</span>
+<span class="line">            </span>
+<span class="line">        except Exception as e:</span>
+<span class="line">            print(f&quot;❌ 读取笔记失败 {note_path}: {str(e)}&quot;)</span>
+<span class="line">            return None</span>
+<span class="line">    </span>
+<span class="line">    def generate_summary_with_gemini(self, content):</span>
+<span class="line">        &quot;&quot;&quot;使用 Gemini 生成摘要&quot;&quot;&quot;</span>
+<span class="line">        prompt = f&quot;&quot;&quot;请为以下内容生成一个结构化的摘要，包含：</span>
+<span class="line">1. 核心观点（2-3句话）</span>
+<span class="line">2. 关键信息点（3-5个要点）</span>
+<span class="line">3. 实践建议（如果适用）</span>
+<span class="line"></span>
+<span class="line">内容：</span>
+<span class="line">{content}</span>
+<span class="line">&quot;&quot;&quot;</span>
+<span class="line">        </span>
+<span class="line">        try:</span>
+<span class="line">            result = subprocess.run([</span>
+<span class="line">                &#39;gemini&#39;, &#39;chat&#39;,</span>
+<span class="line">                &#39;-i&#39;, prompt</span>
+<span class="line">            ], capture_output=True, text=True, timeout=60)</span>
+<span class="line">            </span>
+<span class="line">            if result.returncode == 0:</span>
+<span class="line">                return result.stdout.strip()</span>
+<span class="line">            else:</span>
+<span class="line">                print(f&quot;❌ Gemini 处理失败: {result.stderr}&quot;)</span>
+<span class="line">                return None</span>
+<span class="line">                </span>
+<span class="line">        except Exception as e:</span>
+<span class="line">            print(f&quot;❌ Gemini 调用异常: {str(e)}&quot;)</span>
+<span class="line">            return None</span>
+<span class="line">    </span>
+<span class="line">    def generate_summary_with_claude(self, content):</span>
+<span class="line">        &quot;&quot;&quot;使用 Claude Code 生成摘要&quot;&quot;&quot;</span>
+<span class="line">        # 这里可以集成 Claude Code MCP 工具</span>
+<span class="line">        # 或者使用 Anthropic API</span>
+<span class="line">        pass</span>
+<span class="line">    </span>
+<span class="line">    def sync_to_notion(self, note_path, original_content, summary):</span>
+<span class="line">        &quot;&quot;&quot;同步到 Notion&quot;&quot;&quot;</span>
+<span class="line">        file_name = os.path.basename(note_path).replace(&#39;.md&#39;, &#39;&#39;)</span>
+<span class="line">        </span>
+<span class="line">        try:</span>
+<span class="line">            # 检查是否已存在</span>
+<span class="line">            existing = self.notion.databases.query(</span>
+<span class="line">                database_id=self.notion_database_id,</span>
+<span class="line">                filter={</span>
+<span class="line">                    &quot;property&quot;: &quot;Source File&quot;,</span>
+<span class="line">                    &quot;rich_text&quot;: {</span>
+<span class="line">                        &quot;equals&quot;: note_path</span>
+<span class="line">                    }</span>
+<span class="line">                }</span>
+<span class="line">            )</span>
+<span class="line">            </span>
+<span class="line">            page_data = {</span>
+<span class="line">                &quot;properties&quot;: {</span>
+<span class="line">                    &quot;Name&quot;: {</span>
+<span class="line">                        &quot;title&quot;: [{&quot;text&quot;: {&quot;content&quot;: file_name}}]</span>
+<span class="line">                    },</span>
+<span class="line">                    &quot;Source File&quot;: {</span>
+<span class="line">                        &quot;rich_text&quot;: [{&quot;text&quot;: {&quot;content&quot;: note_path}}]</span>
+<span class="line">                    },</span>
+<span class="line">                    &quot;Last Updated&quot;: {</span>
+<span class="line">                        &quot;date&quot;: {&quot;start&quot;: datetime.now().isoformat()}</span>
+<span class="line">                    },</span>
+<span class="line">                    &quot;Status&quot;: {</span>
+<span class="line">                        &quot;select&quot;: {&quot;name&quot;: &quot;已处理&quot;}</span>
+<span class="line">                    }</span>
+<span class="line">                },</span>
+<span class="line">                &quot;children&quot;: [</span>
+<span class="line">                    {</span>
+<span class="line">                        &quot;object&quot;: &quot;block&quot;,</span>
+<span class="line">                        &quot;type&quot;: &quot;heading_2&quot;,</span>
+<span class="line">                        &quot;heading_2&quot;: {</span>
+<span class="line">                            &quot;rich_text&quot;: [{&quot;text&quot;: {&quot;content&quot;: &quot;AI 生成摘要&quot;}}]</span>
+<span class="line">                        }</span>
+<span class="line">                    },</span>
+<span class="line">                    {</span>
+<span class="line">                        &quot;object&quot;: &quot;block&quot;,</span>
+<span class="line">                        &quot;type&quot;: &quot;paragraph&quot;,</span>
+<span class="line">                        &quot;paragraph&quot;: {</span>
+<span class="line">                            &quot;rich_text&quot;: [{&quot;text&quot;: {&quot;content&quot;: summary}}]</span>
+<span class="line">                        }</span>
+<span class="line">                    },</span>
+<span class="line">                    {</span>
+<span class="line">                        &quot;object&quot;: &quot;block&quot;,</span>
+<span class="line">                        &quot;type&quot;: &quot;heading_2&quot;, </span>
+<span class="line">                        &quot;heading_2&quot;: {</span>
+<span class="line">                            &quot;rich_text&quot;: [{&quot;text&quot;: {&quot;content&quot;: &quot;原始内容&quot;}}]</span>
+<span class="line">                        }</span>
+<span class="line">                    },</span>
+<span class="line">                    {</span>
+<span class="line">                        &quot;object&quot;: &quot;block&quot;,</span>
+<span class="line">                        &quot;type&quot;: &quot;code&quot;,</span>
+<span class="line">                        &quot;code&quot;: {</span>
+<span class="line">                            &quot;language&quot;: &quot;markdown&quot;,</span>
+<span class="line">                            &quot;rich_text&quot;: [{&quot;text&quot;: {&quot;content&quot;: original_content[:2000]}}]  # 限制长度</span>
+<span class="line">                        }</span>
+<span class="line">                    }</span>
+<span class="line">                ]</span>
+<span class="line">            }</span>
+<span class="line">            </span>
+<span class="line">            if existing[&#39;results&#39;]:</span>
+<span class="line">                # 更新现有页面</span>
+<span class="line">                page_id = existing[&#39;results&#39;][0][&#39;id&#39;]</span>
+<span class="line">                self.notion.pages.update(page_id=page_id, **page_data)</span>
+<span class="line">                print(f&quot;🔄 已更新: {file_name}&quot;)</span>
+<span class="line">            else:</span>
+<span class="line">                # 创建新页面</span>
+<span class="line">                page_data[&quot;parent&quot;] = {&quot;database_id&quot;: self.notion_database_id}</span>
+<span class="line">                self.notion.pages.create(**page_data)</span>
+<span class="line">                print(f&quot;✅ 已创建: {file_name}&quot;)</span>
+<span class="line">                </span>
+<span class="line">        except Exception as e:</span>
+<span class="line">            print(f&quot;❌ Notion 同步失败 {file_name}: {str(e)}&quot;)</span>
+<span class="line">    </span>
+<span class="line">    def run_pipeline(self):</span>
+<span class="line">        &quot;&quot;&quot;运行完整流水线&quot;&quot;&quot;</span>
+<span class="line">        print(&quot;🚀 开始运行内容处理流水线...&quot;)</span>
+<span class="line">        </span>
+<span class="line">        # 1. 获取更新的笔记</span>
+<span class="line">        updated_notes = self.get_updated_notes()</span>
+<span class="line">        if not updated_notes:</span>
+<span class="line">            print(&quot;📝 没有发现更新的笔记&quot;)</span>
+<span class="line">            return</span>
+<span class="line">        </span>
+<span class="line">        print(f&quot;📋 发现 {len(updated_notes)} 个更新的笔记&quot;)</span>
+<span class="line">        </span>
+<span class="line">        # 2. 处理每个笔记</span>
+<span class="line">        for note in updated_notes:</span>
+<span class="line">            note_path = note[&#39;path&#39;]</span>
+<span class="line">            print(f&quot;📄 处理笔记: {note_path}&quot;)</span>
+<span class="line">            </span>
+<span class="line">            # 读取内容</span>
+<span class="line">            content = self.read_note_content(note_path)</span>
+<span class="line">            if not content:</span>
+<span class="line">                continue</span>
+<span class="line">            </span>
+<span class="line">            # 生成摘要</span>
+<span class="line">            if self.ai_model == &#39;gemini&#39;:</span>
+<span class="line">                summary = self.generate_summary_with_gemini(content)</span>
+<span class="line">            else:</span>
+<span class="line">                summary = self.generate_summary_with_claude(content)</span>
+<span class="line">            </span>
+<span class="line">            if not summary:</span>
+<span class="line">                print(f&quot;⚠️ 跳过摘要生成失败的笔记: {note_path}&quot;)</span>
+<span class="line">                continue</span>
+<span class="line">            </span>
+<span class="line">            # 同步到 Notion</span>
+<span class="line">            self.sync_to_notion(note_path, content, summary)</span>
+<span class="line">            </span>
+<span class="line">            # 避免 API 限制</span>
+<span class="line">            time.sleep(1)</span>
+<span class="line">        </span>
+<span class="line">        print(&quot;✨ 流水线运行完成!&quot;)</span>
+<span class="line"></span>
+<span class="line">def main():</span>
+<span class="line">    # 配置信息</span>
+<span class="line">    config = {</span>
+<span class="line">        &#39;obsidian_api_key&#39;: os.getenv(&#39;OBSIDIAN_API_KEY&#39;),</span>
+<span class="line">        &#39;obsidian_base_url&#39;: &#39;https://localhost:27123&#39;,</span>
+<span class="line">        &#39;notion_token&#39;: os.getenv(&#39;NOTION_TOKEN&#39;),</span>
+<span class="line">        &#39;notion_database_id&#39;: os.getenv(&#39;NOTION_DATABASE_ID&#39;),</span>
+<span class="line">        &#39;ai_model&#39;: &#39;gemini&#39;  # 或 &#39;claude&#39;</span>
+<span class="line">    }</span>
+<span class="line">    </span>
+<span class="line">    # 验证配置</span>
+<span class="line">    required_keys = [&#39;obsidian_api_key&#39;, &#39;notion_token&#39;, &#39;notion_database_id&#39;]</span>
+<span class="line">    for key in required_keys:</span>
+<span class="line">        if not config[key]:</span>
+<span class="line">            print(f&quot;❌ 缺少必要配置: {key}&quot;)</span>
+<span class="line">            sys.exit(1)</span>
+<span class="line">    </span>
+<span class="line">    # 运行流水线</span>
+<span class="line">    pipeline = ContentPipeline(config)</span>
+<span class="line">    pipeline.run_pipeline()</span>
+<span class="line"></span>
+<span class="line">if __name__ == &quot;__main__&quot;:</span>
+<span class="line">    main()</span></code></pre>
+<h3>自动化部署</h3>
+<p><strong>cron 定时任务</strong></p>
+<pre><code class="language-bash"><span class="line"># 每天晚上 23:30 运行</span>
+<span class="line">30 23 * * * /usr/bin/python3 /path/to/content_pipeline.py &gt;&gt; /path/to/logs/pipeline.log 2&gt;&amp;1</span>
+<span class="line"></span>
+<span class="line"># 每小时检查一次更新</span>
+<span class="line">0 * * * * /usr/bin/python3 /path/to/content_pipeline.py --incremental &gt;&gt; /path/to/logs/pipeline.log 2&gt;&amp;1</span></code></pre>
+<p><strong>systemd 服务</strong></p>
+<pre><code class="language-ini"><span class="line">[Unit]</span>
+<span class="line">Description=Obsidian to Notion Content Pipeline</span>
+<span class="line">After=network.target</span>
+<span class="line"></span>
+<span class="line">[Service]</span>
+<span class="line">Type=oneshot</span>
+<span class="line">User=your-username</span>
+<span class="line">WorkingDirectory=/path/to/pipeline</span>
+<span class="line">ExecStart=/usr/bin/python3 /path/to/content_pipeline.py</span>
+<span class="line">EnvironmentFile=/path/to/.env</span>
+<span class="line"></span>
+<span class="line">[Install]</span>
+<span class="line">WantedBy=multi-user.target</span></code></pre>
+<h2>关键限制与最佳实践</h2>
+<h3>平台限制</h3>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>限制 &amp; 最佳实践</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Obsidian</strong></td>
+<td>REST API 默认端口 27123，建议 127.0.0.1 绑定 + 强密码；Advanced URI 需 Obsidian 正在运行</td>
+</tr>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>单请求 200k-token；可用 stream=true 减少等待；避免一次性丢太多笔记，先归并同主题后摘要</td>
+</tr>
+<tr>
+<td><strong>Gemini CLI</strong></td>
+<td>免费配额 60 req/min、1000 req/天；通过 GEMINI_API_KEY 或 Google 账户登录</td>
+</tr>
+<tr>
+<td><strong>Notion</strong></td>
+<td>children 单次 ≤ 100 块；长摘要需分批 append_block_children。数据库属性键必须与库列一致</td>
+</tr>
+</tbody></table>
+<h3>性能优化建议</h3>
+<ol>
+<li><p><strong>批处理策略</strong></p>
+<ul>
+<li>按主题归并相关笔记后再处理</li>
+<li>使用增量同步，只处理变更内容</li>
+<li>实现智能去重，避免重复处理</li>
+</ul>
+</li>
+<li><p><strong>错误处理</strong></p>
+<ul>
+<li>实现重试机制，处理网络波动</li>
+<li>记录详细日志，便于问题排查</li>
+<li>设置超时控制，避免长时间阻塞</li>
+</ul>
+</li>
+<li><p><strong>内容质量控制</strong></p>
+<ul>
+<li>设置内容长度阈值，过滤无效笔记</li>
+<li>实现摘要质量评估，确保输出质量</li>
+<li>支持人工审核流程，重要内容手动确认</li>
+</ul>
+</li>
+</ol>
+<h3>安全考虑</h3>
+<ol>
+<li><p><strong>API 密钥管理</strong></p>
+<pre><code class="language-bash"><span class="line"># 使用环境变量</span>
+<span class="line">export OBSIDIAN_API_KEY=&quot;your_key_here&quot;</span>
+<span class="line">export NOTION_TOKEN=&quot;secret_token_here&quot;</span>
+<span class="line">export GEMINI_API_KEY=&quot;api_key_here&quot;</span>
+<span class="line"></span>
+<span class="line"># 或使用 .env 文件</span>
+<span class="line">echo &quot;OBSIDIAN_API_KEY=your_key&quot; &gt;&gt; .env</span>
+<span class="line">echo &quot;NOTION_TOKEN=secret_token&quot; &gt;&gt; .env</span>
+<span class="line">chmod 600 .env</span></code></pre>
+</li>
+<li><p><strong>网络安全</strong></p>
+<ul>
+<li>Obsidian REST API 仅绑定本地地址</li>
+<li>使用 HTTPS 和强密码保护端点</li>
+<li>考虑使用 VPN 或隧道加密通信</li>
+</ul>
+</li>
+</ol>
+<h2>快速入门指南</h2>
+<h3>5 分钟快速搭建</h3>
+<p><strong>第一步：Obsidian 设置</strong></p>
+<pre><code class="language-bash"><span class="line"># 1. 插件市场搜索 &quot;Local REST API&quot; -&gt; Enable</span>
+<span class="line"># 2. Settings → Local REST API → Generate Key</span>
+<span class="line"># 3. 记录 API Key 和端口（默认 27123）</span></code></pre>
+<p><strong>第二步：Notion 设置</strong></p>
+<pre><code class="language-bash"><span class="line"># 1. 访问 https://www.notion.com/my-integrations → New integration</span>
+<span class="line"># 2. 获取 Internal Integration Secret</span>
+<span class="line"># 3. 在目标页面 → ... → Add connections → 勾选集成</span>
+<span class="line"># 4. 创建数据库，记录 Database ID</span></code></pre>
+<p><strong>第三步：AI 工具配置</strong></p>
+<pre><code class="language-bash"><span class="line"># Gemini CLI 安装</span>
+<span class="line">brew install gemini-cli</span>
+<span class="line">export GEMINI_API_KEY=your_api_key</span>
+<span class="line"></span>
+<span class="line"># 或 Claude Code 配置</span>
+<span class="line">claude tools add obsidian_rest.yaml notion_sdk.yaml</span></code></pre>
+<p><strong>第四步：运行测试</strong></p>
+<pre><code class="language-bash"><span class="line"># 下载示例脚本</span>
+<span class="line">git clone https://github.com/example/obsidian-notion-pipeline</span>
+<span class="line">cd obsidian-notion-pipeline</span>
+<span class="line"></span>
+<span class="line"># 配置环境变量</span>
+<span class="line">cp .env.example .env</span>
+<span class="line"># 编辑 .env 文件，填入你的 API 密钥</span>
+<span class="line"></span>
+<span class="line"># 安装依赖</span>
+<span class="line">pip install -r requirements.txt</span>
+<span class="line"></span>
+<span class="line"># 运行一次测试</span>
+<span class="line">python content_pipeline.py --test</span></code></pre>
+<p><strong>第五步：自动化部署</strong></p>
+<pre><code class="language-bash"><span class="line"># 设置定时任务</span>
+<span class="line">crontab -e</span>
+<span class="line"># 添加：30 23 * * * /usr/bin/python3 /path/to/content_pipeline.py</span>
+<span class="line"></span>
+<span class="line"># 或使用 systemd</span>
+<span class="line">sudo cp pipeline.service /etc/systemd/system/</span>
+<span class="line">sudo systemctl enable pipeline.service</span>
+<span class="line">sudo systemctl start pipeline.service</span></code></pre>
+<h2>扩展应用场景</h2>
+<h3>双向同步</h3>
+<p>如果后续需要把 Notion 的更新同步回 Obsidian，可以实现反向流水线：</p>
+<pre><code class="language-python"><span class="line">def sync_notion_to_obsidian(self):</span>
+<span class="line">    &quot;&quot;&quot;从 Notion 同步更新回 Obsidian&quot;&quot;&quot;</span>
+<span class="line">    </span>
+<span class="line">    # 查询最近更新的 Notion 页面</span>
+<span class="line">    recent_pages = self.notion.databases.query(</span>
+<span class="line">        database_id=self.notion_database_id,</span>
+<span class="line">        filter={</span>
+<span class="line">            &quot;property&quot;: &quot;Last Edited Time&quot;,</span>
+<span class="line">            &quot;date&quot;: {</span>
+<span class="line">                &quot;after&quot;: (datetime.now() - timedelta(hours=24)).isoformat()</span>
+<span class="line">            }</span>
+<span class="line">        }</span>
+<span class="line">    )</span>
+<span class="line">    </span>
+<span class="line">    for page in recent_pages[&#39;results&#39;]:</span>
+<span class="line">        source_file = page[&#39;properties&#39;][&#39;Source File&#39;][&#39;rich_text&#39;][0][&#39;text&#39;][&#39;content&#39;]</span>
+<span class="line">        </span>
+<span class="line">        # 获取 Notion 页面内容</span>
+<span class="line">        blocks = self.notion.blocks.children.list(block_id=page[&#39;id&#39;])</span>
+<span class="line">        content = self.extract_content_from_blocks(blocks)</span>
+<span class="line">        </span>
+<span class="line">        # 更新 Obsidian 笔记</span>
+<span class="line">        self.update_obsidian_note(source_file, content)</span></code></pre>
+<h3>多源集成</h3>
+<p>支持从多个数据源收集内容：</p>
+<pre><code class="language-python"><span class="line">class MultiSourcePipeline(ContentPipeline):</span>
+<span class="line">    def __init__(self, config):</span>
+<span class="line">        super().__init__(config)</span>
+<span class="line">        self.sources = {</span>
+<span class="line">            &#39;obsidian&#39;: self.process_obsidian_notes,</span>
+<span class="line">            &#39;markdown_files&#39;: self.process_local_markdown,</span>
+<span class="line">            &#39;web_content&#39;: self.process_web_bookmarks,</span>
+<span class="line">            &#39;email_attachments&#39;: self.process_email_pdfs</span>
+<span class="line">        }</span>
+<span class="line">    </span>
+<span class="line">    def run_multi_source_pipeline(self):</span>
+<span class="line">        all_content = []</span>
+<span class="line">        </span>
+<span class="line">        for source_name, processor in self.sources.items():</span>
+<span class="line">            try:</span>
+<span class="line">                content = processor()</span>
+<span class="line">                all_content.extend(content)</span>
+<span class="line">                print(f&quot;✅ 处理完成: {source_name}&quot;)</span>
+<span class="line">            except Exception as e:</span>
+<span class="line">                print(f&quot;❌ 处理失败: {source_name} - {str(e)}&quot;)</span>
+<span class="line">        </span>
+<span class="line">        # 统一处理所有内容</span>
+<span class="line">        self.batch_process_content(all_content)</span></code></pre>
+<h2>总结</h2>
+<p>这个三层架构的内容管理流水线实现了：</p>
+<ol>
+<li><strong>集中管理</strong>：Obsidian 作为单一真相来源，统一管理所有 markdown 内容</li>
+<li><strong>智能处理</strong>：AI 工具自动生成摘要和分析，提升内容价值</li>
+<li><strong>高效分发</strong>：Notion 作为发布平台，便于团队协作和知识分享</li>
+<li><strong>自动化流程</strong>：定时运行，无需人工干预，确保内容同步</li>
+</ol>
+<p>通过这套系统，知识工作者可以专注于内容创作，而将重复性的整理、摘要、同步工作交给自动化流水线处理。随着 AI 技术的发展，这类智能化知识管理工具将成为提升个人和团队效率的重要基础设施。</p>
+<p>是否值得投入？答案是肯定的。这套流水线不仅解决了多平台内容同步的痛点，更重要的是建立了一个可扩展的知识处理框架，为未来更多智能化应用奠定了基础。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

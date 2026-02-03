@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面向内容检索平台的预发布环境搭建 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2022-02-14
+tags: [search]
+legacy: true</h2>
+<h1>面向内容检索平台的预发布环境搭建</h1>
+<p>SolrCloud 是 Solr 的分布式部署模式，用于处理大规模搜索索引。SolrCloud 将索引拆分成多个 分片 (Shard)，每个分片包含整个索引的一部分文档集合 。集合 (Collection) 是用户逻辑上的一个完整索引，它可能由一个或多个分片组成。SolrCloud 会根据文档的唯一键哈希或指定路由，将文档自动分配到对应的分片上，从而实现水平扩展。为了保证查询的完整性，Solr 支持 分布式查询，即一个查询会由查询节点转发到所有分片执行，汇总各分片结果后再返回给客户端。</p>
+<p>每个分片为了高可用起见可以有多个 副本 (Replica)。所有副本的数据完全相同，其中有且只有一个被选举为 Leader，负责该分片的索引更新协调 。其余副本称为 Follower（以前也叫从属），从 Leader 同步索引更新。SolrCloud 没有传统意义的集群主从架构——整个集群不存在单一主节点，每个分片各自独立选主 。ZooKeeper 会维护 SolrCloud 集群的状态信息，包括哪些集合、分片、副本，以及哪个副本当前是 Leader。当需要新增副本或分裂分片时，也通过 Solr 的 Collections API 通知 ZooKeeper 再由集群协同执行。</p>
+<p>这样的设计带来了高可用和容错能力：同一分片有多份副本提供服务，即使某个副本宕机，查询请求会自动由剩余副本处理，不影响整体服务 。如果某分片的 Leader 宕机，ZooKeeper 会在剩余副本中自动选举出新的 Leader，继续承担索引写入。 同时，SolrCloud 利用 ZooKeeper 实现集中配置管理和任务协调 。所有 Solr 实例启动时都会从 ZooKeeper 获取最新的配置，当配置变更时各节点也能及时感知。此外，发送给集群的索引请求无论到达哪个节点，都会由 SolrCloud 自动转发到正确的分片 Leader 去处理 ，这一切都得益于 ZooKeeper 保存的集群路由信息。通过分片+副本+选主机制，SolrCloud 实现了索引的 水平拆分 和 冗余备份。对于内容检索平台而言，这意味着可以轻松扩展索引规模，并保证在预发布环境中也能模拟查询的分布式过程和容错行为。</p>
+<h2>ZooKeeper 选主算法解析</h2>
+<p>ZooKeeper 在上述架构中充当“集群大脑”，为分布式系统提供配置存储、命名服务和同步原语等功能。其中最重要的一点是它需要保证自己的数据一致性——这通过 选主算法 来实现。一个 ZooKeeper 集群（称为 仲裁集合，ensemble）通常由多个节点组成，其中任何时刻只有一个 Leader 节点对外提供写服务，其余为 Follower 节点参与复制和投票。如果 Leader 宕机，剩余节点会通过选举算法选出新的 Leader。</p>
+<p>ZooKeeper 的选主算法本质上是一个 多数投票协议。每个 ZooKeeper 节点有一个唯一的 服务器ID (myid)，以及记录自身数据状态的 事务ID (ZXID) 和轮次编号 Epoch。选举过程如下：当集群启动或Leader失效时，所有节点进入 LOOKING（选举进行中）状态，首先每个节点投自己一票（推举自己为候选Leader）。节点之间交换投票，根据既定规则比较候选者资格： 首先比对 Epoch（轮次较大的优先，这是为了防止过期的投票干扰）；如果 Epoch 相同，则比较 ZXID（数据更新越新的节点优先，意味着它拥有“最新”的集群状态）；如果 ZXID 也相同，再比较 myid（ID数值更大的节点优先）。经过多轮比较和投票交换后，一旦某个候选者获得超过半数节点的认可（这就是 ZooKeeper 要求集群节点数为奇数的原因：超过半数即严格多数），该候选者就当选为 Leader 。选举完成后，集群状态更新：胜出节点切换为 LEADING 状态成为 Leader，其他节点切换为 FOLLOWING 状态成为追随者，开始从新Leader同步数据。 </p>
+<p>通过上述过程，ZooKeeper 保证了在任意时刻只有一个 Leader，并且至少有半数节点保存了最新的数据日志副本。当客户端发起写请求时，Leader 将请求以事务Proposal形式广播给所有 Follower，收集过半确认后提交事务（这就是 Zab 协议的核心思想）。如果 Leader 崩溃，只要大多数节点仍健在，就能选出新 Leader 并继续提供服务。这也解释了为什么我们常见的 ZooKeeper 集群由 3 或 5 台机器组成——3台可容忍1台故障，5台可容忍2台故障，而仍有过半节点存活保证服务不间断。总之，ZooKeeper 的选主算法为分布式系统提供了强一致性的基础，在预发布环境中部署 ZooKeeper 集群能真实模拟生产中的故障切换行为，确保内容检索平台各组件的协调机制在发布前得到充分验证。</p>
+<h2>Python 批量写入 Cassandra 示例</h2>
+<p>预发布环境通常需要构造测试数据。下面通过 Python 和 Cassandra 驱动实现向 Cassandra 批量写入数据的示例。我们假设 Cassandra 已有名为 test_keyspace 的键空间和适当的表结构（如果没有，可先创建表）。代码使用 DataStax Cassandra Python Driver 执行批量插入操作：</p>
+<pre><code class="language-py"><span class="line">from cassandra.cluster import Cluster</span>
+<span class="line">from cassandra.query import BatchStatement, ConsistencyLevel</span>
+<span class="line"></span>
+<span class="line"># 连接 Cassandra 集群（预发布环境通常在本地或内网）</span>
+<span class="line">cluster = Cluster([&#39;127.0.0.1&#39;])</span>
+<span class="line">session = cluster.connect(&#39;test_keyspace&#39;)</span>
+<span class="line"></span>
+<span class="line"># 如果目标表不存在，可以先创建</span>
+<span class="line">session.execute(&quot;&quot;&quot;</span>
+<span class="line">    CREATE TABLE IF NOT EXISTS users (</span>
+<span class="line">        id int PRIMARY KEY,</span>
+<span class="line">        name text,</span>
+<span class="line">        age int</span>
+<span class="line">    )</span>
+<span class="line">&quot;&quot;&quot;)</span>
+<span class="line"></span>
+<span class="line"># 准备插入语句</span>
+<span class="line">insert_stmt = session.prepare(&quot;INSERT INTO users (id, name, age) VALUES (?, ?, ?)&quot;)</span>
+<span class="line"></span>
+<span class="line"># 待插入的数据列表</span>
+<span class="line">users = [</span>
+<span class="line">    (1, &#39;Alice&#39;, 30),</span>
+<span class="line">    (2, &#39;Bob&#39;, 25),</span>
+<span class="line">    (3, &#39;Charlie&#39;, 35)</span>
+<span class="line">]</span>
+<span class="line"></span>
+<span class="line"># 将多个插入操作添加到一个批处理中</span>
+<span class="line">batch = BatchStatement(consistency_level=ConsistencyLevel.QUORUM)</span>
+<span class="line">for user in users:</span>
+<span class="line">    batch.add(insert_stmt, user)</span>
+<span class="line"></span>
+<span class="line"># 执行批量插入</span>
+<span class="line">session.execute(batch)</span>
+<span class="line">print(&quot;Batch insert completed.&quot;)</span></code></pre>
+<p>上述脚本首先连接到 Cassandra（假定在本机 9042 端口），然后通过 BatchStatement 将多条插入语句打包在一起发送，提高插入效率。我们设置了一致性级别为 QUORUM，表示需要多数副本确认写入。这在预发布环境可以帮助测试不同一致性级别下的性能和行为。执行成功后，Cassandra 中将批量写入三条记录。在实际应用中，如测试数据较多，也可以考虑使用 异步插入 或官方提供的 cqlsh COPY、DSBulk 工具来导入大规模数据 。</p>
+<h2>Python 批量更新 Solr 示例</h2>
+<p>有了数据存储，下一步通常需要将数据索引到 SolrCloud 以供检索。下面提供一个 Python 脚本示例，通过 Solr 的 HTTP 接口实现 批量更新索引（添加文档）。这里使用 Python 的 requests 库直接向 Solr 提交 JSON 文档：</p>
+<pre><code class="language-py"><span class="line">import requests, json</span>
+<span class="line"></span>
+<span class="line"># 待索引的文档列表，每个文档是一个字典</span>
+<span class="line">docs = [</span>
+<span class="line">    {&quot;id&quot;: &quot;1&quot;, &quot;title&quot;: &quot;Hello&quot;, &quot;content&quot;: &quot;世界你好&quot;},</span>
+<span class="line">    {&quot;id&quot;: &quot;2&quot;, &quot;title&quot;: &quot;Foo&quot;, &quot;content&quot;: &quot;Bar 内容&quot;}</span>
+<span class="line">]</span>
+<span class="line"></span>
+<span class="line"># Solr 更新接口URL，假设集合名称为 my_collection</span>
+<span class="line">solr_url = &quot;http://localhost:8983/solr/my_collection/update?commit=true&quot;</span>
+<span class="line">headers = {&quot;Content-Type&quot;: &quot;application/json&quot;}</span>
+<span class="line"></span>
+<span class="line"># 发送 POST 请求批量提交文档</span>
+<span class="line">response = requests.post(solr_url, data=json.dumps(docs), headers=headers)</span>
+<span class="line">print(&quot;Response:&quot;, response.status_code, response.text)</span></code></pre>
+<p>在运行此脚本之前，需要确保 SolrCloud 集群中已经创建了名为 my_collection 的集合（collection），并且具有相应的字段模式以接受 title 和 content 等字段。如果集合尚未创建，可以通过 Solr 提供的命令快速创建一个，例如在容器中执行：</p>
+<pre><code class="language-sh"><span class="line">docker exec -it solr1 solr create -c my_collection -n data_driven_schema_configs</span></code></pre>
+<p>上述命令将在 ZooKeeper 协调下创建一个名为 “my_collection”的新集合，使用内置的 data_driven_schema_configs 默认配置。创建完成后，运行 Python 脚本即可将 docs 列表中的文档批量提交给 Solr 索引。我们在请求URL中附加了 commit=true，让Solr在更新后立即提交，使文档可搜索。提交成功后，Solr 返回状态码以及简要结果信息（通常为空或包含更新的文档数量）。批量更新接口一次可以提交多个文档，Solr 会将这些文档路由到各自所属的分片并建立索引 。通过这种方式，我们能够在预发布环境批量构建索引数据，以模拟真实搜索场景。</p>
+<h2>Python 简易健康检查脚本</h2>
+<p>预发布环境部署完成后，进行健康检查非常重要。以下提供一个 Python 编写的简单健康检查脚本，它依次检测 Cassandra、Solr 和 ZooKeeper 三个服务是否正常响应：</p>
+<pre><code class="language-sh"><span class="line">import socket</span>
+<span class="line"></span>
+<span class="line">services = {</span>
+<span class="line">    &quot;Cassandra&quot;: (&quot;localhost&quot;, 9042),</span>
+<span class="line">    &quot;Solr&quot;:      (&quot;localhost&quot;, 8983),</span>
+<span class="line">    &quot;ZooKeeper&quot;: (&quot;localhost&quot;, 2181)</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">for name, (host, port) in services.items():</span>
+<span class="line">    s = socket.socket()</span>
+<span class="line">    try:</span>
+<span class="line">        s.settimeout(5)</span>
+<span class="line">        s.connect((host, port))</span>
+<span class="line">        if name == &quot;ZooKeeper&quot;:</span>
+<span class="line">            # 发送四字命令 &quot;ruok&quot; 检查 ZooKeeper 状态</span>
+<span class="line">            s.sendall(b&quot;ruok&quot;)</span>
+<span class="line">            resp = s.recv(4)</span>
+<span class="line">            if resp == b&#39;imok&#39;:</span>
+<span class="line">                print(f&quot;{name} is healthy (responded {resp.decode()})&quot;)</span>
+<span class="line">            else:</span>
+<span class="line">                print(f&quot;{name} responded with {resp.decode()}&quot;)</span>
+<span class="line">        else:</span>
+<span class="line">            print(f&quot;{name} is up (port {port} reachable)&quot;)</span>
+<span class="line">    except Exception as e:</span>
+<span class="line">        print(f&quot;{name} check failed: {e}&quot;)</span>
+<span class="line">    finally:</span>
+<span class="line">        s.close()</span></code></pre>
+<p>这个脚本通过尝试建立 TCP 连接来判断服务端口是否开放。其中对 ZooKeeper，我们发送了特殊的四字命令 “ruok”（意为“Are you ok”）并期望收到 “imok” 响应，表明 ZooKeeper 运转正常。如果 ZooKeeper 没有启用四字命令，可能不会返回任何数据（在新版本中需配置 ZOO_4LW_COMMANDS_WHITELIST 来开放该命令）。对于 Cassandra 和 Solr，我们仅测试端口连通性：能连接到 9042 则认为 Cassandra 存活，能连接到 8983 则认为 Solr 服务正常。实际生产中可以进一步通过执行查询或请求 API 来验证深层功能，例如对 Cassandra 执行一个简单的 SELECT，对 Solr 发一个查询请求等。</p>
+<p>运行上述健康检查脚本，可快速定位预发布环境中哪个组件出现故障。例如输出 Solr check failed: [Errno 111] Connection refused 则说明 Solr 没有启动或端口未开放；若 ZooKeeper 返回非“imok”则需检查其是否进入正确状态。通过这样的脚本，运维人员可以定期检测预发布集群状态，在问题扩大前及时干预。</p>
+<h2>Docker Compose 集群部署示例</h2>
+<p>有了对原理的理解，我们可以着手在预发布环境部署一个迷你版的内容检索平台集群。这里使用 Docker Compose 一键启动 ZooKeeper + SolrCloud + Cassandra 集群，以模拟生产环境的分布式架构。下面是完整的 docker-compose.yml 示例：</p>
+<pre><code class="language-yaml"><span class="line">version: &#39;3&#39;</span>
+<span class="line">services:</span>
+<span class="line">  # ZooKeeper 集群（3个节点）</span>
+<span class="line">  zoo1:</span>
+<span class="line">    image: zookeeper:3.8</span>
+<span class="line">    container_name: zoo1</span>
+<span class="line">    hostname: zoo1</span>
+<span class="line">    ports:</span>
+<span class="line">      - &quot;2181:2181&quot;</span>
+<span class="line">    environment:</span>
+<span class="line">      ZOO_MY_ID: 1</span>
+<span class="line">      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181</span>
+<span class="line"></span>
+<span class="line">  zoo2:</span>
+<span class="line">    image: zookeeper:3.8</span>
+<span class="line">    container_name: zoo2</span>
+<span class="line">    hostname: zoo2</span>
+<span class="line">    environment:</span>
+<span class="line">      ZOO_MY_ID: 2</span>
+<span class="line">      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - zoo1</span>
+<span class="line"></span>
+<span class="line">  zoo3:</span>
+<span class="line">    image: zookeeper:3.8</span>
+<span class="line">    container_name: zoo3</span>
+<span class="line">    hostname: zoo3</span>
+<span class="line">    environment:</span>
+<span class="line">      ZOO_MY_ID: 3</span>
+<span class="line">      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - zoo1</span>
+<span class="line"></span>
+<span class="line">  # SolrCloud 集群（3个节点）</span>
+<span class="line">  solr1:</span>
+<span class="line">    image: solr:9.2.1</span>
+<span class="line">    container_name: solr1</span>
+<span class="line">    ports:</span>
+<span class="line">      - &quot;8983:8983&quot;            # 映射第一个Solr节点端口到主机</span>
+<span class="line">    environment:</span>
+<span class="line">      ZK_HOST: &quot;zoo1:2181,zoo2:2181,zoo3:2181&quot;</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - zoo1</span>
+<span class="line">      - zoo2</span>
+<span class="line">      - zoo3</span>
+<span class="line"></span>
+<span class="line">  solr2:</span>
+<span class="line">    image: solr:9.2.1</span>
+<span class="line">    container_name: solr2</span>
+<span class="line">    environment:</span>
+<span class="line">      ZK_HOST: &quot;zoo1:2181,zoo2:2181,zoo3:2181&quot;</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - zoo1</span>
+<span class="line">      - zoo2</span>
+<span class="line">      - zoo3</span>
+<span class="line"></span>
+<span class="line">  solr3:</span>
+<span class="line">    image: solr:9.2.1</span>
+<span class="line">    container_name: solr3</span>
+<span class="line">    environment:</span>
+<span class="line">      ZK_HOST: &quot;zoo1:2181,zoo2:2181,zoo3:2181&quot;</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - zoo1</span>
+<span class="line">      - zoo2</span>
+<span class="line">      - zoo3</span>
+<span class="line"></span>
+<span class="line">  # Cassandra 集群（3个节点）</span>
+<span class="line">  cassandra1:</span>
+<span class="line">    image: cassandra:3.11</span>
+<span class="line">    container_name: cassandra1</span>
+<span class="line">    ports:</span>
+<span class="line">      - &quot;9042:9042&quot;            # 映射第一个Cassandra节点端口到主机</span>
+<span class="line">    environment:</span>
+<span class="line">      CASSANDRA_CLUSTER_NAME: &quot;Test Cluster&quot;</span>
+<span class="line">      CASSANDRA_SEEDS: &quot;cassandra1&quot;</span>
+<span class="line">      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch</span>
+<span class="line"></span>
+<span class="line">  cassandra2:</span>
+<span class="line">    image: cassandra:3.11</span>
+<span class="line">    container_name: cassandra2</span>
+<span class="line">    environment:</span>
+<span class="line">      CASSANDRA_CLUSTER_NAME: &quot;Test Cluster&quot;</span>
+<span class="line">      CASSANDRA_SEEDS: &quot;cassandra1&quot;</span>
+<span class="line">      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - cassandra1</span>
+<span class="line"></span>
+<span class="line">  cassandra3:</span>
+<span class="line">    image: cassandra:3.11</span>
+<span class="line">    container_name: cassandra3</span>
+<span class="line">    environment:</span>
+<span class="line">      CASSANDRA_CLUSTER_NAME: &quot;Test Cluster&quot;</span>
+<span class="line">      CASSANDRA_SEEDS: &quot;cassandra1&quot;</span>
+<span class="line">      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch</span>
+<span class="line">    depends_on:</span>
+<span class="line">      - cassandra1</span></code></pre>
+<p>上述 Compose 文件定义了三个 ZooKeeper 容器（zoo1、zoo2、zoo3）、三个 Solr 容器（组成一个 SolrCloud 集群），以及三个 Cassandra 容器（组成一个 Cassandra 集群）。关键配置说明：</p>
+<ul>
+<li>ZooKeeper：通过 ZOO_MY_ID 和 ZOO_SERVERS 环境变量配置集群。这里将每个节点的 ID 分别设为1、2、3，并告诉每个容器集群内所有 ZooKeeper 的地址和端口。这样三个容器启动后会相互发现并选举出 Leader。我们映射了 zoo1 的 2181 端口到主机，以便外部工具（例如 zkCli.sh 或健康检查脚本）可以连接 ZooKeeper 集群。depends_on 确保 zoo2,zoo3 在 zoo1 之后启动（但注意这并不保证启动顺序完全按预期或 ZooKeeper 已经准备就绪，必要时可加入健康检查机制）。</li>
+<li>SolrCloud：每个 Solr 实例启动时通过 ZK_HOST 指定 ZooKeeper 集群地址列表，使其加入 SolrCloud。我们开放了 solr1 的 8983 端口以访问 Web 管理界面，其余 Solr 实例不映射端口但仍在内部网络中与 solr1 互通。使用 depends_on 确保在启动 Solr 容器前 ZooKeeper 容器已启动。Solr 镜像默认会以 Cloud 模式 (-c) 运行，因为提供了 ZK_HOST。当所有 Solr 节点启动后，它们会共同组成一个 SolrCloud 集群。此时可以通过访问 <a href="http://localhost:8983/solr/">http://localhost:8983/solr/</a> 打开 Solr 管理界面，查看集群状态、创建集合等。</li>
+<li>Cassandra：采用官方 Cassandra 镜像来启动三个节点。通过 CASSANDRA_SEEDS 我们指定种子节点地址为 cassandra1（第一个节点自己作为种子），这样其他节点能够发现并加入集群  。所有节点设置相同的 CASSANDRA_CLUSTER_NAME 确保属于同一集群。这里使用 GossipingPropertyFileSnitch（默认）使所有节点视为同一数据中心。如果需要多数据中心模拟，可调整对应的 DC 名称和策略。depends_on 确保后两个节点在种子节点启动后再启动，以避免同时初始化导致的 token 冲突问题 。启动后几分钟内，Cassandra 集群会完成自动发现，我们可以用 docker exec -it cassandra1 nodetool status 命令查看集群状态，每个节点应显示为 UN (Up/Normal) 且握有均匀的 Token Range。</li>
+</ul>
+<p>完成 Compose 文件后，运行 docker-compose up -d 即可在后台启动整个预发布集群。请耐心等待所有容器完成启动：可以通过 docker-compose logs -f 动态跟踪日志。当 Solr 日志出现 “Started Solr server” 字样，Cassandra 日志出现 “Startup complete”，ZooKeeper 日志出现 “Node is leader” 或 “Node is follower” 时，说明各服务均已就绪。</p>
+<h2>常见错误及排查</h2>
+<p>在预发布环境搭建过程中，可能会遇到一些常见问题。以下列出典型错误场景，并提供详细的排查步骤：</p>
+<ul>
+<li>Solr 无法连接 ZooKeeper：如果在 Solr 日志中看到报错 Could not connect to ZooKeeper ... within ... ms，说明 Solr 在指定时间内无法连上 ZooKeeper  。这可能是 ZooKeeper 尚未启动完成或 ZK_HOST 配置不正确。排查：首先执行 docker-compose logs -f zoo1 检查 ZooKeeper 日志是否正常（应有 Leader 选举结果和 绑定端口2181 等信息）。然后确认在 Solr 容器内能解析到 zoo1,zoo2,zoo3 主机名（例如 docker exec solr1 ping zoo1）。若名称解析有问题，可在 Compose 中显式指定 networks 或使用 links。如果只是启动顺序导致，可以尝试重启 Solr 容器：docker-compose restart solr1 solr2 solr3。还可以在 Compose 文件中为 ZooKeeper 增加健康检查，确保其完全就绪后再启动 Solr（通过 depends_on 的 condition: service_healthy 设置）。正常情况下，Solr Admin UI 打开后，在 “Cloud -&gt; Graph” 能看到 ZooKeeper 状态及集群拓扑。</li>
+<li>Solr 集群没有 Leader：创建 collection 时提示 “no active leader” 或查询返回部分分片无结果。这通常由于 SolrCloud 尚未选举完各分片的 leader 副本。排查：通过 Solr 管理界面的 “Cloud -&gt; Tree” 或调用 Collections API 的 CLUSTERSTATUS 查看集合状态，确认每个 shard 下都有一个 &quot;leader&quot;:true 的副本。如果没有，检查 ZooKeeper 集群状态和 Solr 日志中的选主过程。如果 ZooKeeper 集群本身不稳定（例如少于过半节点存活），会导致 Solr 无法完成内部选主。此时需确保 ZooKeeper 至少有过半节点运行，并重启失联的 Solr 副本。通常在预发布环境，重启 SolrCloud 或等待数秒都能重新选出 leader。</li>
+<li>Cassandra 节点未成功加入集群：运行 nodetool status 发现每台 Cassandra 只显示自身，没发现其他节点，或者日志出现集群名称不匹配的错误。排查：首先确保所有 Cassandra 容器使用相同的 CASSANDRA_CLUSTER_NAME（如不一致，会拒绝连接）。其次，检查 CASSANDRA_SEEDS 配置：应让至少一个节点（通常第一个）作为种子，其他节点配置种子列表包含它。如果种子配置正确但仍未互联，可能是由于 Compose 同时启动多个 Cassandra 导致初始 token 冲突 。解决方法：确保第一个节点完全启动后再启动其余节点（Compose 中已用 depends_on，但首次并行启动时仍可能竞争，必要时手动分两步启动）。也可以显式指定每个节点的初始 token 来避免冲突。检查容器日志中有没有 Unable to gossip with any seeds 等消息。如果有，重启出现问题的节点容器。最后，使用 docker exec -it cassandra1 cqlsh 连接Cassandra，执行 SELECT peer, rpc_address FROM system.peers; 查看种子节点眼中已发现的集群同伴列表，确认所有节点互相可见。</li>
+<li>ZooKeeper 集群无法选举：如果 ZooKeeper 日志反复出现选举发起但无法成功（例如不停输出 LOOKING 状态），多数是因为 集群节点数不足多数 导致无法形成 quorum。比如启动了2个节点就尝试提供服务，会发现没有过半票选举不出 Leader。排查：确保 ZooKeeper 节点数是奇数且全部正确启动。如有节点启动失败（检查其日志，有无端口冲突或配置错误），尽快修复启动。使用 ZooKeeper 自带命令行：docker exec -it zoo1 zkServer.sh status 分别查看各节点状态：正常情况下应有一台显示 leader，其余显示 follower。如果都显示 standalone 或 looking，则说明没选出 Leader。此时核对 ZOO_MY_ID 和 ZOO_SERVERS 配置是否对应正确——每个容器的 myid 值必须和在 ZOO_SERVERS列表中的编号一致 。另外，检查网络互通，确保容器间的 2888、3888 端口可达（这些是选举通信端口）。纠正配置或网络问题后，重启 ZooKeeper 容器让它们重新发起选举。待其中一台日志出现 LEADING 并打印 ZooKeeper启动完成的信息，即告选主成功。</li>
+<li>数据无法持久化（非报错但需要注意）：默认情况下，上述 Docker Compose 未对 Cassandra 和 Solr 的数据目录做持久化挂载，这意味着容器删除或重建后数据会丢失（ZooKeeper 的状态也会重置）。在预发布环境，经常需要反复重置数据倒无妨，但如果希望持久化数据以进行持续测试，建议为它们挂载卷。例如在 cassandra1 服务下添加 volumes: - ./data/cassandra1:/var/lib/cassandra，在 solr1 下添加 volumes: - ./data/solr1:/var/solr. 这样容器重启后数据依然保留。不过也要注意挂载可能引入的权限问题，可以在启动前预先调整宿主机目录权限或UID/GID。</li>
+</ul>
+<p>以上排查场景基本覆盖了预发布环境搭建中常见的问题。总结来说，遇到异常不要慌，充分利用日志和内置管理工具，逐一检查各组件的配置和状态，再结合对原理的理解，即可定位并解决问题。</p>
+<h2>经验总结</h2>
+<p>最后，根据实践经验，我们对面向内容检索平台的预发布环境搭建给出以下最佳实践和注意事项：</p>
+<ul>
+<li>配置尽量贴近生产：预发布环境应使用与生产相同的软件版本和配置参数（ZooKeeper 节点数、Solr分片副本数、Cassandra复制因子等）。只有环境一致，测试结果才有参考价值 。例如生产 Cassandra 副本因子为3，预发尽量也部署3个节点保持 RF=3，否则某些一致性级别在预发环境无法模拟（如 QUORUM 在2节点集群就退化成 ALL）。</li>
+<li>合理缩减规模：虽要配置一致，但规模可比生产小。 一般一个机架上的最小集群规模即可，如生产 Solr 有6台12个分片，预发可用3台减半分片，在保证核心机制（分片、副本、容错）模拟到的同时节约资源。切忌为了省事用单节点假集群，那样很多分布式问题（选主、网络分区等）就测不出来了。</li>
+<li>自动化与基础设施即代码：使用 Docker Compose、Kubernetes 或 Terraform 等工具来定义和部署预发布环境。一键部署减少人为失误，也方便环境的反复销毁重建。Compose 文件、K8s YAML等最好与代码仓库一起管理版本，确保团队成员搭建出的环境一致。</li>
+<li>数据准备：尽可能使用贴近真实的数据进行测试。可以从线上脱敏抽取一部分数据导入预发，以便在索引量、查询负载上发现潜在性能问题。若无法使用真实数据，也应构造边界情况的数据（如超长文本、特殊字符）以测试系统兼容性。</li>
+<li>关注系统日志：预发布环境是发现问题的最佳时机，应密切关注各组件日志。特别是 ZooKeeper 日志（观察会话断连、选举变化）、Solr 日志（索引提交错误、GC警告）、Cassandra 日志（hint太多、读修复频繁）等。如果预发环境日志中已有异常或警告，在生产环境往往会被放大，需在发布前修复。</li>
+<li>定期演练故障：在预发环境可以主动演练一些故障，以验证系统的自动恢复能力。例如杀掉一个 Cassandra 节点观察读写是否正常（根据一致性设置可能有短暂失败，但应该在节点重启后自动恢复并进行 Hint Handoff）；停止 Solr 的 Leader 副本看查询是否无感知切换到副本、新Leader选举是否快速完成；模拟网络分区测试 ZooKeeper 的行为（可通过iptables临时阻断部分节点通信）。通过演练，这些组件在故障场景下的表现和潜在坑点就能在预发中了解到，避免上线后措手不及。</li>
+<li>确保安全隔离：预发布环境通常对标生产，但绝对不能影响生产。因此做好隔离工作，例如使用不同的网络/VPC，避免预发的 ZooKeeper 或 Cassandra 意外加入生产集群。数据上如果共享了部分生产数据，一定要严格控制预发环境对生产数据的修改权限（理想情况下预发只读生产快照）。此外，为防止误操作，预发布和生产的访问入口、管理账号应有明显区分。</li>
+<li>资源监控：不要因为是预发布就忽视监控。建议部署基本的监控和告警，如节点CPU/内存、Cassandra 的 compaction 延迟、Solr JVM 内存使用、ZooKeeper 延时等。在预发布观察这些指标的变化，有助于提前发现资源瓶颈并调整参数。例如通过预发压测发现 Solr Heap 不足导致频繁 GC，那么上线前就可考虑调大内存。</li>
+</ul>
+<p>通过以上这些实践，预发布环境可以更好地发挥“生产环境试金石”的作用 ：既捕获功能和性能问题，又验证系统在异常情况的表现，为最终上线保驾护航。在搭建和使用预发布环境的过程中，我们不断积累经验，将其沉淀为文档和自动化脚本，从而让团队在未来的迭代中更高效、更安心地交付内容检索平台的新功能。每一次在预发布环境中发现并解决的问题，都是在生产环境避免一次故障的宝贵收益。希望本指南能帮助你顺利搭建自己的预发布环境，在实战中不断完善，打造出稳健可依赖的内容检索平台！</p>
+<h2>参考资料：</h2>
+<ul>
+<li>Cassandra 官方文档 - Architecture - Dynamo-style Replication  </li>
+<li>Apigee Docs - About Cassandra Replication Factor </li>
+<li>Apache Solr Reference Guide - Shards and Indexing Data in SolrCloud  </li>
+<li>CSDN 博客 - SolrCloud 自动容错机制 </li>
+<li>ZooKeeper 资料 - Leader 选举原理 </li>
+<li>Stack Overflow 讨论 - Solr could not connect to ZooKeeper error</li>
+</ul>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

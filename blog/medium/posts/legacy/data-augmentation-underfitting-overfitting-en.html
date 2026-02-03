@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification: Data Scarcity, Augmentation, and Underfitting/Overfitting</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, image classification, data augmentation, overfitting, underfitting, pytorch]
+legacy: true</h2>
+<h1>Image Classification: Data Scarcity, Augmentation, and Underfitting/Overfitting</h1>
+<p><img src="__TABLE_39221808__" alt="Table"></p><h3>3. Data Augmentation under Data Scarcity</h3>
+<p>Among all strategies for mitigating over-fitting, data augmentation is one of the most direct and effective methods. It expands the information content of the dataset without additional labeling costs by applying a series of random transformations to the existing training data, creating more diverse samples that the model has &quot;never seen&quot; before.</p>
+<h4>3.1 Geometric Transformations</h4>
+<p>These transformations simulate variations in an object&#39;s pose, scale, and position that might occur in the real world. Common operations include: random rotation (±15° to ±30°), random scaling (0.8× to 1.2×), and random translation (≤10% of image dimensions). More complex transformations like Elastic Distortion and Perspective Transformation can provide even stronger generalization capabilities.</p>
+<h4>3.2 Pixel-level Perturbations</h4>
+<p>These transformations aim to improve the model&#39;s robustness to changes in image quality. For instance, adding Gaussian Noise (e.g., σ=0.01-0.05 × 255) or Salt-and-Pepper Noise (e.g., ratio=0.3-0.5%) to the image, and applying GaussianBlur (kernel size=3 or 5) or MotionBlur.</p>
+<h4>3.3 Color Space Transformations</h4>
+<p>Transformations in the color space enhance the model&#39;s adaptability to variations in lighting, contrast, and color. <code>ColorJitter</code> is a common tool that randomly adjusts an image&#39;s brightness, contrast, and saturation (e.g., between 0.8 and 1.2 times the original). Converting an image to grayscale and then duplicating it across three channels is another effective technique to force the model to focus on shape rather than color.</p>
+<h4>3.4 Synthetic/Mixing Methods</h4>
+<p>In recent years, augmentation methods that mix information from multiple images have become very popular. They create samples that do not exist in the real world but are highly beneficial for model regularization.</p>
+<p><img src="__TABLE_-3a6ea8c__" alt="Table"></p><h4>3.5 Auto-Augmentation</h4>
+<p>Manually designing augmentation policy combinations is time-consuming. Thus, auto-augmentation methods were developed. <strong>RandAugment</strong> is a simple yet effective method that randomly selects N transformations from a predefined pool and applies them with a uniform magnitude M. It often yields significant gains on small datasets (e.g., with N=2, M=9). The more complex <strong>AutoAugment</strong> uses reinforcement learning to search for the optimal policy combination but is computationally expensive.</p>
+<h3>4. Implementation in PyTorch</h3>
+<p>Here, we demonstrate how to build a <code>transform</code> pipeline in PyTorch that includes various augmentation strategies and implement a plug-and-play Mixup function.</p>
+<h4>4.1 Transform Pipeline</h4>
+<blockquote><code>import torchvision.transforms as T</code><br>
+<code>import torch</code><br>
+<code>import numpy as np</code><br>
+<code></code><br>
+<code># Custom Salt-and-Pepper noise class</code><br>
+<code>class SaltPepperNoise:</code><br>
+<code>    def __init__(self, ratio=0.003):</code><br>
+<code>        self.ratio = ratio</code><br>
+<code># ... (15 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/f25c7c332072de07ee81c2ef56f22606">GitHub Gist</a></em></p><p>This pipeline integrates various geometric and color transformations. Note that the <code>Normalize</code> step is typically placed at the end, and its mean and standard deviation should be set based on the dataset used for the pre-trained model (e.g., ImageNet).</p>
+<h4>4.2 Plug-and-Play Mixup/CutMix</h4>
+<blockquote><code>def mixup_data(x, y, alpha=0.2, use_cuda=True):</code><br>
+<code>    &#039;&#039;&#039;Returns mixed inputs, pairs of targets, and lambda&#039;&#039;&#039;</code><br>
+<code>    if alpha &gt; 0:</code><br>
+<code>        lam = np.random.beta(alpha, alpha)</code><br>
+<code>    else:</code><br>
+<code>        lam = 1</code><br>
+<code></code><br>
+<code>    batch_size = x.size()[0]</code><br>
+<code># ... (11 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/0e60d310635987b8dd0c4e6142708e36">GitHub Gist</a></em></p><p>In your training loop, you can fetch <code>inputs</code> and <code>targets</code> from the DataLoader, call <code>mixup_data</code> to generate mixed data, and then compute the mixed loss using <code>mixup_criterion</code>.</p>
+<h4>4.3 Learning Curve Monitoring</h4>
+<p>Throughout the training process, it is crucial to continuously monitor the accuracy and loss curves for both the training and validation sets. A key practice is <strong>Early Stopping</strong>: when the validation loss stops decreasing and starts to rise for N consecutive epochs, training should be halted, and the model weights with the best previous validation performance should be saved. This effectively prevents the model from over-fitting in the later stages of training.</p>
+<h3>5. Integrated Tuning Workflow</h3>
+<p>A systematic tuning process can help you maximize the effectiveness of data augmentation:</p>
+<ol>
+<li><strong>Establish Baseline</strong>: First, train the model without any data augmentation and record its accuracy and loss as a baseline.</li>
+<li><strong>Phase 1</strong>: Add basic geometric and color transformations; the learning rate can be kept the same or slightly increased.</li>
+<li><strong>Phase 2</strong>: Introduce Mixup or CutMix, often in conjunction with Label Smoothing for better results.</li>
+<li><strong>Phase 3</strong>: If computational resources permit, try using RandAugment or AutoAugment to automatically search for the optimal augmentation policy.</li>
+<li><strong>Phase 4</strong>: Finally, fine-tune the model&#39;s capacity (e.g., network depth) and regularization parameters (e.g., Dropout rate, weight decay) based on the augmented data distribution.</li>
+</ol>
+<h3>6. Common Pitfalls &amp; Practical Tips</h3>
+<ul>
+<li><strong>Over-augmentation</strong>: Excessive augmentation can cause a significant distribution shift between the training set and the actual test set, thereby hurting performance. It&#39;s advisable to start with a small application probability (e.g., <code>p=0.3</code>).</li>
+<li><strong>Label Synchronization</strong>: In object detection or semantic segmentation tasks, when applying geometric transformations to an image, the exact same transformations must be applied to the bounding boxes or masks.</li>
+<li><strong>Validation Set Purity</strong>: The validation set should be kept as &quot;clean&quot; as possible to accurately reflect the model&#39;s performance on the original data distribution. Typically, only necessary resizing and center cropping are applied, without heavy augmentation.</li>
+<li><strong>Mixup with Small Batches</strong>: Using Mixup with a very small batch size can excessively dilute the original signal. In such cases, consider increasing the batch size or adjusting the learning rate.</li>
+</ul>
+<h3>7. Conclusion &amp; Further Exploration</h3>
+<p>When faced with the challenge of data scarcity, our core objective is to <strong>expand the diversity</strong> of the data through augmentation, not just to increase its quantity. The struggle against under-fitting and over-fitting is essentially about finding a delicate balance between the model&#39;s <strong>capacity</strong> and the data&#39;s <strong>information content</strong>.</p>
+<p>The strategies introduced in this article are a classic starting point for solving this problem. Building on this foundation, you can further explore more advanced directions, such as: using unlabeled data for Self-supervised Pre-training, synthesizing new data with generative models (like Diffusion Models) or 3D rendering, and applying Semi-supervised Learning techniques.</p>
+
+</body>
+</html>

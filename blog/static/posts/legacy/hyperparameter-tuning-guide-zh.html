@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器学习超参数调优：从理论到实践的全面指南 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, machine learning, hyperparameter tuning, python, pytorch, optuna, scikit-learn]
+legacy: true</h2>
+<h1>机器学习超参数调优：从理论到实践的全面指南</h1>
+<h2>2. 调优手段综述与代码实践</h2>
+<p>选择合适的调优策略是平衡探索（覆盖更广的搜索空间）和利用（在有希望的区域进行更精细的搜索）的艺术。下面我们逐一深挖各种主流方法，并提供可直接运行的代码骨架。</p>
+<h3>2.1 网格搜索 (Grid Search)</h3>
+<p><strong>核心思路</strong>：对所有提供的超参数组合进行暴力枚举（笛卡尔积），是维度少时最稳妥的方法。</p>
+<pre><code class="language-python"><span class="line"># pip install scikit-learn</span>
+<span class="line">from sklearn.model_selection import GridSearchCV</span>
+<span class="line">from sklearn.svm import SVC</span>
+<span class="line"></span>
+<span class="line"># 假设 X_train, y_train 已加载</span>
+<span class="line"># from sklearn.datasets import make_classification</span>
+<span class="line"># X_train, y_train = make_classification(n_samples=1000, n_features=20, n_informative=10, random_state=42)</span>
+<span class="line"></span>
+<span class="line">param_grid = {</span>
+<span class="line">    &quot;C&quot;:     [0.1, 1, 10],</span>
+<span class="line">    &quot;gamma&quot;: [1, 0.1, 0.01],</span>
+<span class="line">    &quot;kernel&quot;: [&quot;rbf&quot;]</span>
+<span class="line">}</span>
+<span class="line">grid = GridSearchCV(</span>
+<span class="line">    estimator=SVC(),</span>
+<span class="line">    param_grid=param_grid,</span>
+<span class="line">    cv=5,               # 五折交叉验证</span>
+<span class="line">    scoring=&quot;accuracy&quot;,</span>
+<span class="line">    n_jobs=-1           # CPU 并行</span>
+<span class="line">)</span>
+<span class="line"># grid.fit(X_train, y_train)</span>
+<span class="line"># print(f&quot;Best Params: {grid.best_params_}&quot;)</span>
+<span class="line"># print(f&quot;Best Score: {grid.best_score_:.4f}&quot;)</span></code></pre>
+<p><strong>技巧</strong>：先用粗粒度网格扫描一个较大的范围，锁定表现最好的区域后，再构建一个更精细的局部网格进行搜索。</p>
+<h3>2.2 随机搜索 (Random Search)</h3>
+<p><strong>核心思路</strong>：与网格搜索不同，随机搜索在指定的分布中随机采样固定数量的参数组合。当超参数数量较多时，它通常比网格搜索更高效。</p>
+<pre><code class="language-python"><span class="line"># pip install scikit-learn scipy</span>
+<span class="line">from sklearn.model_selection import RandomizedSearchCV</span>
+<span class="line">from sklearn.ensemble import GradientBoostingClassifier</span>
+<span class="line">from scipy.stats import loguniform, randint</span>
+<span class="line"></span>
+<span class="line"># 假设 X_train, y_train 已加载</span>
+<span class="line">param_dist = {</span>
+<span class="line">    &quot;learning_rate&quot;: loguniform(1e-4, 1e-1),</span>
+<span class="line">    &quot;n_estimators&quot;:  randint(100, 1000),</span>
+<span class="line">    &quot;max_depth&quot;:     randint(2, 6)</span>
+<span class="line">}</span>
+<span class="line">rs = RandomizedSearchCV(</span>
+<span class="line">    GradientBoostingClassifier(),</span>
+<span class="line">    param_distributions=param_dist,</span>
+<span class="line">    n_iter=60,          # 采样 60 组</span>
+<span class="line">    cv=5,</span>
+<span class="line">    random_state=42,</span>
+<span class="line">    n_jobs=-1</span>
+<span class="line">)</span>
+<span class="line"># rs.fit(X_train, y_train)</span>
+<span class="line"># print(f&quot;Best Params: {rs.best_params_}&quot;)</span>
+<span class="line"># print(f&quot;Best Score: {rs.best_score_:.4f}&quot;)</span></code></pre>
+<p><strong>思考点</strong>：对于学习率、正则化强度这类对数量级敏感的超参数，使用对数均匀分布（<code>loguniform</code>）进行采样会比线性均匀分布更有效。</p>
+<h3>2.3 贝叶斯优化 (Bayesian Optimization)</h3>
+<p><strong>核心思路</strong>：这是一种更智能的搜索策略。它使用一个概率模型（代理模型）来建模“超参数-性能”函数，并利用历史评估结果来选择下一个最有希望的评估点。这使得它能用更少的迭代次数逼近最优解。<code>Optuna</code> 是一个流行的实现库。</p>
+<pre><code class="language-python"><span class="line"># pip install optuna torch torchvision</span>
+<span class="line">import torch</span>
+<span class="line">import torch.nn as nn</span>
+<span class="line">import optuna</span>
+<span class="line">from torchvision.datasets import MNIST</span>
+<span class="line">from torch.utils.data import DataLoader</span>
+<span class="line">from torchvision import transforms</span>
+<span class="line"></span>
+<span class="line">DEVICE = &quot;cuda&quot; if torch.cuda.is_available() else &quot;cpu&quot;</span>
+<span class="line"></span>
+<span class="line">def objective(trial):</span>
+<span class="line">    # 1. 采样超参数</span>
+<span class="line">    lr = trial.suggest_loguniform(&quot;lr&quot;, 1e-4, 1e-1)</span>
+<span class="line">    dropout = trial.suggest_uniform(&quot;dropout&quot;, 0.1, 0.5)</span>
+<span class="line">    hidden = trial.suggest_categorical(&quot;hidden&quot;, [64, 128, 256])</span>
+<span class="line"></span>
+<span class="line">    # 2. 构造模型</span>
+<span class="line">    model = nn.Sequential(</span>
+<span class="line">        nn.Flatten(),</span>
+<span class="line">        nn.Linear(28*28, hidden), nn.ReLU(), nn.Dropout(dropout),</span>
+<span class="line">        nn.Linear(hidden, 10)</span>
+<span class="line">    ).to(DEVICE)</span>
+<span class="line"></span>
+<span class="line">    # 3. 训练</span>
+<span class="line">    optimizer = torch.optim.Adam(model.parameters(), lr=lr)</span>
+<span class="line">    loss_fn = nn.CrossEntropyLoss()</span>
+<span class="line">    train_loader = DataLoader(</span>
+<span class="line">        MNIST(&quot;.&quot;, train=True, download=True, transform=transforms.ToTensor()),</span>
+<span class="line">        batch_size=128, shuffle=True</span>
+<span class="line">    )</span>
+<span class="line">    model.train()</span>
+<span class="line">    for epoch in range(2):  # 每个 trial 只跑 2 epoch 以快速迭代</span>
+<span class="line">        for x, y in train_loader:</span>
+<span class="line">            x, y = x.to(DEVICE), y.to(DEVICE)</span>
+<span class="line">            optimizer.zero_grad()</span>
+<span class="line">            loss = loss_fn(model(x), y)</span>
+<span class="line">            loss.backward()</span>
+<span class="line">            optimizer.step()</span>
+<span class="line"></span>
+<span class="line">    # 4. 验证</span>
+<span class="line">    correct = 0</span>
+<span class="line">    val_loader = DataLoader(</span>
+<span class="line">        MNIST(&quot;.&quot;, train=False, transform=transforms.ToTensor()),</span>
+<span class="line">        batch_size=512</span>
+<span class="line">    )</span>
+<span class="line">    model.eval()</span>
+<span class="line">    with torch.no_grad():</span>
+<span class="line">        for x, y in val_loader:</span>
+<span class="line">            preds = model(x.to(DEVICE)).argmax(1).cpu()</span>
+<span class="line">            correct += (preds == y).sum().item()</span>
+<span class="line">    </span>
+<span class="line">    accuracy = correct / len(val_loader.dataset)</span>
+<span class="line">    return accuracy # Optuna 默认最大化目标</span>
+<span class="line"></span>
+<span class="line"># study = optuna.create_study(direction=&quot;maximize&quot;)</span>
+<span class="line"># study.optimize(objective, n_trials=40, timeout=600) # 40次尝试或10分钟</span>
+<span class="line"># print(f&quot;Best score: {study.best_value:.4f}&quot;)</span>
+<span class="line"># print(f&quot;Best hyperparameters: {study.best_params}&quot;)</span></code></pre>
+<p><strong>加强版</strong>：可以结合 <code>optuna.pruners</code> 来提前终止没有希望的试验（trial），从而显著节省计算资源。</p>
+<h3>2.4 基于提前终止的算法 (Successive Halving / Hyperband)</h3>
+<p><strong>核心思路</strong>：这些算法旨在通过动态资源分配来加速搜索。它们首先为许多配置分配少量资源（如训练几个 epoch），然后根据初始表现淘汰掉表现差的配置，只为“幸存者”分配更多资源。</p>
+<pre><code class="language-python"><span class="line"># pip install scikit-learn</span>
+<span class="line">from sklearn.experimental import enable_halving_search_cv</span>
+<span class="line">from sklearn.model_selection import HalvingGridSearchCV</span>
+<span class="line">from sklearn.ensemble import RandomForestClassifier</span>
+<span class="line"></span>
+<span class="line"># 假设 X_train, y_train 已加载</span>
+<span class="line">param_grid = {&quot;max_depth&quot;: [5, 10, 15, None],</span>
+<span class="line">              &quot;min_samples_leaf&quot;: [1, 2, 4]}</span>
+<span class="line">sh = HalvingGridSearchCV(</span>
+<span class="line">    RandomForestClassifier(n_estimators=200),</span>
+<span class="line">    param_grid,</span>
+<span class="line">    cv=5,</span>
+<span class="line">    factor=3,            # 每轮保留 1/factor 的候选配置</span>
+<span class="line">    resource=&quot;n_samples&quot;, # scikit-learn 中资源是样本数</span>
+<span class="line">    scoring=&quot;accuracy&quot;,</span>
+<span class="line">    n_jobs=-1</span>
+<span class="line">)</span>
+<span class="line"># sh.fit(X_train, y_train)</span>
+<span class="line"># print(f&quot;Best Params: {sh.best_params_}&quot;)</span></code></pre>
+<p>对于深度学习，<code>KerasTuner</code> 的 <code>Hyperband</code> 或 <code>Optuna</code> 的 <code>SuccessiveHalvingPruner</code> 是更自然的选择，它们可以将 <code>epoch</code> 作为资源维度。</p>
+<h3>2.5 进化策略 (Population-Based Training, PBT)</h3>
+<p><strong>核心思路</strong>：这是一种更高级的混合策略，常见于大规模分布式训练。它并行训练一组模型（一个“种群”），并周期性地用表现好的模型的权重来替换表现差的模型，同时对超参数进行轻微的随机扰动（“变异”）。</p>
+<pre><code class="language-python"><span class="line"># pip install &quot;ray[tune]&quot; torch</span>
+<span class="line">from ray import tune</span>
+<span class="line">from ray.tune.schedulers import PopulationBasedTraining</span>
+<span class="line"></span>
+<span class="line">def train_model(config):</span>
+<span class="line">    # 此处省略模型、数据加载和训练循环的定义</span>
+<span class="line">    # 训练循环中需要通过 tune.report() 报告验证集指标</span>
+<span class="line">    # e.g., tune.report(mean_accuracy=acc)</span>
+<span class="line">    pass</span>
+<span class="line"></span>
+<span class="line">pbt = PopulationBasedTraining(</span>
+<span class="line">    time_attr=&quot;training_iteration&quot;,</span>
+<span class="line">    metric=&quot;mean_accuracy&quot;,</span>
+<span class="line">    mode=&quot;max&quot;,</span>
+<span class="line">    perturbation_interval=5, # 每5个迭代周期进行一次扰动</span>
+<span class="line">    hyperparam_mutations={</span>
+<span class="line">        &quot;lr&quot;: lambda: tune.loguniform(1e-4, 1e-1).sample(),</span>
+<span class="line">        &quot;dropout&quot;: [0.2, 0.3, 0.4, 0.5]</span>
+<span class="line">    }</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line"># analysis = tune.run(</span>
+<span class="line">#     train_model,</span>
+<span class="line">#     resources_per_trial={&quot;cpu&quot;: 2, &quot;gpu&quot;: 1},</span>
+<span class="line">#     config={&quot;lr&quot;: 1e-3, &quot;dropout&quot;: 0.4},</span>
+<span class="line">#     num_samples=10, # 种群大小</span>
+<span class="line">#     scheduler=pbt</span>
+<span class="line"># )</span>
+<span class="line"># print(&quot;Best config: &quot;, analysis.get_best_config(metric=&quot;mean_accuracy&quot;, mode=&quot;max&quot;))</span></code></pre>
+<p>PBT 的强大之处在于它不仅能优化超参数，还能在线学习到有效的学习率调度策略。</p>
+<h2>3. 常见超参数及其影响</h2>
+<p>理解不同超参数如何影响模型行为是做出明智调整决策的关键。</p>
+<table>
+<thead>
+<tr>
+<th align="left">类别</th>
+<th align="left">超参数</th>
+<th align="left">值太小</th>
+<th align="left">值过大</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>优化</strong></td>
+<td align="left">学习率 (lr)</td>
+<td align="left">收敛慢，容易陷入局部最小值</td>
+<td align="left">损失函数振荡或发散，无法收敛</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">批大小 (batch_size)</td>
+<td align="left">梯度更新噪声大，收敛不稳定</td>
+<td align="left">内存消耗大，泛化能力可能下降</td>
+</tr>
+<tr>
+<td align="left"><strong>模型容量</strong></td>
+<td align="left">层数 / 神经元数</td>
+<td align="left">欠拟合，无法学习复杂模式</td>
+<td align="left">过拟合，记忆训练数据，泛化差</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">卷积核尺寸</td>
+<td align="left">感受野不足，无法捕捉大尺度特征</td>
+<td align="left">参数量剧增，计算昂贵，易过拟合</td>
+</tr>
+<tr>
+<td align="left"><strong>正则化</strong></td>
+<td align="left">Dropout 比例</td>
+<td align="left">正则化效果不足，容易过拟合</td>
+<td align="left">模型有效容量下降过多，导致欠拟合</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">L1/L2 正则强度 (λ)</td>
+<td align="left">模型复杂度惩罚不足</td>
+<td align="left">模型过于简单，导致欠拟合</td>
+</tr>
+</tbody></table>
+<h2>4. 实用调参技巧</h2>
+<ol>
+<li><strong>确定大方向</strong>：数据量充足？优先增加模型容量。数据量有限？优先调整正则化或应用数据增强。</li>
+<li><strong>分组调参</strong>：不要一次性调整所有参数。可以先调整优化相关参数（如学习率、批大小），再调整模型结构参数，最后调整正则化参数。</li>
+<li><strong>使用对数尺度</strong>：对于学习率和正则化强度等超参数，在对数尺度上（如 <code>1e-5</code> 到 <code>1e-1</code>）进行搜索远比线性尺度高效。</li>
+<li><strong>可视化与早停</strong>：使用 TensorBoard 或 WandB 等工具监控训练/验证曲线。一旦发现验证损失停止下降或开始上升，就应考虑提前终止训练或增强正则化。</li>
+<li><strong>借鉴已有成果</strong>：从相关论文或开源代码库的默认配置开始，这通常是一个很好的基线。先在相同数量级内进行微调。</li>
+<li><strong>资源优先</strong>：首先确定硬件（尤其是显存）能承受的最大批大小和模型尺寸，然后再在这个约束下精调其他参数。</li>
+</ol>
+<h2>5. 总结与决策树</h2>
+<p>如何选择合适的调优方法？</p>
+<ol>
+<li><strong>维度 ≤ 3，数据量小，CPU训练？</strong> → 直接用 <code>GridSearchCV</code>。</li>
+<li><strong>想快速得到一个80分的结果？</strong> → <code>RandomizedSearchCV</code> 结合对数分布采样是你的朋友。</li>
+<li><strong>使用GPU训练，计算预算有限？</strong> → <code>Optuna</code> (TPE) 结合剪枝 (<code>Pruner</code>) 或 <code>Hyperband</code> 是最高效的选择。</li>
+<li><strong>拥有大规模分布式集群？</strong> → <code>Ray Tune</code> 的 PBT 能发挥最大威力。</li>
+<li><strong>进行学术研究或需要极致精调？</strong> → 可以探索梯度式超参优化，但要准备好应对其复杂性。</li>
+</ol>
+<p>通过将这些理论知识和代码实践相结合，你将能够更系统、更高效地进行超参数调优，从而显著提升你的模型性能。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

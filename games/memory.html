@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match | Yuxu Ge</title>
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+            --card-bg: #2196F3;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        /* ===== SPLIT LAYOUT ===== */
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* ===== LEFT SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            width: 160px;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* ===== RIGHT CONTENT AREA ===== */
+        .content {
+            margin-left: 320px;
+            padding: 2rem 3rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: rgba(255,255,255,0.7);
+            align-self: flex-start;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        /* Game Styles */
+        .game-header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .game-title {
+            font-size: 1.75rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .card {
+            width: 80px;
+            height: 80px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #42A5F5, #1E88E5);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card-front::after {
+            content: '?';
+            color: rgba(255,255,255,0.5);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-back {
+            background: #E8F5E9;
+            border: 2px solid #4CAF50;
+        }
+
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background: white;
+            color: #1565C0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover { background: #E3F2FD; }
+
+        .message {
+            margin-top: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            min-height: 1.5rem;
+        }
+
+        .difficulty {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .difficulty button {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .difficulty button.active {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .instructions {
+            margin-top: 1.5rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .sidebar-top {
+                gap: 0;
+            }
+
+            .contact-block {
+                margin-top: 1.5rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            .sidebar h1 {
+                font-size: 1.4rem;
+            }
+
+            .title-role {
+                font-size: 0.8rem;
+            }
+
+            .card {
+                width: 65px;
+                height: 65px;
+            }
+            .card-front::after { font-size: 2rem; }
+            .card-back { font-size: 1.5rem; }
+            .grid { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js"></script>
+
+        <main class="content">
+            <a href="/games/" class="back-link">← Back to Games</a>
+
+            <div class="game-header">
+                <h1 class="game-title">Memory Match</h1>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Moves</div>
+                        <div class="stat-value" id="moves">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value" id="time">0:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-container">
+                <div class="grid" id="grid"></div>
+            </div>
+
+            <div class="controls">
+                <button onclick="startGame()">New Game</button>
+            </div>
+
+            <div class="difficulty">
+                <button class="active" onclick="setDifficulty(4)" id="diff-4">4x4</button>
+                <button onclick="setDifficulty(6)" id="diff-6">6x6</button>
+            </div>
+
+            <div class="message" id="message"></div>
+
+            <div class="instructions">
+                <strong>How to play:</strong> Click cards to flip them.<br>
+                Find all matching pairs to win!
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const EMOJIS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+                        '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
+                        '🦄', '🐝'];
+
+        let gridSize = 4;
+        let cards = [];
+        let flipped = [];
+        let matched = [];
+        let moves = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let canFlip = true;
+
+        function setDifficulty(size) {
+            gridSize = size;
+            document.querySelectorAll('.difficulty button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`diff-${size}`).classList.add('active');
+            startGame();
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startGame() {
+            const gridEl = document.getElementById('grid');
+            gridEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+
+            const pairCount = (gridSize * gridSize) / 2;
+            const selectedEmojis = shuffle([...EMOJIS]).slice(0, pairCount);
+            cards = shuffle([...selectedEmojis, ...selectedEmojis]);
+
+            flipped = [];
+            matched = [];
+            moves = 0;
+            startTime = null;
+            canFlip = true;
+
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('time').textContent = '0:00';
+            document.getElementById('message').textContent = '';
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            // Adjust card size based on grid
+            const cardSize = gridSize === 4 ? 80 : 60;
+            document.querySelectorAll('.card').forEach(c => {
+                c.style.width = cardSize + 'px';
+                c.style.height = cardSize + 'px';
+            });
+
+            gridEl.innerHTML = cards.map((emoji, i) => `
+                <div class="card" data-index="${i}" onclick="flipCard(${i})" style="width:${cardSize}px;height:${cardSize}px;">
+                    <div class="card-inner">
+                        <div class="card-front"></div>
+                        <div class="card-back">${emoji}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function flipCard(index) {
+            if (!canFlip) return;
+            if (flipped.includes(index)) return;
+            if (matched.includes(index)) return;
+
+            // Start timer on first flip
+            if (!startTime) {
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+
+            const card = document.querySelector(`.card[data-index="${index}"]`);
+            card.classList.add('flipped');
+            flipped.push(index);
+
+            if (flipped.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+
+                const [first, second] = flipped;
+                if (cards[first] === cards[second]) {
+                    // Match!
+                    matched.push(first, second);
+                    document.querySelector(`.card[data-index="${first}"]`).classList.add('matched');
+                    document.querySelector(`.card[data-index="${second}"]`).classList.add('matched');
+                    flipped = [];
+
+                    // Check win
+                    if (matched.length === cards.length) {
+                        clearInterval(timerInterval);
+                        const time = document.getElementById('time').textContent;
+                        document.getElementById('message').textContent =
+                            `Congratulations! ${moves} moves in ${time}`;
+                    }
+                } else {
+                    // No match
+                    canFlip = false;
+                    setTimeout(() => {
+                        document.querySelector(`.card[data-index="${first}"]`).classList.remove('flipped');
+                        document.querySelector(`.card[data-index="${second}"]`).classList.remove('flipped');
+                        flipped = [];
+                        canFlip = true;
+                    }, 1000);
+                }
+            }
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            document.getElementById('time').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        startGame();
+    </script>
+</body>
+</html>

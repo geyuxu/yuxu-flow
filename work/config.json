@@ -1,0 +1,41 @@
+{
+    "title": "Current Work",
+    "description": "Projects I'm currently building and researching",
+    "items": [
+        {
+            "title": "L-Zero",
+            "description": "L-Zero is an instruction set designed for AI agents to generate executable programs. Just download the runtime, feed your AI the documentation, describe what you want, and watch it build.",
+            "link": "https://l-zero.yuxu.ge/",
+            "tag": "Engineering & Research",
+            "year": "Jan 2026"
+        },
+        {
+            "title": "Neural Networks from Scratch",
+            "description": "Implement classic neural networks from scratch without using nn.Module, to deeply understand PyTorch and model principles.",
+            "link": "https://github.com/geyuxu/nn-from-scratch",
+            "tag": "Engineering",
+            "year": "Jan 2026"
+        },
+        {
+            "title": "Yuxu's Game of Life",
+            "description": "A GPU-accelerated genome-based evolution simulation where neural network organisms compete, reproduce, and evolve through natural selection and reinforcement learning.",
+            "link": "https://gol.yuxu.ge",
+            "tag": "Engineering & Research",
+            "year": "Jan 2026"
+        },
+        {
+            "title": "Search Data Sync Platform",
+            "description": "A high-performance, Event-Driven search platform featuring Change Data Capture (CDC), Zero-Code Coupling, and Distributed Tracing.",
+            "link": "https://github.com/geyuxu/search-data-sync-platform",
+            "tag": "Engineering",
+            "year": "Dec 2025"
+        },
+        {
+            "title": "Spring-AI-RAG-System",
+            "description": "Enterprise-grade Retrieval-Augmented Generation pipeline implementing hybrid search (Elasticsearch + PgVector). Solves context window limits and reduces hallucination through explainable retrieval chains.",
+            "link": "https://github.com/geyuxu/Spring-AI-RAG-System",
+            "tag": "Engineering",
+            "year": "Dec 2025"
+        }
+    ]
+}

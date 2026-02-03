@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类模型评估指标权威指南：从混淆矩阵到AUC与F1分数</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, machine learning, classification, metrics, python]
+legacy: true</h2>
+<h1>分类模型评估指标权威指南：从混淆矩阵到AUC与F1分数</h1>
+<p><img src="__TABLE_6a0ad0f5__" alt="Table"></p><ul>
+<li><strong>TP (真正例)</strong>: 真实为正，预测也为正。</li>
+<li><strong>FN (假负例)</strong>: 真实为正，但预测为负（第 I 类错误）。</li>
+<li><strong>FP (假正例)</strong>: 真实为负，但预测为正（第 II 类错误）。</li>
+<li><strong>TN (真负例)</strong>: 真实为负，预测也为负。</li>
+</ul>
+<p>几乎所有后续的分类指标，都是基于这四个基础统计量计算得出的。</p>
+<h3>2. 点值型核心指标 (Threshold-Dependent)</h3>
+<p>这类指标的计算依赖于一个确定的分类阈值（通常默认为 0.5）。</p>
+<p><img src="__TABLE_66c5aab8__" alt="Table"></p><h3>3. 阈值曲线类指标 (Threshold-Independent)</h3>
+<p>这类指标通过改变分类阈值来评估模型在所有可能阈值下的整体性能。</p>
+<p><img src="__TABLE_3c965758__" alt="Table"></p><p><strong>核心建议</strong>：在处理不均衡数据时，<strong>PR 曲线及其 AUPRC</strong> 比 ROC-AUC 更能真实地反映模型的性能，因为 ROC-AUC 在海量负样本（TN）存在时，其值可能虚高，给人以模型性能很好的错觉。</p>
+<h3>4. 概率质量指标</h3>
+<p>这类指标直接评估模型输出概率的质量，而非最终的分类标签。</p>
+<p><img src="__TABLE_-672cbda__" alt="Table"></p><h3>5. 多分类与不均衡的加权方式</h3>
+<p>在多分类任务中，我们需要将每个类别的指标汇集成一个总分。</p>
+<ul>
+<li><strong>Micro 平均 (Micro Average)</strong>：将所有类别的 TP, FP, FN, TN 汇总后，再计算单一指标。它给予每个<strong>样本</strong>相同的权重，适合评估模型的整体性能。</li>
+<li><strong>Macro 平均 (Macro Average)</strong>：先为每个类别计算指标，然后取算术平均。它给予每个<strong>类别</strong>相同的权重，能更好地反映模型在稀有类别上的表现。</li>
+<li><strong>Weighted 平均 (Weighted Average)</strong>：在 Macro 平均的基础上，按每个类别的样本数量进行加权。是前两者的一种折中。</li>
+</ul>
+<p><strong>建议</strong>：先绘制类别分布图。如果数据长尾分布严重，应同时报告 <strong>Macro-F1</strong> 和 <strong>Micro-F1</strong>，以全面了解模型在多数类和少数类上的表现。</p>
+<h3>6. 常见误区与排雷</h3>
+<ol>
+<li><strong>高 Accuracy ≠ 好模型</strong>：在 99:1 的数据上，一个把所有样本都预测为负类的“傻瓜模型”也能达到 99% 的准确率。</li>
+<li><strong>混淆 Precision 和 Recall</strong>：请记住，Recall (召回率) 关心的是 FN (漏报)，而 Precision (精确率) 关心的是 FP (误报)。</li>
+<li><strong>F1 不是万金油</strong>：如果业务场景更在乎召回（如癌症筛查），应使用 F2-Score；如果更在乎精确（如法务文档检索），则使用 F0.5-Score。</li>
+<li><strong>跨数据集比较 AUC</strong>：不同测试集的正负样本比例和难度不同，会导致 ROC/PR 曲线形态变化，因此 AUC 值不应直接跨数据集进行横向比较。</li>
+<li><strong>混淆分类能力与概率校准</strong>：一个模型的 ROC-AUC 可能很高（排序能力强），但其输出的概率可能严重失准。在生产环境中，需要同时关注 LogLoss 或 ECE。</li>
+</ol>
+<h3>7. Python 快速实战模板</h3>
+<p>下面是一个使用 <code>scikit-learn</code> 在一个（不均衡的）多分类数据集上计算多种指标的模板。</p>
+<blockquote><code>import numpy as np</code><br>
+<code>from sklearn.metrics import (accuracy_score, precision_recall_fscore_support,</code><br>
+<code>                             roc_auc_score, average_precision_score,</code><br>
+<code>                             log_loss, brier_score_loss, confusion_matrix, matthews_corrcoef)</code><br>
+<code>from sklearn.datasets import make_classification</code><br>
+<code>from sklearn.model_selection import train_test_split</code><br>
+<code>from sklearn.linear_model import LogisticRegression</code><br>
+<code></code><br>
+<code># ... (41 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/2134e6df8b42e3884684e6e141400da5">GitHub Gist</a></em></p><p><strong>输出示例</strong>:</p>
+<blockquote><code>--- Classification Metrics ---</code><br>
+<code>Accuracy (Weighted) : 0.8944</code><br>
+<code>Precision (Weighted): 0.8861</code><br>
+<code>Recall (Weighted)   : 0.8944</code><br>
+<code>F1-Score (Weighted) : 0.8862</code><br>
+<code>Matthews Corr Coef  : 0.7183</code><br>
+<code></code><br>
+<code>Precision (Macro)   : 0.7989</code><br>
+<code>Recall (Macro)      : 0.7311</code><br>
+<code>F1-Score (Macro)    : 0.7552</code><br>
+<code></code><br>
+<code>LogLoss             : 0.2819</code><br>
+<code>Brier Score (Avg)   : 0.0542</code></blockquote><p>观察到 Macro-F1 (0.755) 明显低于 Weighted-F1 (0.886)，这揭示了模型在稀有类别上的性能较差，这是仅看总体准确率时容易忽略的。</p>
+<h3>8. 选指标的小流程</h3>
+<ol>
+<li><strong>明确业务目标</strong>：定义 FP 和 FN 的业务成本。哪个错误更“贵”？</li>
+<li><strong>选择点值指标</strong>：如果成本已知，可以优化分类阈值并重点关注 Precision, Recall, 或 Fβ-Score。如果未知或同等重要，F1-Score 是一个好的起点。</li>
+<li><strong>评估概率质量</strong>：在模型上线前，务必检查其概率输出是否校准。使用 LogLoss 作为训练损失，并用 ECE 或 Brier Score 进行验证。</li>
+<li><strong>监控整体性能</strong>：在模型迭代或 A/B 测试中，使用 AUPRC (不均衡数据) 或 ROC-AUC (均衡数据) 来评估模型的整体排序能力。</li>
+<li><strong>处理不均衡问题</strong>：如果 Macro-F1 远低于 Micro-F1，分析混淆矩阵，找出模型在哪些小类上表现不佳。考虑使用重采样技术、代价敏感学习或 Focal Loss 等方法来提升模型在少数类上的性能。</li>
+</ol>
+
+</body>
+</html>

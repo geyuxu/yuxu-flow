@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cassandra 数据清理实战 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2022-02-24
+tags: [search]
+legacy: true</h2>
+<h1>Cassandra 数据清理实战</h1>
+<p>针对上述问题，我们设计了一套数据清理方案，主要步骤如下：
+1.	导出全部商品ID：从Cassandra中导出商品数据表的所有商品ID，形成全量ID列表文件。
+2.	获取有效商品ID列表：从业务系统获取当前仍有效（在售/有效）商品的ID列表，作为比对的权威数据源。
+3.	筛选无效商品ID：将全量ID列表与有效ID列表进行比对，找出其中无效的商品ID（即在Cassandra中存在但已失效的ID）。
+4.	批量删除无效数据：通过编写脚本，批量删除Cassandra中这些无效商品ID对应的数据记录。
+5.	验证清理效果：清理完成后，重新检查数据量或抽检特定商品ID，确保无效数据已被删除干净。</p>
+<p>以上流程可以概括为：数据导出 -&gt; 有效ID获取 -&gt; 无效ID筛选 -&gt; 批量删除 -&gt; 结果验证。下面将对各步骤进行具体介绍，并给出相应的操作示例和Python脚本实现。</p>
+<h2>数据导出：导出Cassandra商品ID</h2>
+<p>清理的第一步是获取当前Cassandra中存储的所有商品ID列表。假设商品数据表名为 products，我们只需导出该表的主键ID列即可。</p>
+<p>我们可以使用Cassandra自带的cqlsh提供的COPY命令导出数据。为了应对数千万行的数据量，导出前可以适当提高超时时间。例如，在命令行执行：</p>
+<pre><code class="language-sh"><span class="line">$ cqlsh --request-timeout=600000 &lt;cassandra_host&gt;</span>
+<span class="line">cqlsh&gt; USE product_keyspace;</span>
+<span class="line">cqlsh:product_keyspace&gt; COPY products(id) TO &#39;/tmp/products_ids.csv&#39; WITH HEADER = false;</span></code></pre>
+<p>上述命令将 products 表的id列全部导出到服务器临时目录下的CSV文件中（不包含表头）。由于数据量巨大，实际导出数千万行ID耗时约十余分钟。导出完成后，我们通过scp将文件拷贝到本地处理，例如：</p>
+<pre><code class="language-sh"><span class="line">$ scp user@&lt;cassandra_server&gt;:/tmp/products_ids.csv ./products_ids.csv</span></code></pre>
+<p>这样，我们在本地得到一个包含所有商品ID的文件products_ids.csv.</p>
+<h2>获取有效商品ID列表</h2>
+<p>第二步是获取当前有效商品ID列表，作为判定无效数据的依据。通常，这个列表可以来自于电商业务的商品中心或相关服务。例如，我们可以通过调用公司内部的商品服务接口获取所有在线商品的ID列表。假设有一个内部API可返回JSON格式的商品ID数组，我们使用curl调用并将结果保存到文件：</p>
+<pre><code class="language-sh"><span class="line">$ curl &quot;http://internal.api.company/active_products&quot; -H &quot;Content-Type: application/json&quot; -d &#39;{&quot;pageSize&quot;:10000,&quot;currentPage&quot;:1}&#39; -o active_products.json</span></code></pre>
+<p>接口返回的JSON结果可能需要进行简单处理，例如提取出其中的商品ID字段并保存为文本文件valid_ids.txt，每行一个ID。经过以上处理，我们得到valid_ids.txt，内含当前所有有效商品的ID。</p>
+<h2>筛选无效商品ID</h2>
+<p>有了Cassandra导出的全量ID列表和业务侧提供的有效ID列表，我们就可以对比找出无效的商品ID。无效ID即出现在Cassandra中但不在有效列表中的那些ID。</p>
+<p>我们使用Python脚本进行筛选：先将有效商品ID加载到内存集合，随后逐行扫描全量ID文件，若某ID不在有效集合中，则将其视为无效并输出到待删除列表。示例脚本如下：</p>
+<pre><code class="language-py"><span class="line"># load valid ids into a set for fast lookup</span>
+<span class="line">valid_ids = set()</span>
+<span class="line">with open(&#39;valid_ids.txt&#39;, &#39;r&#39;) as f:</span>
+<span class="line">    for line in f:</span>
+<span class="line">        vid = line.strip()</span>
+<span class="line">        if vid:</span>
+<span class="line">            valid_ids.add(vid)</span>
+<span class="line"></span>
+<span class="line"># iterate over all exported IDs and filter</span>
+<span class="line">count = 0</span>
+<span class="line">with open(&#39;products_ids.csv&#39;, &#39;r&#39;) as f_all, open(&#39;garbage_ids.txt&#39;, &#39;w&#39;) as f_out:</span>
+<span class="line">    for line in f_all:</span>
+<span class="line">        pid = line.strip()</span>
+<span class="line">        if not pid:</span>
+<span class="line">            continue</span>
+<span class="line">        if pid not in valid_ids:</span>
+<span class="line">            f_out.write(pid + &quot;\n&quot;)</span>
+<span class="line">            count += 1</span>
+<span class="line"></span>
+<span class="line">f_out.close()</span>
+<span class="line">print(&quot;无效商品ID数量:&quot;, count)</span></code></pre>
+<p>上述脚本逐行读取products_ids.csv，判断ID是否在valid_ids集合中。如果不在，则将该ID写入输出文件garbage_ids.txt。脚本结束后，garbage_ids.txt即包含所有需要从Cassandra中删除的无效商品ID，每行一个，并打印出无效ID的总数量供参考。</p>
+<p><strong>注：</strong> 在处理如此大文件时，务必采用逐行读取方式以避免内存不足；本例假定有效ID数量相对较小可以放入内存。</p>
+<h2>删除无效数据</h2>
+<p>现在我们已经拿到了需要删除的无效ID列表，下一步就是在Cassandra中批量删除这些数据。我们可以使用Python的Cassandra驱动库来连接数据库并执行删除语句。</p>
+<p>下面提供一个删除脚本的示例。在执行之前，请确保安装了cassandra-driver库，并根据实际环境调整集群地址、密钥空间等参数：</p>
+<pre><code class="language-py"><span class="line">from cassandra.cluster import Cluster</span>
+<span class="line"></span>
+<span class="line"># 连接Cassandra集群</span>
+<span class="line">cluster = Cluster([&#39;&lt;cassandra_host_ip&gt;&#39;], port=9042)</span>
+<span class="line">session = cluster.connect(&#39;product_keyspace&#39;)</span>
+<span class="line"></span>
+<span class="line"># 准备参数化删除语句</span>
+<span class="line">delete_stmt = session.prepare(&quot;DELETE FROM products WHERE id = ?&quot;)</span>
+<span class="line"></span>
+<span class="line"># 逐行读取无效ID文件，执行删除</span>
+<span class="line">count = 0</span>
+<span class="line">with open(&#39;garbage_ids.txt&#39;, &#39;r&#39;) as f:</span>
+<span class="line">    for line in f:</span>
+<span class="line">        pid = line.strip()</span>
+<span class="line">        if not pid:</span>
+<span class="line">            continue</span>
+<span class="line">        session.execute(delete_stmt, [pid])</span>
+<span class="line">        count += 1</span>
+<span class="line"></span>
+<span class="line">print(&quot;删除完成，删除总条数:&quot;, count)</span></code></pre>
+<p>该脚本逐条读取garbage_ids.txt并执行CQL删除语句，将对应ID的记录从products表删除。我们使用了预编译语句prepare来提升执行效率。在实际运行中，删除上百万条数据可能需要较长时间，建议在业务低峰期执行，并耐心等待完成。</p>
+<p><strong>注意：</strong> Cassandra 删除操作不会立即物理移除数据，而是打上“墓碑”标记等待后续压缩清理。一次性大量删除后应关注墓碑堆积对性能的影响，必要时进行压缩和维护。</p>
+<h2>验证清理结果</h2>
+<p>当删除脚本执行完毕后，我们需要验证清理是否成功。可以采用以下两种方式：</p>
+<ul>
+<li>重新导出ID列表比对：重复执行最开始的数据导出步骤，导出清理后的products表ID列表，与清理前的列表比较行数是否减少，减去的数量应当与garbage_ids.txt中记录的无效ID数量一致。我们的实际清理结果显示数据量比清理前减少了约上百万条，验证了删除操作的有效性。</li>
+<li>抽样查询验证：针对garbage_ids.txt中的若干ID，尝试在Cassandra中查询它们对应的数据（例如通过SELECT语句），确认这些ID均已查不到记录。</li>
+</ul>
+<p>通过以上方法确认无误后，本次数据清理工作就算圆满完成。</p>
+<h2>实践总结</h2>
+<p>在本次基于Cassandra的大数据清理实践中，我们积累了一些经验和注意事项：</p>
+<ul>
+<li>充分评估和准备：在清理前，明确无效数据的判定标准，确保获取的有效ID列表准确可靠，避免误删正常数据。大规模操作前做好数据备份或留存关键日志（例如保留待删除ID列表文件）。</li>
+<li>使用批处理和脚本：针对海量数据，手工操作无法完成，借助脚本可以提高效率并降低出错风险。利用Cassandra的COPY导出功能和Python脚本相结合，是处理此类数据清理的有效方式。</li>
+<li>注意性能与影响：导出和删除数千万数据对数据库和系统都会造成压力，应选择业务低峰期进行，并合理设置批次和并发。删除操作产生的大量墓碑可能影响后续读性能，需要监控集群状况，适时进行维护（如压缩等）。</li>
+<li>验证和收尾：清理完成后要及时验证结果，确保目标达成。同时，将清理脚本、过程和结果整理记录，形成文档，以备后续类似操作参考。</li>
+</ul>
+<p>通过上述过程，我们成功清理了Cassandra中大量无效商品数据，为搜索系统“减负”的同时保障了线上数据的准确性。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

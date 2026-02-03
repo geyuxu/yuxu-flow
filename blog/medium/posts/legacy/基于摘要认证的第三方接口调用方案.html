@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基于摘要认证的第三方接口调用方案</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2022-01-05
+tags: [service_governance]
+legacy: true</h2>
+<h1>基于摘要认证的第三方接口调用方案</h1>
+<blockquote><code>{</code><br>
+<code>    &quot;credential&quot;: &quot;key:46d47e6c6d8e0c826e214447f80627b6e527c0bfa52323332adb6479c639b5ee=version:v1&quot;,</code><br>
+<code>    &quot;page_size&quot;: 10,</code><br>
+<code>    &quot;page&quot;: 1</code><br>
+<code>}</code></blockquote><p>上述请求体中的 <code>credential</code> 字段即为摘要凭证，其中 <code>key:...=version:v1</code> 由两部分组成：<code>key</code> 后紧跟的一长串十六进制字符串是通过 SHA-256 算法计算的 client_id 摘要值（即哈希值），<code>version:v1</code> 表示认证方案版本1。<code>key</code>和<code>version</code>之间用等号隔开。服务器端据此可以识别认证版本并采用对应的校验逻辑。</p>
+<ul>
+<li>工作流程概括：<ul>
+<li>注册阶段：服务平台为每个第三方系统分配唯一的 client_id （可看作共享密钥），并在数据库中保存该第三方的身份标识以及其被授权的接口权限列表。</li>
+<li>请求阶段：第三方系统调用任意受保护的API时，在请求数据中加入按照规定算法生成的 <code>credential</code> 字段。</li>
+<li>校验阶段：服务器根据 <code>credential</code> 中标明的版本选择对应的验证算法（如 v1 版本采用 SHA-256 摘要比对）。若提供的摘要与某个已注册 client_id 的摘要匹配，则说明请求者身份有效。</li>
+<li>授权阶段：服务器查验调用方的权限配置。如果身份与权限均满足，则允许执行后续业务逻辑；否则拒绝请求。</li>
+</ul>
+</li>
+</ul>
+<p>通过以上流程，实现了对第三方接口调用的身份验证和权限控制。整个方案设计轻量简洁，只需一次摘要计算和比对即可确认身份，同时支持在数据库中灵活添加新的第三方及其权限配置，具备良好的动态扩展性。</p>
+<h2>认证字段生成方法</h2>
+<blockquote><code>import hashlib</code><br>
+<code></code><br>
+<code>client_id = &quot;alpha_secret&quot;  # 示例客户端密钥</code><br>
+<code>digest = hashlib.sha256(client_id.encode(&#039;utf-8&#039;)).hexdigest()</code><br>
+<code>credential = f&quot;key:{digest}=version:v1&quot;</code><br>
+<code></code><br>
+<code>print(credential)</code></blockquote><h2>服务器端认证与授权流程</h2>
+<blockquote><code>import hashlib</code><br>
+<code></code><br>
+<code>clients_db = {</code><br>
+<code>    &quot;alpha_system&quot;: {</code><br>
+<code>        &quot;secret&quot;: &quot;alpha_secret&quot;,</code><br>
+<code>        &quot;permissions&quot;: [&quot;service:getUserContact&quot;, &quot;data:listRecords&quot;]</code><br>
+<code>    }</code><br>
+<code>}</code><br>
+<code># ... (19 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/8eafb60ee63aa96521544bdc5e1bc60b">GitHub Gist</a></em></p><h2>安全性分析</h2>
+<ul>
+<li><p>优点  </p>
+<ul>
+<li>摘要算法不可逆，隐藏调用方标识  </li>
+<li>实现简单，性能开销低  </li>
+<li>版本号可扩展</li>
+</ul>
+</li>
+<li><p>风险  </p>
+<ul>
+<li>容易遭受重放攻击  </li>
+<li>不涵盖请求完整性  </li>
+<li>密钥弱或泄露风险</li>
+</ul>
+</li>
+</ul>
+<h2>后续改进</h2>
+<ul>
+<li>引入时间戳 / nonce 防重放  </li>
+<li>采用 HMAC 或签名算法覆盖请求关键字段  </li>
+<li>引入 RBAC / ABAC 提升权限管理  </li>
+<li>区分公开ID与私密密钥  </li>
+<li>定期轮换密钥并全程使用 TLS</li>
+</ul>
+<h2>总结</h2>
+<p>该摘要认证方案以最小代价满足了基础身份验证和授权需求，适用于对性能和集成成本敏感、受信环境相对可控的接口调用场景。如需更高安全性，可按需引入时间戳、HMAC、签名以及细粒度权限模型等防护措施。</p>
+
+</body>
+</html>

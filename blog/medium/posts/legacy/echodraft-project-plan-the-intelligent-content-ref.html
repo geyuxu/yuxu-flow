@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoDraft Project Plan: The Intelligent Content Refiner for Audio and Video</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2025-07-25
+tags: [general_notes]
+legacy: true</h2>
+<h1>EchoDraft Project Plan: The Intelligent Content Refiner for Audio and Video</h1>
+<p>The EchoDraft project was thus conceived to address these pain points through automation and intelligent methods. Our goal is to build an end-to-end CLI tool that automates the entire process of handling audio and video content—from downloading, processing, and transcribing to finally generating structured articles. This significantly lowers the barrier and cost of content processing and enhances information retrieval efficiency.</p>
+<h2>Technical Architecture Design: Modularity and Efficient Collaboration</h2>
+<p>EchoDraft adopts a modular design, ensuring the independence, maintainability, and extensibility of its functional components. The entire processing workflow is meticulously divided into several core stages, unifiedly orchestrated via the command-line interface provided by the Typer framework.</p>
+<p>Its core architecture can be summarized by the following workflow:</p>
+<blockquote><code>User Input (CLI)</code><br>
+<code>    ↓</code><br>
+<code>Audio/Video Download (Downloader)</code><br>
+<code>    ↓</code><br>
+<code>Audio Pre-processing (Audio Processor)</code><br>
+<code>    ↓</code><br>
+<code>Speech-to-Text (Transcriber)</code><br>
+<code>    ↓</code><br>
+<code>Intelligent Content Analysis &amp; Generation (Analyzer)</code><br>
+<code>    ↓</code><br>
+<code>Structured Article Output</code></blockquote><p>This pipeline-oriented design allows each module to focus on its core task, with data seamlessly passed through clear interfaces, ensuring the stability and efficiency of the entire system.</p>
+<h2>Core Functional Modules Introduction</h2>
+<h3>1. Audio/Video Download Module (<code>modules/downloader.py</code>)</h3>
+<ul>
+<li><strong>Core Technology</strong>: <code>yt-dlp</code></li>
+<li><strong>Functionality</strong>: Serving as the data entry point for the project, this module leverages the powerful <code>yt-dlp</code> library to support content downloads from mainstream audio/video platforms like YouTube and Bilibili. <code>yt-dlp</code>, with its robust compatibility and continuous updates, can handle various complex download scenarios, ensuring reliable acquisition of raw data.</li>
+</ul>
+<h3>2. Audio Processing Module (<code>modules/audio_processor.py</code>)</h3>
+<ul>
+<li><strong>Core Technology</strong>: <code>pydub</code></li>
+<li><strong>Functionality</strong>: This is a critical step in EchoDraft for reducing transcription costs. We utilize <code>pydub</code> to pre-process downloaded audio, primarily involving:<ul>
+<li><strong>Audio Acceleration</strong>: Speeding up the audio without significantly compromising sound quality or intelligibility. This effectively shortens the audio duration, thereby substantially reducing the cost of duration-based transcription services (e.g., certain cloud-based Whisper APIs).</li>
+<li><strong>Format Conversion and Standardization</strong>: Ensuring the audio format meets the requirements of subsequent transcription modules.</li>
+</ul>
+</li>
+<li><strong>Value</strong>: Through intelligent audio acceleration, we can maximize cost-effectiveness while maintaining transcription quality.</li>
+</ul>
+<h3>3. Speech-to-Text Module (<code>modules/transcriber.py</code>)</h3>
+<ul>
+<li><strong>Core Technology</strong>: <code>faster-whisper</code></li>
+<li><strong>Functionality</strong>: This module is responsible for converting pre-processed audio into high-quality text. We chose <code>faster-whisper</code>, an optimized version of the OpenAI Whisper model, which offers the following advantages:<ul>
+<li><strong>High Performance</strong>: Under identical hardware conditions, <code>faster-whisper</code> provides significantly faster inference speeds than the original Whisper.</li>
+<li><strong>Local Deployment</strong>: Supports running on local GPUs or CPUs, mitigating data privacy risks and reducing reliance on external APIs.</li>
+<li><strong>High Accuracy</strong>: Inherits the Whisper model&#39;s excellent transcription capabilities across multiple languages and complex audio environments.</li>
+</ul>
+</li>
+<li><strong>Value</strong>: Provides a fast, accurate, and cost-effective local transcription service, laying a solid foundation for subsequent intelligent analysis.</li>
+</ul>
+<h3>4. Intelligent Content Analysis Module (<code>modules/analyzer.py</code>)</h3>
+<ul>
+<li><strong>Core Technology</strong>: Large Language Model (LLM) API</li>
+<li><strong>Functionality</strong>: This is the &quot;brain&quot; of EchoDraft, responsible for extracting knowledge from transcribed text and generating structured content. By calling LLM APIs, this module achieves the following functionalities:<ul>
+<li><strong>Outline Generation</strong>: Automatically identifies themes and key points in the text to generate clear chapter outlines.</li>
+<li><strong>Article Generation</strong>: Based on the outline and original text content, generates coherent and logical structured articles, which can be summaries, reports, or in-depth analysis.</li>
+<li><strong>Information Extraction</strong>: Future extensions could include keyword extraction, entity recognition, sentiment analysis, and more.</li>
+</ul>
+</li>
+<li><strong>Value</strong>: Transforms large volumes of unstructured audio data into easily readable and understandable structured text, significantly enhancing content usability.</li>
+</ul>
+<h2>Implementation Progress and Milestones</h2>
+<p>Currently, the EchoDraft project has completed the core architecture setup and has initially integrated all key technology modules.</p>
+<ul>
+<li><strong>Milestone 1 (Completed)</strong>: CLI entry point (<code>main.py</code>), audio/video download (<code>downloader.py</code>), audio processing (<code>audio_processor.py</code>), and speech-to-text (<code>transcriber.py</code>) modules&#39; basic functionality integration and end-to-end workflow validation.</li>
+<li><strong>Milestone 2 (In Progress)</strong>: Intelligent content analysis module (<code>analyzer.py</code>) LLM API integration, implementing basic outline generation and article draft functionality.</li>
+<li><strong>Milestone 3 (Upcoming)</strong>: Optimizing LLM output quality, introducing more refined Prompt Engineering techniques to enhance the structural degree, logic, and readability of generated articles.</li>
+<li><strong>Milestone 4 (Future)</strong>: Improving CLI user experience, adding error handling, progress display, configuration management functions, and conducting comprehensive testing.</li>
+</ul>
+<h2>Technical Challenges and Solutions</h2>
+<p>During the development of EchoDraft, we have encountered and are working to resolve the following technical challenges:</p>
+<h3>1. Audio/Video Compatibility and Stability</h3>
+<ul>
+<li><strong>Challenge</strong>: Although <code>yt-dlp</code> is powerful, platform updates may lead to download failures; encoding and format differences between different audio/video content also increase processing difficulty.</li>
+<li><strong>Solution</strong>: Continuously monitor <code>yt-dlp</code> updates and upgrade promptly; add more robust format detection and conversion logic in <code>audio_processor</code> to ensure compatibility.</li>
+</ul>
+<h3>2. Audio Acceleration Quality Balance</h3>
+<ul>
+<li><strong>Challenge</strong>: Excessive acceleration may lead to degraded audio quality or reduced transcription accuracy.</li>
+<li><strong>Solution</strong>: Determine optimal acceleration multipliers through experimentation, balancing cost and quality; consider introducing intelligent algorithms to dynamically adjust acceleration strategies based on audio characteristics; explore combining silent segment removal and other technologies for further optimization in the future.</li>
+</ul>
+<h3>3. <code>faster-whisper</code> Performance and Accuracy Tuning</h3>
+<ul>
+<li><strong>Challenge</strong>: Selecting appropriate model sizes (Tiny, Base, Small, Medium, Large) to balance local resource consumption and transcription quality; handling complex scenarios like accents and background noise.</li>
+<li><strong>Solution</strong>: Provide flexible model selection configuration; test and tune for specific scenarios; consider introducing VAD (Voice Activity Detection) preprocessing in the future to improve transcription effectiveness in complex environments.</li>
+</ul>
+<h3>4. LLM Content Quality Control and Cost Optimization</h3>
+<ul>
+<li><strong>Challenge</strong>: LLMs may produce &quot;hallucinations,&quot; logical inconsistencies, or redundant content; API call costs need to be controlled.</li>
+<li><strong>Solutions</strong>:<ul>
+<li><strong>Prompt Engineering</strong>: Invest significant effort in designing and optimizing prompts, clearly specifying output structure, style, and content limitations to guide LLM generation of high-quality, expected articles.</li>
+<li><strong>Segmented Processing and Iterative Generation</strong>: For long texts, consider segmented input to LLM for processing, then integrate and refine.</li>
+<li><strong>Cost Control</strong>: Optimize input token quantity, such as preliminary summarization of transcribed text before sending to LLM, or reduce repetitive calls through caching mechanisms.</li>
+</ul>
+</li>
+</ul>
+<h2>Future Development Plans</h2>
+<p>EchoDraft&#39;s future is full of unlimited possibilities, and we plan to iterate and expand around the following directions:</p>
+<ol>
+<li><strong>Richer Input Source Support</strong>: Beyond online platforms, add direct integration with local audio/video files, live streams, and even meeting recording tools.</li>
+<li><strong>Advanced Audio Processing Functions</strong>: Introduce noise reduction, voice separation, multi-speaker identification (Speaker Diarization) and other functions to further improve transcription and analysis accuracy.</li>
+<li><strong>LLM Enhancement Functions</strong>:<ul>
+<li><strong>Multi-dimensional Content Analysis</strong>: Such as sentiment analysis, keyword clouds, entity relationship graphs, etc.</li>
+<li><strong>Interactive Q&amp;A</strong>: Allow users to directly ask questions about audio/video content, with LLM providing precise answers.</li>
+<li><strong>Multi-language Support and Translation</strong>: Achieve cross-language transcription and content generation.</li>
+</ul>
+</li>
+<li><strong>User Experience Optimization</strong>:<ul>
+<li>Develop more user-friendly graphical user interfaces (GUI) or web interfaces to lower the entry barrier for non-technical users.</li>
+<li>Provide more detailed progress feedback and visualization reports.</li>
+</ul>
+</li>
+<li><strong>Plugin-based and Ecosystem Building</strong>: Design open plugin interfaces, allowing community contributors to develop new downloader, processor, or analyzer modules.</li>
+<li><strong>Performance and Deployment Optimization</strong>: Explore using Docker and other container technologies to simplify deployment; optimize parallel processing capabilities to further reduce processing time.</li>
+</ol>
+<h2>Conclusion</h2>
+<p>EchoDraft is committed to becoming your powerful assistant for processing audio and video content, transforming tedious manual labor into intelligent insights. We believe that through continuous iteration and community feedback, EchoDraft will continue to grow and bring value to more users.</p>
+<p>The project is currently in active development stage. We welcome developers interested in audio/video processing and content generation to follow our progress and look forward to your valuable suggestions and contributions!</p>
+
+</body>
+</html>

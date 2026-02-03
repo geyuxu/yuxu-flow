@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro-News-Bot: Building an AI-Driven Automated News Aggregation and Publishing System</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai]
+legacy: true</h2>
+<h1>Astro-News-Bot: Building an AI-Driven Automated News Aggregation and Publishing System</h1>
+<p>During the initial architecture design, I followed several core principles:</p>
+<ol>
+<li><strong>Modularity</strong>: Each function (crawling, deduplication, AI processing, publishing) should be an independent module, easy to maintain and replace</li>
+<li><strong>Automation</strong>: The entire process requires no manual intervention, achieving &quot;set once, run forever&quot;</li>
+<li><strong>Idempotency</strong>: Repeated task execution produces no side effects</li>
+<li><strong>Scalability</strong>: Easy to add new news sources or processing steps</li>
+</ol>
+<h3>Technical Architecture</h3>
+<p>Based on these principles, I designed a linear data processing pipeline:</p>
+<p><code>RSS Sources → Fetcher → Vector Dedup → AI Summary → Markdown Generation → Git Publishing → Blog Deployment</code></p><p>Core module structure:</p>
+<blockquote><code>astro-news-bot/</code><br>
+<code>├── news_bot/</code><br>
+<code>│   ├── fetcher.py      # News fetching</code><br>
+<code>│   ├── dedup.py        # Vector deduplication</code><br>
+<code>│   ├── summarizer.py   # AI summarization</code><br>
+<code>│   ├── writer.py       # Markdown generation</code><br>
+<code>│   ├── selector.py     # News filtering</code><br>
+<code>│   ├── publisher.py    # Git publishing</code><br>
+<code>│   └── job.py          # Workflow orchestration</code><br>
+<code>├── config.json         # Configuration file</code><br>
+<code>├── requirements.txt    # Dependencies</code><br>
+<code>└── run_daily_news.sh  # Execution script</code></blockquote><h3>Data Flow Design</h3>
+<ol>
+<li><strong>News Fetching</strong> → Multi-source crawling → <code>raw_{date}.json</code></li>
+<li><strong>Vector Deduplication</strong> → Semantic similarity filtering → <code>dedup_{date}.json</code>  </li>
+<li><strong>AI Summarization</strong> → GPT-4o generates Chinese summaries → <code>summary_{date}.json</code></li>
+<li><strong>Markdown Generation</strong> → Organized by category → <code>news_{date}.md</code></li>
+<li><strong>Git Publishing</strong> → Push to blog repository → Trigger automatic deployment</li>
+</ol>
+<h2>Core Technical Implementation</h2>
+<h3>1. Vector Deduplication: Beyond Simple Title Matching</h3>
+<p>In the early stages, I used article titles or URLs for deduplication, but quickly discovered issues:</p>
+<ul>
+<li>Different news sources use different titles for the same event</li>
+<li>URLs may differ due to tracking parameters</li>
+</ul>
+<p>The solution is <strong>semantic-based vector deduplication</strong>:</p>
+<blockquote><code># dedup.py core implementation</code><br>
+<code>from sentence_transformers import SentenceTransformer</code><br>
+<code>import numpy as np</code><br>
+<code>from sklearn.metrics.pairwise import cosine_similarity</code><br>
+<code></code><br>
+<code>class NewsDeduplicator:</code><br>
+<code>    def __init__(self, similarity_threshold=0.85):</code><br>
+<code>        self.model = SentenceTransformer(&#039;all-MiniLM-L6-v2&#039;)</code><br>
+<code># ... (27 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/8919ee41d848512744ce0bffcab33492">GitHub Gist</a></em></p><p>This method effectively identifies articles that &quot;say the same thing in different ways,&quot; far more accurate than keyword matching.</p>
+<h3>2. AI Summarization and Classification: The Art of Prompt Engineering</h3>
+<p>The quality of AI summarization and classification directly determines the final output value. The key isn&#39;t which LLM to choose, but how to design <strong>Prompts</strong>:</p>
+<blockquote><code># summarizer.py core Prompt</code><br>
+<code>SUMMARY_PROMPT = &quot;&quot;&quot;</code><br>
+<code>You are a professional tech news editor specializing in organizing news summaries for developers.</code><br>
+<code></code><br>
+<code>Please generate for the following news:</code><br>
+<code>1. A Chinese summary of no more than 100 words, summarizing core information</code><br>
+<code>2. Select the most appropriate category from: Artificial Intelligence, Mobile Technology, Autonomous Driving, Cloud Computing, Chip Technology, Venture Capital, Cybersecurity, Blockchain, Scientific Research, Other Tech</code><br>
+<code></code><br>
+<code># ... (28 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/5961776bfd71b2052929f4ef150855a5">GitHub Gist</a></em></p><p>Through clear roles, detailed instructions, and output format requirements, we achieve stable, high-quality AI output.</p>
+<h3>3. GitOps Publishing: Reliable Automated Deployment</h3>
+<p>Why choose Git instead of API operations on the blog backend?</p>
+<ul>
+<li><strong>Atomicity and Traceability</strong>: Every content update is a Git commit, providing clear change records</li>
+<li><strong>Decoupling and Security</strong>: The bot only needs Git repository write permissions, no need to expose blog backend credentials</li>
+<li><strong>Leverage Existing CI/CD</strong>: Reuse Git-triggered CI/CD from platforms like Vercel/Netlify</li>
+</ul>
+<blockquote><code># publisher.py core implementation</code><br>
+<code>import subprocess</code><br>
+<code>import os</code><br>
+<code></code><br>
+<code>class NewsPublisher:</code><br>
+<code>    def __init__(self, blog_repo_path):</code><br>
+<code>        self.repo_path = blog_repo_path</code><br>
+<code>        </code><br>
+<code># ... (26 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/53273e15eb405d60e923c73759f75c50">GitHub Gist</a></em></p><h2>Astro Blog Integration Modifications</h2>
+<p>To achieve seamless integration between <code>astro-news-bot</code> and the Astro blog, minimal but crucial modifications to the blog project are needed:</p>
+<h3>1. Define News Content Collection</h3>
+<blockquote><code>// src/content/config.ts</code><br>
+<code>import { defineCollection, z } from &#039;astro:content&#039;;</code><br>
+<code>import { glob } from &#039;astro/loaders&#039;;</code><br>
+<code></code><br>
+<code>const news = defineCollection({</code><br>
+<code>  loader: glob({ base: &#039;./src/content/news&#039;, pattern: &#039;**/*.md&#039; }),</code><br>
+<code>  schema: z.object({</code><br>
+<code>    title: z.string(),</code><br>
+<code># ... (12 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/71146740d070c14f7564fad220f6c9ef">GitHub Gist</a></em></p><h3>2. Create LatestNews Component</h3>
+<blockquote><code>---</code><br>
+<code>// src/components/LatestNews.astro</code><br>
+<code>import { getCollection } from &#039;astro:content&#039;;</code><br>
+<code></code><br>
+<code>const newsEntries = await getCollection(&#039;news&#039;);</code><br>
+<code></code><br>
+<code>let latestNews = null;</code><br>
+<code>if (newsEntries &amp;&amp; newsEntries.length &gt; 0) {</code><br>
+<code># ... (49 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/2dd78cdb2d2f6f8db273a8d59ccfad6d">GitHub Gist</a></em></p><h3>3. Fix Dynamic Route Rendering</h3>
+<p>Due to structural changes in entry objects with glob loader in Astro 5.x, adaptation is needed:</p>
+<blockquote><code>---</code><br>
+<code>// src/pages/news/[date].astro</code><br>
+<code>import { getCollection, getEntry } from &#039;astro:content&#039;;</code><br>
+<code></code><br>
+<code>export async function getStaticPaths() {</code><br>
+<code>  const newsEntries = await getCollection(&#039;news&#039;);</code><br>
+<code>  </code><br>
+<code>  return newsEntries</code><br>
+<code># ... (29 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/ddee2112c3f5c7e000b9e1ef678dad4d">GitHub Gist</a></em></p><p>Key modification points:</p>
+<ul>
+<li>Use <code>entry.id</code> instead of <code>entry.slug</code> (slug is undefined in glob loader)</li>
+<li>Use <code>post.rendered.html</code> to get pre-rendered content</li>
+<li>Get complete entry object via <code>getEntry</code> during page rendering</li>
+</ul>
+<h2>Diverse Execution Methods</h2>
+<p>To adapt to different deployment environments, I designed multiple execution methods:</p>
+<h3>1. Direct Execution (Development &amp; Debugging)</h3>
+<blockquote><code># Complete workflow</code><br>
+<code>python -m news_bot.job --date $(date +%Y-%m-%d)</code><br>
+<code></code><br>
+<code># Dry run mode (skip publishing)</code><br>
+<code>python -m news_bot.job --date 2025-07-25 --dry-run</code></blockquote><h3>2. Shell Script Execution</h3>
+<blockquote><code>#!/bin/bash</code><br>
+<code># run_daily_news.sh</code><br>
+<code></code><br>
+<code>cd &quot;$(dirname &quot;$0&quot;)&quot;</code><br>
+<code>source .env</code><br>
+<code></code><br>
+<code># Create log directory</code><br>
+<code>mkdir -p ~/logs</code><br>
+<code># ... (8 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/8052c09d387a40f62a3aa0c66188bbf3">GitHub Gist</a></em></p><h3>3. Daemon Mode (Recommended)</h3>
+<blockquote><code># Start daemon (complete background execution)</code><br>
+<code>./start_daemon.sh start</code><br>
+<code></code><br>
+<code># Check running status  </code><br>
+<code>./start_daemon.sh status</code><br>
+<code></code><br>
+<code># View logs</code><br>
+<code>./start_daemon.sh logs</code><br>
+<code></code><br>
+<code># Graceful stop</code><br>
+<code>./stop_daemon.sh</code></blockquote><h3>4. Cron Scheduled Tasks</h3>
+<blockquote><code># Edit crontab</code><br>
+<code>crontab -e</code><br>
+<code></code><br>
+<code># Execute daily at 8:05</code><br>
+<code>5 8 * * * /Users/geyuxu/repo/astro-news-bot/run_daily_news.sh</code></blockquote><h2>Operations Experience and Best Practices</h2>
+<h3>Configuration Management</h3>
+<blockquote><code>{</code><br>
+<code>  &quot;output_config&quot;: {</code><br>
+<code>    &quot;blog_content_dir&quot;: &quot;/Users/geyuxu/repo/blog/geyuxu.com/src/content/news&quot;,</code><br>
+<code>    &quot;filename_format&quot;: &quot;news_{date}.md&quot;,</code><br>
+<code>    &quot;use_blog_dir&quot;: true</code><br>
+<code>  },</code><br>
+<code>  &quot;git_config&quot;: {</code><br>
+<code>    &quot;target_branch&quot;: &quot;gh-pages&quot;,</code><br>
+<code># ... (19 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/9926fae5354699a4a03b3b7be7daeddc">GitHub Gist</a></em></p><h3>Cost Control</h3>
+<ul>
+<li>Daily processing: ~6 articles</li>
+<li>Estimated token consumption: ~4000 tokens/day</li>
+<li>OpenAI cost: ~$0.01-0.05/day</li>
+</ul>
+<h3>Log Management</h3>
+<blockquote><code># View real-time logs</code><br>
+<code>tail -f logs/daemon.log</code><br>
+<code></code><br>
+<code># View scheduler logs</code><br>
+<code>tail -f logs/scheduler.log</code><br>
+<code></code><br>
+<code># View today&#039;s execution records</code><br>
+<code>grep &quot;$(date +%Y-%m-%d)&quot; ~/logs/news_bot.log</code></blockquote><h2>Project Value and Results</h2>
+<h3>Test Validation Results</h3>
+<p>Latest test (2025-07-26):</p>
+<ul>
+<li>✅ <strong>Fetcher</strong>: Retrieved 31 tech news articles (RSS sources)</li>
+<li>✅ <strong>Deduplicator</strong>: Vector deduplication, retained 31 unique articles</li>
+<li>✅ <strong>Summarizer</strong>: AI summary generation, used 10,681 tokens</li>
+<li>✅ <strong>Writer</strong>: Generated 188-line Markdown with 7 tech categories</li>
+<li>✅ <strong>Publisher</strong>: Successfully committed and pushed to blog repository</li>
+</ul>
+<h3>News Classification System</h3>
+<p>The system automatically categorizes news into 9 tech domains:</p>
+<ul>
+<li>🤖 Artificial Intelligence</li>
+<li>📱 Mobile Technology  </li>
+<li>🚗 Autonomous Driving</li>
+<li>☁️ Cloud Computing</li>
+<li>💾 Chip Technology</li>
+<li>💰 Venture Capital</li>
+<li>🔒 Cybersecurity</li>
+<li>⛓️ Blockchain</li>
+<li>🔬 Scientific Research</li>
+</ul>
+<h3>Output Format Example</h3>
+<blockquote><code>---</code><br>
+<code>title: Daily News Digest · 2025-07-26</code><br>
+<code>pubDate: &#039;2025-07-26&#039;</code><br>
+<code>description: In 2025, the US semiconductor market experienced significant changes...</code><br>
+<code>tags: [News, Daily, Chip Technology, Autonomous Driving, Mobile Technology]</code><br>
+<code>layout: news</code><br>
+<code>---</code><br>
+<code></code><br>
+<code># ... (13 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/e289aace27770bfe2b130ac8843952ef">GitHub Gist</a></em></p><h2>Future Plans</h2>
+<ol>
+<li><strong>Smarter Source Discovery</strong>: Enable the bot to automatically discover and recommend new high-quality news sources</li>
+<li><strong>Trend Analysis &amp; Topic Aggregation</strong>: Identify hot topics within specific time periods and aggregate related articles</li>
+<li><strong>User Feedback Loop</strong>: Collect user feedback data for fine-tuning AI models</li>
+<li><strong>Open Source Plan</strong>: Clean up code and open source to help others build their own AI news bots</li>
+</ol>
+<h2>Conclusion</h2>
+<p><code>astro-news-bot</code> is a typical &quot;use technology to solve your own problems&quot; project. It organically combines AI, automation scripts, modern web development frameworks (Astro), and DevOps principles (GitOps) to build an elegant automated system.</p>
+<p>This project not only solves my information overload problem but also serves as an excellent testbed for practicing LLM applications, vector databases, GitOps, and other emerging technologies. If you want to build a similar system, I hope this article provides some inspiration and reference.</p>
+<p>Key Tech Stack:</p>
+<ul>
+<li><strong>Backend</strong>: Python + OpenAI API + SentenceTransformers</li>
+<li><strong>Frontend</strong>: Astro + TypeScript + Content Collections</li>
+<li><strong>Deployment</strong>: GitOps + Shell Scripts + Cron Jobs</li>
+<li><strong>Data</strong>: JSON + Markdown + Git</li>
+</ul>
+<p>The entire system embodies modern AI application development best practices: modular design, vectorized processing, automated deployment, and continuous operations.</p>
+
+</body>
+</html>

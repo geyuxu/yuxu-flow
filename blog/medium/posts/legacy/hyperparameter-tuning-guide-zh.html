@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器学习超参数调优：从理论到实践的全面指南</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, machine learning, hyperparameter tuning, python, pytorch, optuna, scikit-learn]
+legacy: true</h2>
+<h1>机器学习超参数调优：从理论到实践的全面指南</h1>
+<h2>2. 调优手段综述与代码实践</h2>
+<p>选择合适的调优策略是平衡探索（覆盖更广的搜索空间）和利用（在有希望的区域进行更精细的搜索）的艺术。下面我们逐一深挖各种主流方法，并提供可直接运行的代码骨架。</p>
+<h3>2.1 网格搜索 (Grid Search)</h3>
+<p><strong>核心思路</strong>：对所有提供的超参数组合进行暴力枚举（笛卡尔积），是维度少时最稳妥的方法。</p>
+<blockquote><code># pip install scikit-learn</code><br>
+<code>from sklearn.model_selection import GridSearchCV</code><br>
+<code>from sklearn.svm import SVC</code><br>
+<code></code><br>
+<code># 假设 X_train, y_train 已加载</code><br>
+<code># from sklearn.datasets import make_classification</code><br>
+<code># X_train, y_train = make_classification(n_samples=1000, n_features=20, n_informative=10, random_state=42)</code><br>
+<code></code><br>
+<code># ... (15 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/7208739753fa48c8b363762a70419212">GitHub Gist</a></em></p><p><strong>技巧</strong>：先用粗粒度网格扫描一个较大的范围，锁定表现最好的区域后，再构建一个更精细的局部网格进行搜索。</p>
+<h3>2.2 随机搜索 (Random Search)</h3>
+<p><strong>核心思路</strong>：与网格搜索不同，随机搜索在指定的分布中随机采样固定数量的参数组合。当超参数数量较多时，它通常比网格搜索更高效。</p>
+<blockquote><code># pip install scikit-learn scipy</code><br>
+<code>from sklearn.model_selection import RandomizedSearchCV</code><br>
+<code>from sklearn.ensemble import GradientBoostingClassifier</code><br>
+<code>from scipy.stats import loguniform, randint</code><br>
+<code></code><br>
+<code># 假设 X_train, y_train 已加载</code><br>
+<code>param_dist = {</code><br>
+<code>    &quot;learning_rate&quot;: loguniform(1e-4, 1e-1),</code><br>
+<code># ... (14 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/c20e9b66b0c9d6edbc82cb9124e5ac56">GitHub Gist</a></em></p><p><strong>思考点</strong>：对于学习率、正则化强度这类对数量级敏感的超参数，使用对数均匀分布（<code>loguniform</code>）进行采样会比线性均匀分布更有效。</p>
+<h3>2.3 贝叶斯优化 (Bayesian Optimization)</h3>
+<p><strong>核心思路</strong>：这是一种更智能的搜索策略。它使用一个概率模型（代理模型）来建模“超参数-性能”函数，并利用历史评估结果来选择下一个最有希望的评估点。这使得它能用更少的迭代次数逼近最优解。<code>Optuna</code> 是一个流行的实现库。</p>
+<blockquote><code># pip install optuna torch torchvision</code><br>
+<code>import torch</code><br>
+<code>import torch.nn as nn</code><br>
+<code>import optuna</code><br>
+<code>from torchvision.datasets import MNIST</code><br>
+<code>from torch.utils.data import DataLoader</code><br>
+<code>from torchvision import transforms</code><br>
+<code></code><br>
+<code># ... (50 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/32f71ca893e4a521730400cb8f09c82c">GitHub Gist</a></em></p><p><strong>加强版</strong>：可以结合 <code>optuna.pruners</code> 来提前终止没有希望的试验（trial），从而显著节省计算资源。</p>
+<h3>2.4 基于提前终止的算法 (Successive Halving / Hyperband)</h3>
+<p><strong>核心思路</strong>：这些算法旨在通过动态资源分配来加速搜索。它们首先为许多配置分配少量资源（如训练几个 epoch），然后根据初始表现淘汰掉表现差的配置，只为“幸存者”分配更多资源。</p>
+<blockquote><code># pip install scikit-learn</code><br>
+<code>from sklearn.experimental import enable_halving_search_cv</code><br>
+<code>from sklearn.model_selection import HalvingGridSearchCV</code><br>
+<code>from sklearn.ensemble import RandomForestClassifier</code><br>
+<code></code><br>
+<code># 假设 X_train, y_train 已加载</code><br>
+<code>param_grid = {&quot;max_depth&quot;: [5, 10, 15, None],</code><br>
+<code>              &quot;min_samples_leaf&quot;: [1, 2, 4]}</code><br>
+<code># ... (11 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/fccacce8cfe268bb7014d501fd32e045">GitHub Gist</a></em></p><p>对于深度学习，<code>KerasTuner</code> 的 <code>Hyperband</code> 或 <code>Optuna</code> 的 <code>SuccessiveHalvingPruner</code> 是更自然的选择，它们可以将 <code>epoch</code> 作为资源维度。</p>
+<h3>2.5 进化策略 (Population-Based Training, PBT)</h3>
+<p><strong>核心思路</strong>：这是一种更高级的混合策略，常见于大规模分布式训练。它并行训练一组模型（一个“种群”），并周期性地用表现好的模型的权重来替换表现差的模型，同时对超参数进行轻微的随机扰动（“变异”）。</p>
+<blockquote><code># pip install &quot;ray[tune]&quot; torch</code><br>
+<code>from ray import tune</code><br>
+<code>from ray.tune.schedulers import PopulationBasedTraining</code><br>
+<code></code><br>
+<code>def train_model(config):</code><br>
+<code>    # 此处省略模型、数据加载和训练循环的定义</code><br>
+<code>    # 训练循环中需要通过 tune.report() 报告验证集指标</code><br>
+<code>    # e.g., tune.report(mean_accuracy=acc)</code><br>
+<code># ... (21 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/f408a9d5e48d2618ae292e00fdc25b32">GitHub Gist</a></em></p><p>PBT 的强大之处在于它不仅能优化超参数，还能在线学习到有效的学习率调度策略。</p>
+<h2>3. 常见超参数及其影响</h2>
+<p>理解不同超参数如何影响模型行为是做出明智调整决策的关键。</p>
+<p><img src="__TABLE_21c6563e__" alt="Table"></p><h2>4. 实用调参技巧</h2>
+<ol>
+<li><strong>确定大方向</strong>：数据量充足？优先增加模型容量。数据量有限？优先调整正则化或应用数据增强。</li>
+<li><strong>分组调参</strong>：不要一次性调整所有参数。可以先调整优化相关参数（如学习率、批大小），再调整模型结构参数，最后调整正则化参数。</li>
+<li><strong>使用对数尺度</strong>：对于学习率和正则化强度等超参数，在对数尺度上（如 <code>1e-5</code> 到 <code>1e-1</code>）进行搜索远比线性尺度高效。</li>
+<li><strong>可视化与早停</strong>：使用 TensorBoard 或 WandB 等工具监控训练/验证曲线。一旦发现验证损失停止下降或开始上升，就应考虑提前终止训练或增强正则化。</li>
+<li><strong>借鉴已有成果</strong>：从相关论文或开源代码库的默认配置开始，这通常是一个很好的基线。先在相同数量级内进行微调。</li>
+<li><strong>资源优先</strong>：首先确定硬件（尤其是显存）能承受的最大批大小和模型尺寸，然后再在这个约束下精调其他参数。</li>
+</ol>
+<h2>5. 总结与决策树</h2>
+<p>如何选择合适的调优方法？</p>
+<ol>
+<li><strong>维度 ≤ 3，数据量小，CPU训练？</strong> → 直接用 <code>GridSearchCV</code>。</li>
+<li><strong>想快速得到一个80分的结果？</strong> → <code>RandomizedSearchCV</code> 结合对数分布采样是你的朋友。</li>
+<li><strong>使用GPU训练，计算预算有限？</strong> → <code>Optuna</code> (TPE) 结合剪枝 (<code>Pruner</code>) 或 <code>Hyperband</code> 是最高效的选择。</li>
+<li><strong>拥有大规模分布式集群？</strong> → <code>Ray Tune</code> 的 PBT 能发挥最大威力。</li>
+<li><strong>进行学术研究或需要极致精调？</strong> → 可以探索梯度式超参优化，但要准备好应对其复杂性。</li>
+</ol>
+<p>通过将这些理论知识和代码实践相结合，你将能够更系统、更高效地进行超参数调优，从而显著提升你的模型性能。</p>
+
+</body>
+</html>

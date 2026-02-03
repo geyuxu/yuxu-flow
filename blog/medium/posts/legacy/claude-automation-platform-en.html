@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Research on Using Claude for Automated Updates to Notion, Obsidian, and Heptabase</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2025-01-24
+tags: [ai]
+legacy: true</h2>
+<h1>Technical Research on Using Claude for Automated Updates to Notion, Obsidian, and Heptabase</h1>
+<ul>
+<li><code>POST https://api.notion.com/v1/pages</code> - Create new page entries in specified databases</li>
+<li><code>PATCH https://api.notion.com/v1/blocks/{block_id}/children</code> - Append content blocks to existing pages</li>
+</ul>
+<p>Before use, you must create an &quot;Integration,&quot; obtain an OAuth Token or internal integration secret, and connect it to target pages/databases with content insertion permissions. Otherwise, write requests will return HTTP 403 errors.</p>
+<h3>Markdown Content Writing Solutions</h3>
+<p>The Notion API accepts JSON-formatted block structures to represent page content, not direct Markdown text. Therefore, Markdown must be parsed into Notion&#39;s block structure before writing via API.</p>
+<p>Here&#39;s an example using the Notion Python SDK to create a database page and add text paragraph content:</p>
+<blockquote><code>notion.pages.create(**{</code><br>
+<code>    &quot;parent&quot;: {&quot;database_id&quot;: DATABASE_ID},</code><br>
+<code>    &quot;properties&quot;: {  </code><br>
+<code>        &quot;title&quot;: {&quot;title&quot;: [{&quot;type&quot;: &quot;text&quot;, &quot;text&quot;: {&quot;content&quot;: title}}]},  </code><br>
+<code>        &quot;Tags&quot;: {&quot;type&quot;: &quot;multi_select&quot;, &quot;multi_select&quot;: [{&quot;name&quot;: tag}]},  </code><br>
+<code>        &quot;Created&quot;: {&quot;date&quot;: {&quot;start&quot;: date}}  </code><br>
+<code>    },</code><br>
+<code>    &quot;children&quot;: [  </code><br>
+<code># ... (9 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/c4b4e9cf4f36dffda05d8a41a4cf75f8">GitHub Gist</a></em></p><p>Where <code>parent</code> specifies the target database ID, <code>properties</code> sets page attributes (title, tags, date), and <code>children</code> contains the actual note content. Note that the Notion API has a limit of 100 content blocks per request, requiring segmentation for longer articles.</p>
+<h3>Existing Integration Tool Ecosystem</h3>
+<p>Around the Notion API, the community has built a rich ecosystem of SDKs and integration tools:</p>
+<h4>Auto-GPT Plugin</h4>
+<p>An open-source Auto-GPT Notion plugin exists that allows autonomous agents to read, create, and update Notion pages/databases. The plugin provides a complete command set:</p>
+<ul>
+<li><code>notion_create_page</code> - Create new pages</li>
+<li><code>notion_append_page</code> - Append content</li>
+<li><code>notion_query_database</code> - Query databases</li>
+</ul>
+<p>Usage requires providing Notion integration tokens and database IDs in Auto-GPT&#39;s environment configuration, and whitelisting the plugin. Once enabled, AI agents can automatically save searched information or generated notes to specified Notion databases.</p>
+<h4>Claude MCP Integration</h4>
+<p>Anthropic&#39;s Claude supports MCP (Model Context Protocol) extensions. Community-developed MCP-based Notion connectors, such as Notion MCP Server, act as bridges between Claude and Notion. Configuring this connector requires:</p>
+<ol>
+<li>Providing Notion API tokens</li>
+<li>Running MCP services</li>
+<li>Registering as tools in Claude Code or Claude Desktop</li>
+</ol>
+<p>Once configured, Claude can execute instructions like &quot;create a new Notion database entry&quot; or &quot;update page content,&quot; with underlying operations calling Notion APIs. This approach fully leverages Claude&#39;s automation capabilities, using Notion as external memory or task boards.</p>
+<p><strong>Summary:</strong> Notion is the platform with the highest degree of automation support. Through official APIs, Markdown notes can be created in batches, provided content is converted to Notion block structures with appropriate permissions. Whether using lightweight scripts or complex AI Agents, mature support solutions are available.</p>
+<h2>Obsidian Platform: Plugin Ecosystem-Driven Local Automation</h2>
+<h3>Official Support Status and Limitations</h3>
+<p>Obsidian is a local-first note-taking application that <strong>does not provide officially open cloud APIs</strong>. The Obsidian Sync service also doesn&#39;t offer open interfaces. Developers mainly extend functionality through the Obsidian plugin API (for writing community plugins), with no default REST interfaces for external program operations.</p>
+<p>Therefore, automatically writing content to Obsidian requires workaround solutions using local automation.</p>
+<h3>Viable Automatic Writing Solutions</h3>
+<h4>1. Direct File System Operations</h4>
+<p>Obsidian notes are stored as Markdown (.md) files in local Vault folders. The most direct method is having automation scripts directly create/modify these Markdown files on the file system.</p>
+<blockquote><code># Example: Python script directly writing Obsidian notes</code><br>
+<code>vault_path = &quot;/path/to/obsidian/vault&quot;</code><br>
+<code>note_path = os.path.join(vault_path, f&quot;{note_title}.md&quot;)</code><br>
+<code></code><br>
+<code>with open(note_path, &#039;w&#039;, encoding=&#039;utf-8&#039;) as f:</code><br>
+<code>    f.write(f&quot;# {note_title}\n\n{content}&quot;)</code></blockquote><p>When Obsidian has the Vault open, newly added or modified .md files are detected and loaded in real-time. This method doesn&#39;t require Obsidian to provide interfaces but requires automation programs to have disk write permissions.</p>
+<h4>2. Advanced URI Plugin Solution</h4>
+<p>Obsidian includes native <code>obsidian://</code> protocol for basic operations. The community-developed <strong>Advanced URI plugin</strong> further extends the URI interface, allowing rich Obsidian operations through specific URL calls:</p>
+<blockquote><code># Example URI for creating or updating notes</code><br>
+<code>obsidian://advanced-uri?vault=MyVault&amp;filepath=new-note.md&amp;content=...&amp;mode=append</code></blockquote><p>Advanced URI converts URL parameters into file read/write actions within Obsidian, making it ideal for scripted integration. This solution requires Obsidian to have the corresponding Vault open and the plugin installed.</p>
+<h4>3. Local REST API Plugin</h4>
+<p>For more general automation needs, the community developed the <strong>Obsidian Local REST API plugin</strong>. When installed and enabled, it starts a local HTTPS server (default ports 27123/27124) providing REST interfaces:</p>
+<blockquote><code># Create new note</code><br>
+<code>POST https://localhost:27123/notes/new-note-path</code><br>
+<code>Authorization: Bearer YOUR_API_KEY</code><br>
+<code>Content-Type: application/json</code><br>
+<code></code><br>
+<code>{</code><br>
+<code>  &quot;content&quot;: &quot;# Title\n\nNote content...&quot;</code><br>
+<code>}</code></blockquote><p>This plugin supports executing Obsidian commands, creating journals, and other advanced functions, making Obsidian a programmable platform. Using standard HTTP interfaces makes it highly suitable for integration with various programming languages and AI Agents.</p>
+<h3>Integration Tools and AI Applications</h3>
+<h4>Auto-GPT Obsidian Plugin</h4>
+<p>Similar to Notion, third parties have developed Auto-GPT plugins for Obsidian. This plugin allows Auto-GPT Agents to &quot;understand&quot; Obsidian Vault structure and content, programmatically creating or modifying notes. Features include:</p>
+<ul>
+<li>Automatically generating knowledge cards</li>
+<li>Completing note metadata</li>
+<li>Generating memory cards based on note content</li>
+</ul>
+<p>Auto-GPT achieves these functions by calling files in Obsidian Vaults (using interfaces encapsulated by the obsidiantools library).</p>
+<h4>Claude MCP Integration</h4>
+<p>Similar to Notion&#39;s MCP approach, some have wrapped Obsidian&#39;s local REST API as MCP Server. For example, &quot;MCP Obsidian Server&quot; allows Claude to call tools for:</p>
+<ul>
+<li>Searching note content</li>
+<li>Reading full note text</li>
+<li>Browsing Vault file structures</li>
+</ul>
+<p>While current MCP integrations focus on reading analysis (like having AI search for answers across all notes), since the underlying Obsidian REST interface also supports write operations, theoretically Claude Agents can also create or update Obsidian notes through appropriate tool instructions.</p>
+<p><strong>Summary:</strong> Obsidian&#39;s automatic content updates require implementation through local plugins or scripts. The community-provided local REST API plugin is a more general solution that, combined with AutoGPT or Claude Agents, can achieve automatic reading and writing of Obsidian notes. Compared to Notion, Obsidian integration requires users to have local runtime environments and some plugin configuration, but once set up, AI-generated Markdown can be seamlessly written to Vaults.</p>
+<h2>Heptabase Platform: Limited Options in a Closed Ecosystem</h2>
+<h3>Official Support and Limitations</h3>
+<p>Heptabase <strong>currently does not provide public APIs</strong>. According to Heptabase&#39;s official August 2024 AMA, they plan to eventually support APIs to enhance interoperability, but this won&#39;t likely happen until after 2025.</p>
+<p>The official strategy is to implement integrations with other applications on a case-by-case basis based on user needs before supporting general APIs. However, Heptabase is currently a relatively closed system overall, with no official interfaces for external programs to directly create or update note cards.</p>
+<h3>Indirect Methods: Import/Export Mechanisms</h3>
+<p>While real-time writing through programming interfaces isn&#39;t possible, Heptabase supports importing data from other note-taking tools:</p>
+<h4>Markdown Import Functionality</h4>
+<p>Heptabase includes built-in functionality for importing notes from Markdown files. Users can:</p>
+<ol>
+<li>Import Markdown notes (such as .md files from Obsidian) into Heptabase</li>
+<li>Each Markdown file converts to cards in Heptabase</li>
+<li>Support imports from Notion, Roam Research, Logseq, and other platforms</li>
+</ol>
+<p>Import process example:</p>
+<ul>
+<li>Package Obsidian vault as zip, then use Heptabase&#39;s Import function in the bottom left to select &quot;Obsidian&quot;</li>
+<li>Can also directly select individual .md files for import within the application</li>
+</ul>
+<p>Heptabase preserves Markdown text formatting (including links, tags, etc.) and converts to its proprietary card structure, with Wiki links converted to Heptabase-supported standard links.</p>
+<h4>Data Sync and Export</h4>
+<p>Heptabase automatically syncs user data to the cloud and writes local backups. It supports exporting notes as Markdown or PDF to ensure data portability. However, these are manually triggered import/export operations for data migration and backup, not programmable continuous update pipelines.</p>
+<h3>Current Integration Tool Status</h3>
+<p>Due to the lack of open APIs and no official plugin mechanisms for AI integration, there are currently no open-source integration tools like AutoGPT or LangChain specifically for Heptabase.</p>
+<p>Regarding AI functionality, Heptabase itself has launched a built-in &quot;AI Chat&quot; feature that can interact with note content to answer user questions. However, this is an internal AI feature of the Heptabase application, utilizing user-provided OpenAI API Keys, and doesn&#39;t provide interfaces for third-party AI to write content.</p>
+<h3>Viable Alternative Solutions</h3>
+<p>Before official APIs are released, if automatic updating of Heptabase content is absolutely necessary, only unconventional methods can be considered:</p>
+<h4>GUI Script Simulation</h4>
+<p>Using methods that simulate user interface operations to &quot;automatically input&quot; content into Heptabase. For example:</p>
+<blockquote><code># AppleScript example: Adding logs to Heptabase</code><br>
+<code>tell application &quot;Heptabase&quot;</code><br>
+<code>    activate</code><br>
+<code>    key code 36  # Enter key</code><br>
+<code>    type text &quot;## &quot; &amp; (current date as string) &amp; &quot;\n\n&quot;</code><br>
+<code>    type text &quot;New log content...&quot;</code><br>
+<code>end tell</code></blockquote><p>Community users have shared scripts using AppleScript + Raycast to quickly append logs to Heptabase&#39;s today page. These scripts use AppleScript to call Heptabase application windows, insert specific strings at the end of current cards (triggering Heptabase&#39;s template expansion functionality), achieving one-click addition of timestamped log entries.</p>
+<p>This approach essentially &quot;plays human&quot; when no API exists, partially satisfying personal workflow automation needs, but requires writing scripts specific to Heptabase client interfaces, with high maintenance costs and vulnerability to application interface changes.</p>
+<h4>Indirect Collaborative Updates</h4>
+<p>If users simultaneously use Heptabase and another API-supporting note tool (like Obsidian or Notion), consider maintaining content sync through intermediate bridging:</p>
+<ol>
+<li>Use plugins to automatically generate notes in Obsidian</li>
+<li>Periodically export these notes as Markdown</li>
+<li>Import into Heptabase</li>
+</ol>
+<p>However, this workflow cannot achieve real-time, fine-grained updates and is more of a batch import approach.</p>
+<p><strong>Summary:</strong> Currently, there&#39;s no way to programmatically update Heptabase notes directly through Claude or other automation Agents. Only manual imports and some interface-level script assistance are available. The Heptabase team clearly states they won&#39;t open APIs in the short term, so for users pursuing automation, Heptabase lags behind in this aspect.</p>
+<h2>Platform Solution Comparison Summary</h2>
+<p><img src="__TABLE_4d1488cf__" alt="Table"></p><h2>Technical Implementation Recommendations</h2>
+<h3>For Notion Integration</h3>
+<ol>
+<li><strong>Recommended Solution</strong>: Official SDK + Claude MCP integration</li>
+<li><strong>Implementation Steps</strong>:<ul>
+<li>Create Notion integration to obtain API Token</li>
+<li>Set up MCP server configuration</li>
+<li>Register tools in Claude Code</li>
+<li>Test automatic content creation and updates</li>
+</ul>
+</li>
+</ol>
+<h3>For Obsidian Integration</h3>
+<ol>
+<li><strong>Recommended Solution</strong>: Local REST API plugin + file system direct writing backup</li>
+<li><strong>Implementation Steps</strong>:<ul>
+<li>Install and configure Local REST API plugin</li>
+<li>Set API keys and ports</li>
+<li>Develop or configure Agent interface calls</li>
+<li>Implement automatic Markdown content writing</li>
+</ul>
+</li>
+</ol>
+<h3>For Heptabase Integration</h3>
+<ol>
+<li><strong>Current Solution</strong>: Indirect import + GUI automation assistance</li>
+<li><strong>Implementation Steps</strong>:<ul>
+<li>First automatically generate content in Obsidian/Notion</li>
+<li>Periodically export to Markdown format</li>
+<li>Process in batches through Heptabase import functionality</li>
+<li>Use AppleScript and other tools for assistance when necessary</li>
+</ul>
+</li>
+</ol>
+<h2>Conclusion</h2>
+<p>Among the three major knowledge management platforms, <strong>Notion provides the most comprehensive automation support</strong>, with its official API and rich integration ecosystem making it easy for AI Agents like Claude to achieve automatic content creation and updates.</p>
+<p><strong>Obsidian provides flexible local automation solutions through community plugins</strong>. While requiring some configuration work, once set up, seamless integration with AI workflows can be achieved.</p>
+<p><strong>Heptabase is currently most limited in automation</strong>, mainly relying on manual imports and interface simulation scripts. Users need to wait for official API releases or adopt indirect workflows to achieve partial automation needs.</p>
+<p>For knowledge management workflows pursuing high degrees of automation, we recommend prioritizing Notion or Obsidian solutions and selecting appropriate integration paths based on specific requirements.</p>
+
+</body>
+</html>

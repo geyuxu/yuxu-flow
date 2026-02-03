@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通过AI助手、笔记工具与番茄工作法进行高效学习 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [general_notes]
+legacy: true</h2>
+<h1>通过AI助手、笔记工具与番茄工作法进行高效学习</h1>
+<table>
+<thead>
+<tr>
+<th align="left">学习目标</th>
+<th align="left">建议每日投入</th>
+<th align="left">主要学习任务</th>
+<th align="left">AI/工具辅助</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>英语学习</strong></td>
+<td align="left">2 个番茄（约1 小时）</td>
+<td align="left">阅读英文文章/书籍，听英文播客/新闻；英语写作或口语练习（如写日记或对话模拟）</td>
+<td align="left">ChatGPT Pro（生词释义、语法纠错、生成总结）；Notion（记录生词、例句）</td>
+</tr>
+<tr>
+<td align="left"><strong>AI技术与算法</strong></td>
+<td align="left">3 个番茄（约1.5 小时）</td>
+<td align="left">学习AI理论（在线课程/论文）；算法代码实践（刷题或项目）</td>
+<td align="left">ChatGPT Pro（解答概念疑问、总结要点）；Claude Code/Gemini CLI（代码生成与调试）；Notion（记录教程要点）</td>
+</tr>
+<tr>
+<td align="left"><strong>专业课程学习</strong></td>
+<td align="left">5 个番茄（约2.5 小时）</td>
+<td align="left">预习/复习课堂笔记与教材；完成作业或练习题</td>
+<td align="left">ChatGPT Pro（难点讲解、习题提示）；Notion（课件笔记、任务清单）</td>
+</tr>
+</tbody></table>
+<p><strong>每周规划</strong>：每周初在 Notion 中制定学习计划，列出各科待办（章节阅读、习题、项目等）并分配到每日。采用主题日或交替学习的方法避免枯燥：例如每周安排1–2次较长的英语输入（观看英文电影/讲座），1次AI项目实战或竞赛题训练，穿插于日常计划中。每周末留出时间进行复盘和休息：在周末通过 Obsidian 和 Notion 回顾本周笔记，总结收获，梳理遗漏知识，并利用 ChatGPT 进行自测或答疑，加深记忆。合理安排休息日，保证精力充沛地迎接下周学习。</p>
+<h3>英语学习：工具组合与任务规划</h3>
+<p><strong>主要工具组合</strong>：英语学习推荐使用 ChatGPT Pro 作为智能导师和语伴，结合 Notion 和 Obsidian 记录笔记。ChatGPT Pro 可以提供对话练习、文章翻译和写作批改等多种功能；Notion 适合记录每日生词、表达和学习清单；Obsidian 则可用于整理长期的语法知识点和高频词汇笔记，形成个人英语知识库。</p>
+<ul>
+<li><strong>每日学习任务</strong>：利用2个番茄时间专注英语输入和输出。第一段25分钟可进行输入练习：阅读英语新闻/杂志或听英文播客。在阅读过程中，如遇生词短语，可随时在 ChatGPT Pro 询问词义或获取例句解释，也可让其用中文总结段落大意。将新学单词和短语记录到 Notion 的词汇表中，方便日后复习。第二段25分钟专注输出练习：可以选择写一段英语日记或短文，然后让 ChatGPT Pro 批改润色；或者使用 ChatGPT 进行角色扮演对话练习，例如设定情景“餐厅点餐”，由ChatGPT扮演服务生与你对话。对话结束后，请求ChatGPT纠正你在对话中不自然的表达，使对话更加地道。ChatGPT 会以粗体标出修改处，让你直观了解提升之处。这样的模拟对话和纠错练习，有助于口语表达和地道用法的提升。</li>
+<li><strong>每周学习任务</strong>：每周选择1-2个主题深入练习。例如，本周主题为“旅游”，则阅读相关英文文章，整理常用词句；周末观看一部英文电影或纪录片。之后利用 ChatGPT Pro 对本周主题进行总结对话：例如让它提问你5个与主题相关的问题，模拟问答检测掌握情况。每周末还可写一篇小随笔或主题总结，由ChatGPT批改并评分，了解自己的进步。同时，在 Obsidian 中将本周积累的重点词汇、表达和纠正的错误例句整理成笔记，通过双链将新知识与已有语法点或词汇笔记关联起来，形成英语知识网络。定期翻阅 Obsidian 中的语法笔记、常错点，并使用 Notion 的复习清单或第三方记忆工具对高频词汇进行间隔重复记忆，不断巩固语言基础。</li>
+</ul>
+<h3>AI技术与算法学习：工具组合与任务规划</h3>
+<p><strong>主要工具组合</strong>：AI技术和算法学习建议充分利用AI 编程助手和大模型的优势。这里推荐将 Claude Code 和 Gemini CLI 作为代码编写与调试的智能助手，同时用 ChatGPT Pro 夯实理论概念。Claude Code 是 Anthropic 推出的命令行编程助手，相当于在终端里的 AI 搭档；它可以理解整个代码库（无需手动指定上下文）并自主编辑代码、查找bug，甚至执行测试。Gemini CLI 则是 Google 开源的终端 AI 助手，免费提供高性能 Gemini 模型，每日可执行 1000 次请求且具备高达百万词的上下文窗口。它能直接从命令行接入 Google Gemini 模型用于编码、内容生成和研究等，并内置联网检索功能，可在需要时从网页获取最新资料。此外，ChatGPT Pro 依然是强大的通用学习工具，可用于算法原理问答、论文摘要和代码段解读。Notion 用于规划学习路径、记录学习笔记和代码笔记；Obsidian 用于构建个人知识图谱，将算法思想、代码实现心得链接成网，方便融会贯通。</p>
+<ul>
+<li><strong>每日学习任务</strong>：安排3个番茄时间专注AI理论和算法实践。<ul>
+<li><strong>理论学习（约1番茄）</strong>：通过在线课程、教程或论文学习一个AI相关概念或算法。例如阅读“Transformer模型”原理介绍或观看机器学习课程视频。学习过程中，使用 ChatGPT Pro 进行互动式提问加深理解：将不懂的概念提问，让它用通俗比喻解释；或在阅读论文时，让 ChatGPT 总结每个章节要点，提取公式背后的含义。Gemini CLI 的联网功能也能帮忙检索最新资料，当遇到晦涩难懂的技术细节时，可以让它搜索相关文档并提供简明解释。</li>
+<li><strong>算法编码实践（约2番茄）</strong>：选择一道算法题（如LeetCode挑战）或进行小型项目练习。在编写代码时，Claude Code 或 Gemini CLI 充当即时辅导：比如当卡在 bug 时，可在 Claude Code 终端直接输入问题：“请介绍一下当前这个项目，找出可能的Bug原因。”Claude Code 会自动扫描当前项目代码并给出有条理的结论，帮助你定位问题并提供修改建议。这种自然语言提问调试大幅节省排错时间。如果需要重构或优化代码，可以让 Claude Code 自动编辑：它支持自主修改多个文件、生成测试用例等。Gemini CLI 则以大上下文见长，当你需要分析一个大型代码库或运行复杂的多文件项目时，可利用其百万级上下文窗口加载项目全貌，并询问“模块A和B的交互流程”以获取体系结构摘要。在编码练习中也可以用 ChatGPT Pro 提问算法思路（例如：“如何优化快速排序的最坏情况？”）或让其解释你写的代码复杂度。</li>
+<li><strong>记录与反思</strong>：将当天学习的新算法思想、Bug教训记录到 Notion 的学习日志中，简单列出问题和解决方法。晚间利用 Obsidian 撰写更深入的笔记，例如针对当天学到的算法写一篇心得（描述算法原理、应用场景，链接到相关数学知识或以前学过的算法），通过连接笔记把新旧知识联系起来。</li>
+</ul>
+</li>
+<li><strong>每周学习任务</strong>：每周确定重点学习主题（例如“一种新算法”或“一个AI领域应用”）。围绕主题设计一系列任务：如阅读2-3篇相关论文/博客，观看1个专题讲座视频，完成1个小项目实现。使用 Notion 的项目板追踪这些任务的完成进度。周中侧重分散完成理论和实践任务，周末进行整合提升：例如，周六花半天实现一个综合小项目（如训练一个简易模型或编写算法库），充分运用本周所学。过程中用 Claude Code 辅助复杂代码的调试和测试——Claude Code 能自动执行一系列shell命令来跑通项目，并在失败时调整，近似实现半自动编码（需注意及时介入指导，以免AI在错误思路上浪费时间）。周日进行知识整理和复盘：在 Obsidian 中梳理一周所学AI知识点，更新“AI术语词条”笔记并通过双链链接相关概念（例如把“梯度下降”笔记链接到“神经网络训练”笔记）。可以让 ChatGPT Pro 充当出题人，对本周学习内容提出5-10道问答题测试自己；或者让 Gemini CLI/Claude 针对本周主题生成一个知识图或提纲，检查有无遗留的盲点。最后，在 Notion 的周记中记录本周收获和下周计划，不断优化学习方法。通过周而复始的实践和回顾，在AI技术领域循序渐进地夯实基础并拓展技能。</li>
+</ul>
+<h3>专业课程学习：工具组合与任务规划</h3>
+<p><strong>主要工具组合</strong>：专业课程（如大学专业课）学习需要结合课程教材、课堂笔记和作业要求，以理解记忆和应试应用为导向。ChatGPT Pro 可以成为课业学习的强力助教，用于解惑答疑、要点总结和提供练习题；Gemini CLI/Claude Code 在涉及编程或数据分析类课程时同样有用武之地，可帮助完成实验编程、调试代码或处理数据。笔记管理方面，Notion 适合整理课程资料（如上传课件、整理笔记大纲）和管理任务清单（如作业DDL提醒、小组任务协作），Obsidian 则可用于知识内化，把跨课程的知识点串联，形成个人的学科知识网络。</p>
+<ul>
+<li><strong>每日学习任务</strong>：根据课程表，在上课以外留出至少4-5个番茄时间用于当日课程的预复习和作业。<ul>
+<li><strong>课前预习</strong>：在正式课堂前，花半个小时快速浏览将讲授的章节。在 Notion 中打开课程笔记页面，列出本章的学习目标和关键概念。如果遇到不解之处，可询问 ChatGPT Pro：“用通俗的比喻解释一下XX概念是什么意思？”获得初步理解后再去上课。</li>
+<li><strong>课后复习</strong>：当天课程结束后，尽快利用1-2个番茄复习巩固。翻阅课堂笔记和教材，梳理知识框架，将要点补充到 Notion 的课程笔记中（如将课堂板书整理成条理清晰的要点清单）。然后借助 ChatGPT Pro 总结和提问：让它将本节内容用几句话总结，检查自己笔记是否遗漏关键点；或者让它扮演出题老师，针对本节内容出几道选择题/问答题考考你。如果出现模糊的知识，可以进一步追问 ChatGPT 获取解释。对于理工科课程中复杂的公式推导或难题，尝试先独立思考，再将自己的思路告诉 ChatGPT，请它指出漏洞或给予提示（切忌直接拷贝作业题完整求解，以免影响独立思考能力和违反学术诚信）。</li>
+<li><strong>完成作业</strong>：在编程类或数据分析类作业中，充分利用 AI 工具调试和优化。比如，编写程序遇到报错时，将错误信息和相关代码段提交给 Claude Code，请它定位错误原因并提供修改建议；或使用 Gemini CLI 直接在本地运行代码辅助排查（它可调用网络搜索查找报错的可能原因并提供修复方案）。当作业要求撰写论文报告时，先自行完成初稿，再用 ChatGPT Pro 充当写作助理：请它检查措辞和逻辑连贯性，提出润色建议，甚至可以让其按提纲生成示例段落供参考（注意不要抄袭，而是学习表达）。写完后也可让 ChatGPT 充当审稿人，给文章打分并指出不足。</li>
+</ul>
+</li>
+<li><strong>每周学习任务</strong>：每周针对每门课程进行规划-执行-检查循环。周初在 Notion 中查看各科本周任务清单（读多少章节，完成何种作业），合理安排到每天。对于临近的测验或大型作业，预留充分的准备时间（例如提前2周开始复习或分阶段完成项目）。<ul>
+<li><strong>整合学习</strong>：如果专业课程之间存在关联（例如高等数学为物理课提供数学工具），周中或周末抽时间在 Obsidian 中写“连接笔记”，总结不同课程知识的联系，加深对知识的整体理解。</li>
+<li><strong>周末复盘</strong>：用半天时间进行各科目的回顾和自测。重温一遍本周各课程的Notion笔记，试着合上笔记回忆核心概念，然后对照笔记补充遗忘点。可以让 ChatGPT Pro 协助复习：例如“请出10道关于本周两节历史课的选择题”，做完后核对答案；或“请用思维导图列出本周生物课讲的五个要点”。将ChatGPT给出的要点和自己的笔记比对，检查是否遗漏。对于编程类课程的lab作业，周末可再次运行代码验证结果，使用 Claude Code 尝试对代码进行扩展功能或优化，以拓展学习深度。如果笔记零散，利用周末时间用 Obsidian 整理成体系：例如创建“公式定理库”笔记，将本周学到的重要公式添加进去，并链接到应用这些公式的例题笔记上。坚持每周这样归纳整理，在期末复习时就能依赖自己构建的知识网络快速回顾。通过有条不紊的周计划管理，确保不遗漏任何一门课程的学习任务，在平时就扎实掌握知识点，减少考前压力。</li>
+</ul>
+</li>
+</ul>
+<h3>阅读文献与内容总结的高效方法</h3>
+<p><strong>工具最佳用途</strong>：在阅读学术文献、专业资料或任何长篇内容时，善用 AI 工具来提炼信息、降低理解难度。</p>
+<ul>
+<li><strong>主动阅读为主，AI辅助为辅</strong>：首先进行主动阅读，带着问题浏览全文，尽量自己概括要点。然后利用 ChatGPT Pro 或 Claude 来检查和补充理解。例如，选取论文的一段复杂论述，要求 ChatGPT 用简单中文解释，或者直接问：“这段话的核心结论是什么？” AI可以提供简明扼要的释义和结论，帮助你确认自己理解是否准确无误。对于整篇论文或报告，可以让 AI 按层次生成摘要：例如要求“请分段总结该论文的背景、方法、结论”。如果文本较长，Claude Code（借助其大上下文窗口）更擅长处理整篇输入，可一次性输出详细提炼后的要点。Gemini CLI 则可在需要时联网搜索文中提及的概念或术语的最新解释，确保你的理解与前沿同步。</li>
+<li><strong>提取关键词和建立索引</strong>：阅读完一篇资料后，使用 ChatGPT 提取其中的关键词和关键句。例如：“列出本文出现的5个核心术语并解释其含义”。将这些术语和解释记录在 Notion 或 Obsidian 中，作为日后复习的知识索引。当积累多篇文献笔记后，可在 Obsidian 中建立一个“文献-主题”索引，通过双向链接把相关主题的文章笔记关联起来，形成你的文献知识地图。</li>
+<li><strong>总结和输出</strong>：阅读文献的最终目的是转化为自己的知识。尝试在不参考原文的情况下，用 Obsidian 写一篇简短的阅读摘要或心得。然后将你的摘要交给 ChatGPT Pro，请它对比原文检查是否遗漏重要信息，或者让 AI 提建议如何深化分析。如果遗漏了某点，可以再返回原文查证并补充笔记。这样的过程可强化对内容的掌握。<strong>实例</strong>：很多学生发现，用 ChatGPT 进行对话式回顾效果很好——比如每天阅读完英文文章后，让 ChatGPT 扮演老师询问细节，你用英语作答。这种问答能逼你回忆文章细节，同时锻炼英语表达，一举两得。</li>
+</ul>
+<h3>代码调试与编程实践的高效方法</h3>
+<p><strong>工具最佳用途</strong>：在编程练习和项目开发中，AI 工具可充当智能调试助手和虚拟对话伙伴，协助你高效解决问题并积累经验。</p>
+<ul>
+<li><strong>错误定位与修复</strong>：当代码出现错误或异常行为时，不要盲目试错，尝试利用 Claude Code 或 ChatGPT Pro 来协助分析。将错误信息和相关代码段复制给 AI，并询问：“出现这个错误的可能原因是什么？应该如何修改？” ChatGPT Pro 通常会给出错误成因分析和修改建议。而 Claude Code 在 CLI 中更进一步，它可以自动读取项目的相关文件来找到Bug来源，并给出结构化的修复计划。<strong>实例</strong>：如果你在一个大型项目中不确定问题源头，只需在 Claude Code 中下指令描述问题，它会像资深工程师一样梳理代码关系、锁定可能的错误模块并提出解决步骤。这种自动化处理让你仿佛拥有一位不知疲倦的资深搭档，时刻提供调试思路。</li>
+<li><strong>代码生成与优化</strong>：在遇到难以实现的功能时，可以先用 ChatGPT Pro 讨论实现思路，甚至直接让它生成示例代码片段供参考。Claude Code 和 Gemini CLI 则能够直接在项目环境中执行“代理式”编程：根据你的自然语言指令创建或修改代码。Gemini CLI 能批量重构代码、完善注释，并生成单元测试来验证功能。Claude Code 则擅长“大刀斧斧”地完成连续的编码任务，比如在多个文件中应用同一逻辑修改，或按照描述生成模块骨架。值得注意的是，全自动代码生成有时会出现偏差，建议生成后由你来review把关，必要时手动调整。通过与 AI 反复协作，你能逐步优化代码质量，从中学习到更简洁高效的实现方式。</li>
+<li><strong>算法思路辅导</strong>：在算法题训练或编程竞赛准备中，AI 可以扮演思路引导者。当你苦思某个问题解法时，不妨将你已有的想法告诉 ChatGPT，请它提示下一步。例如：“我打算用动态规划解决这个问题，应该如何定义状态转移方程？” ChatGPT Pro 会给出建议或指出可能的误区。你也可以让 AI 出一些边界测试用例来检验你的算法健壮性。Claude Code 也能自动生成多种测试并运行，帮你找出代码在特殊情况下的表现是否正确。借助这些工具，你可以更快地验证想法、纠正错误，从而专注于算法思想本身的学习。</li>
+<li><strong>实践项目协作</strong>：在较大型的实践项目（课程设计或科研项目）中，合理使用 AI 能提升开发效率。尝试把项目任务拆解，在 Notion 上列出待完成功能。对于每个子功能，先自行构思方案，再用 ChatGPT Pro 与“虚拟队友”头脑风暴，确认方案的可行性和完善细节。编码过程中遇到瓶颈，用 Gemini CLI 搜索相关技术实现的资料，或用 Claude Code 执行部分重复性编写工作（如根据数据表结构自动生成模型类代码）。完成初版后，让 AI 帮忙代码审查：ChatGPT Pro 可以逐段阅读你的代码并给出优化建议（比如提示变量命名改进、可能的性能问题等）。这种AI协助下的项目开发，不仅加快了进度，也让你在交互中不断学习更好的编程习惯。</li>
+</ul>
+<h3>笔记管理与复盘：Notion + Obsidian</h3>
+<p>高效的学习离不开科学的笔记管理和定期复盘巩固。Notion 和 Obsidian 的结合能够满足任务管理和知识沉淀两方面需求：</p>
+<ul>
+<li><strong>Notion</strong>：充当学习中控和信息整理平台。使用 Notion 创建一个学习仪表板，包括每日待办、周计划、课程笔记数据库、阅读清单等模块。Notion 非常适合记录原始笔记和素材：例如课堂笔记、阅读文摘、待整理的想法等都先记录在 Notion 中。利用其模板和表格功能，可以搭建课程笔记页（含章节纲要、重要概念、习题列表），每日/每周计划页（以日历或看板视图排列任务）等。Notion 还可用于习惯追踪和个人复盘：比如每日报告完成了几个番茄、学习时长，并简短写下当天收获和明日调整。其强大的数据库和视图功能让你对学习任务做到心中有数，随时调整计划以保证各目标的均衡进展。</li>
+<li><strong>Obsidian</strong>：充当个人知识库，将 Notion 中的“原始笔记”进一步提炼、关联，形成长久记忆的“永恒笔记”。Obsidian 的Markdown笔记和双向链接功能非常适合整理知识网络。建议每隔一段时间（如每周或每章学完后），将 Notion 上的零散笔记迁移/总结到 Obsidian：提炼出精华观点，写成结构化笔记，并通过链接将其与已有相关笔记连接。例如，你在 Notion 做了关于线性代数和微积分课程的笔记，那么在 Obsidian 中可以建立“数学基础知识”主笔记，里面链接线性代数、微积分两个子笔记，再进一步链接具体定理或公式笔记，构建层次分明的知识网络。Obsidian 中的标签和Graph视图有助于发现不同学科之间的关联，激发融会贯通的灵感。对于需要反复记忆的内容（单词、公式等），可以考虑使用 Obsidian 的闪卡插件或第三方记忆应用，将笔记内容转化为问答卡片，定期自测。</li>
+<li><strong>定期复盘机制</strong>：坚持日清周结的笔记复盘习惯。<ul>
+<li><strong>每日复盘</strong>：利用睡前15分钟浏览当日笔记，尤其关注当天标记的难点或未解决问题。如果仍有困惑，标注下来第二天请教老师或让 ChatGPT 解答。</li>
+<li><strong>每周复盘</strong>：周末集中整理一周笔记，将 Notion 中的内容精炼迁移到 Obsidian。如 Reddit 网友所言：Notion 侧重规划和原始记录，而 Obsidian 则用于将零散笔记“提炼为永久的知识”。通过每周整理，你可以持续输出高质量笔记，确保知识点真正被消化而不是堆积在素材里。周复盘时还可检视自己一周计划完成情况，在 Notion 周计划中给已完成任务打勾，对未完成事项分析原因并调整下周计划。这种闭环复盘能让你的学习流程不断优化，做到高效且心中有数。</li>
+</ul>
+</li>
+<li><strong>协同使用示例</strong>：比如你本周用 Notion 记录了“卷积神经网络”一课的笔记和一些不解之处。周末整理时，在 Obsidian 新建“卷积神经网络”永久笔记，写下你对其原理的理解，并链接到 “深度学习”的上位主题笔记。同时将当时不解的问题用 ChatGPT 得到答案后附在笔记中。这样，Notion 保留过程痕迹和任务管理，而 Obsidian 则沉淀结果和知识体系。两者相辅相成，让你既能高效执行每日学习，又能沉淀长期知识，实现真正的学有所获而非一学即忘。</li>
+</ul>
+<hr>
+<h3>总结</h3>
+<p>以上流程旨在帮助全职学生在繁忙的学习生活中实现高效与简洁。合理规划时间并充分利用 AI 工具，可以让你如虎添翼：ChatGPT Pro 等于随身导师答疑解惑；Claude Code、Gemini CLI 则是得力的编程拍档；Notion 和 Obsidian 则构筑起你专属的知识宝库。在实践中可根据自身情况微调计划，坚持一段时间后，你将明显感觉到学习变得更有条理、事半功倍。祝你学业顺利，持续进步！</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games | Yuxu Ge</title>
+    <meta name="description" content="20 browser-based classic games - 2048, Snake, Tetris, Minesweeper, and more">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 16px; scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a { color: var(--vermilion); text-decoration: none; transition: opacity 0.2s ease; }
+        a:hover { opacity: 0.75; }
+
+        .layout { min-height: 100vh; }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover { opacity: 1; transform: scale(1.05); }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .name-block { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+
+        h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 1px; color: var(--off-white); }
+
+        .title-role { font-size: 0.9rem; color: #888; margin-top: 0.25rem; font-weight: 400; }
+
+        .contact-block { margin-top: 2.5rem; width: 100%; }
+
+        .social-links { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .social-links a:hover { color: var(--vermilion); opacity: 1; background: rgba(255,255,255,0.05); }
+        .social-links svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .social-links .orcid-link { font-size: 0.68rem; width: 160px; gap: 0.5rem; white-space: nowrap; }
+
+        .sidebar-footer { text-align: center; font-size: 0.75rem; color: #555; }
+
+        .content { margin-left: 320px; padding: 3rem 4rem; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover { color: var(--vermilion); }
+
+        .page-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #ddd; }
+
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--black); margin-bottom: 0.25rem; }
+
+        .page-desc { font-size: 0.9rem; color: var(--dark-grey); }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            max-width: 1200px;
+        }
+
+        .game-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .game-card:hover {
+            border-color: var(--vermilion);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            opacity: 1;
+        }
+
+        .game-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .game-icon.c2048 { background: linear-gradient(135deg, #edc53f, #f2b179); }
+        .game-icon.snake { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+        .game-icon.tetris { background: linear-gradient(135deg, #9C27B0, #673AB7); }
+        .game-icon.memory { background: linear-gradient(135deg, #2196F3, #1976D2); }
+        .game-icon.minesweeper { background: linear-gradient(135deg, #607D8B, #455A64); }
+        .game-icon.breakout { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .game-icon.pong { background: linear-gradient(135deg, #00c853, #009624); }
+        .game-icon.flappy { background: linear-gradient(135deg, #FFD93D, #FF9800); }
+        .game-icon.tictactoe { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .game-icon.connect4 { background: linear-gradient(135deg, #2c3e50, #3498db); }
+        .game-icon.simon { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .game-icon.whack { background: linear-gradient(135deg, #8B4513, #A0522D); }
+        .game-icon.dino { background: linear-gradient(135deg, #535353, #333); }
+        .game-icon.wordle { background: linear-gradient(135deg, #538d4e, #6aaa5e); }
+        .game-icon.hangman { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .game-icon.puzzle { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .game-icon.match3 { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+        .game-icon.space { background: linear-gradient(135deg, #0f0, #090); }
+        .game-icon.sudoku { background: linear-gradient(135deg, #1976d2, #1565c0); }
+        .game-icon.typing { background: linear-gradient(135deg, #ffd700, #ff9800); }
+
+        .game-title { font-size: 1.1rem; font-weight: 600; color: var(--black); }
+
+        .game-desc { font-size: 0.85rem; color: var(--dark-grey); line-height: 1.4; }
+
+        .game-controls { font-size: 0.75rem; color: #888; padding-top: 0.5rem; border-top: 1px solid #eee; }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .sidebar-top { gap: 0; }
+            .contact-block { margin-top: 1.5rem; }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem;
+            }
+
+            .social-links a, .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg { width: 24px; height: 24px; }
+            .social-links .hide-mobile { display: none; }
+            .sidebar-footer { margin-top: 1rem; }
+
+            .content { margin-left: 0; padding: 2rem 1rem; }
+
+            .games-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { padding: 1.5rem 1rem 1rem; }
+            .avatar { width: 80px; height: 80px; }
+            h1 { font-size: 1.4rem; }
+            .title-role { font-size: 0.8rem; }
+            .content { padding: 1.5rem 1rem; }
+            .page-title { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/" class="back-link">← Back to Home</a>
+
+            <header class="page-header">
+                <h2 class="page-title">Games</h2>
+                <p class="page-desc">20 browser-based classics, no installation required</p>
+            </header>
+
+            <div class="games-grid" id="games-grid"></div>
+            <script>
+                fetch('/games/config.json')
+                    .then(r => r.json())
+                    .then(config => {
+                        const grid = document.getElementById('games-grid');
+                        config.items.forEach(game => {
+                            const card = document.createElement('a');
+                            card.href = game.href;
+                            card.className = 'game-card';
+                            card.innerHTML = `
+                                <div class="game-icon ${game.iconClass}">${game.icon}</div>
+                                <div class="game-title">${game.title}</div>
+                                <div class="game-desc">${game.desc}</div>
+                                <div class="game-controls">${game.controls}</div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                    });
+            </script>
+        </main>
+    </div>
+</body>
+</html>

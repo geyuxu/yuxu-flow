@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用R-Tree实现2D点去重与可视化优化</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-09-30
+tags: [backend]
+legacy: true</h2>
+<h1>使用R-Tree实现2D点去重与可视化优化</h1>
+<p>R-Tree（矩形树）是一种常用的空间索引数据结构，其原理类似于B树，但针对多维空间进行了优化。R-Tree的基本思想是用**最小外接矩形（MBR, Minimum Bounding Rectangle）**来近似表示数据对象（例如点或多边形）的空间范围。树中的每个节点关联一个矩形区域，包含了其子节点或叶子节点中所有对象的范围。这样一来，查询时可以通过这些嵌套的矩形快速剪枝——丢弃那些与查询范围不相交的子树，从而只遍历潜在相关的数据对象。</p>
+<ul>
+<li>结构特点：R-Tree通常是平衡树，所有叶节点深度相同。每个节点包含若干条目，每个条目要么是子节点的指针和该子节点的MBR，要么（在叶节点）是实际存储的对象及其对应的MBR。节点的容量有限，当插入新对象导致节点满溢时，会触发节点拆分（类似B树的分裂）。</li>
+<li>操作效率：得益于其分层的空间划分，R-Tree在平均情况下可以做到查询复杂度为O(log N)（N为对象数量），这远优于线性扫描全部对象。插入和删除操作的平均性能也接近O(log N)。当然，在最坏情况下（例如所有点非常聚集，导致很多矩形区域高度重叠），R-Tree的性能可能退化接近O(N)，但总体而言它在实际地理和游戏数据中表现良好。</li>
+<li>应用场景：R-Tree广泛应用于需要快速空间查询的场景，例如数据库中的GIS扩展、地图服务中的兴趣点检索、碰撞检测，以及地图应用或游戏中视野范围内对象的高效提取等。许多地理数据库（如PostGIS）和图形引擎内部都实现了R-Tree或类似的空间索引以优化性能。</li>
+</ul>
+<h2>R-Tree在Java中的使用</h2>
+<p>了解了R-Tree的原理，我们可以在实际项目中使用现有的R-Tree库来简化开发。在Java中，我们可以使用开源的com.github.davidmoten:rtree库来创建和操作R-Tree。使用Maven的项目可以通过添加以下依赖来引入该库：</p>
+<blockquote><code>&lt;dependency&gt;</code><br>
+<code>    &lt;groupId&gt;com.github.davidmoten&lt;/groupId&gt;</code><br>
+<code>    &lt;artifactId&gt;rtree&lt;/artifactId&gt;</code><br>
+<code>    &lt;version&gt;0.9.3&lt;/version&gt; &lt;!-- 具体版本可根据需要选择 --&gt;</code><br>
+<code>&lt;/dependency&gt;</code></blockquote><p>引入依赖后，我们就可以使用R-Tree的数据结构。在这个库中，R-Tree被实现为泛型类，我们可以指定存储对象的类型和几何范围的类型。例如，我们要存储自定义的二维点对象MapPoint，并使用R-Tree提供的Rectangle类（表示二维轴对齐矩形）作为范围类型，则可以创建R-Tree实例如下：</p>
+<p><code>RTree&lt;MapPoint, Rectangle&gt; rtree = RTree.create();</code></p><p>这里的MapPoint是我们自定义的数据类型，用于表示一个二维点。假设它有以下字段：id（点的唯一标识），x和y（坐标），以及可能的附加属性如高度height和速度speed（根据需要定义）。而Rectangle是R-Tree库提供的用于描述矩形范围的类，我们可以利用它来表示点的“碰撞区域”。对于点而言，我们可以将其碰撞区域视为以该点为中心的一个极小的矩形（例如一个零宽度零高度的矩形，或给定半径范围的正方形）。</p>
+<p>下面的代码演示了如何向R-Tree中插入若干个MapPoint对象，以及为每个点创建对应的矩形范围。这里为了模拟点的重叠，我们为每个点创建了一个1x1大小的正方形区域（使用Geometries.rectangle(x1, y1, x2, y2)方法），这样如果两个点距离很近，它们的范围矩形就会发生交叠。</p>
+<blockquote><code>// 创建R-Tree实例</code><br>
+<code>RTree&lt;MapPoint, Rectangle&gt; rtree = RTree.create();</code><br>
+<code></code><br>
+<code>// 添加示例数据点及其范围</code><br>
+<code>rtree = rtree.add(EntryDefault.entry(new MapPoint(1, 1.0, 1.0, 1.0, 1.0),</code><br>
+<code>                               Geometries.rectangle(1.0, 1.0, 2.0, 2.0)));</code><br>
+<code>rtree = rtree.add(EntryDefault.entry(new MapPoint(2, 2.0, 2.0, 1.0, 1.0),</code><br>
+<code>                               Geometries.rectangle(2.0, 2.0, 3.0, 3.0)));</code><br>
+<code>rtree = rtree.add(EntryDefault.entry(new MapPoint(3, 1.5, 1.5, 1.0, 1.0),</code><br>
+<code>                               Geometries.rectangle(1.5, 1.5, 2.5, 2.5)));</code></blockquote><p>上述代码中，我们插入了三个点：</p>
+<ul>
+<li><p><code>点1：ID=1，坐标(1.0, 1.0)，为它创建范围矩形(1.0,1.0)-(2.0,2.0)</code></p></li>
+<li><p><code>点2：ID=2，坐标(2.0, 2.0)，范围矩形(2.0,2.0)-(3.0,3.0)</code></p></li>
+<li><p><code>点3：ID=3，坐标(1.5, 1.5)，范围矩形(1.5,1.5)-(2.5,2.5)</code></p></li>
+</ul>
+<p>我们可以看到，点1和点3的范围重叠，点2和点3的范围也重叠，而点1和点2仅在边界上接触（(2.0,2.0)这个边界点）。通过这些范围的设置，点3与点1、点2都发生了碰撞（重叠）。</p>
+<h2>2D点去重与隐藏的算法实现</h2>
+<p>有了上述数据结构，我们就可以基于R-Tree来实现二维点的去重与隐藏逻辑。问题描述：对于任意两个或多个位置重叠的点，只保留其中ID最大的那个点，其余点标记为隐藏。最后需要输出所有未被隐藏（可见）的点列表。</p>
+<p>算法思路：利用R-Tree快速检索重叠点的特性，我们可以按照以下步骤来处理所有点：</p>
+<ul>
+<li><p><code>步骤1：将所有点及其对应范围插入R-Tree索引中（这一部分我们已经完成）。</code></p></li>
+<li><p><code>步骤2：遍历每个点，对于每个点使用R-Tree执行一次范围查询，找出与该点范围有相交的所有其他点。</code></p><ul>
+<li>对于当前点，如果找到任何相交（碰撞）的其他点，取出其中ID最大的点。</li>
+<li>将除ID最大的点之外的所有相交点都标记为“隐藏”（即它们不是可见点）。</li>
+</ul>
+</li>
+<li><p><code>步骤3：遍历完所有点后，所有被标记为隐藏的点将被排除，剩余未被隐藏的点就是最终的可见点集合。</code></p></li>
+</ul>
+<p>这样的逻辑确保对于每一组重叠在一起的点集合来说，我们最终只会保留其中ID最高的那个点。在实现中，我们需要一个数据结构（例如Set）来记录被隐藏的点ID，然后再过滤原始点列表。</p>
+<p>代码实现：下面的代码展示了上述算法的具体实现。我们将使用前面构建的R-Tree来高效查询每个点的碰撞点集合：</p>
+<blockquote><code>// 用于记录需要隐藏的点</code><br>
+<code>Set&lt;MapPoint&gt; pointsToHide = new HashSet&lt;&gt;();</code><br>
+<code></code><br>
+<code>// 获取R-Tree中所有点的条目集合</code><br>
+<code>List&lt;Entry&lt;MapPoint, Rectangle&gt;&gt; entries = rtree.entries().toList().toBlocking().single();</code><br>
+<code></code><br>
+<code>// 遍历每个点条目</code><br>
+<code>for (Entry&lt;MapPoint, Rectangle&gt; entry : entries) {</code><br>
+<code># ... (41 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/1d787c379518f235e8b84697117abbd5">GitHub Gist</a></em></p><p>在这段代码中，我们首先通过rtree.entries().toList().toBlocking().single()获取了R-Tree中所有的条目列表（每个条目包含了一个MapPoint对象和对应的范围Rectangle）。然后对于每个点，我们执行rtree.search(region)来查找与之范围相交的所有条目。由于我们在创建范围时已经包括了点本身的位置，这个查询结果会至少包含当前点自己。</p>
+<p>接下来，我们遍历查询到的冲突点集合，找出其中ID最大的点(maxIdPoint)。如果当前点不是ID最大的那个，那么根据规则它应该被隐藏，我们将其加入pointsToHide集合中。反之，如果当前点就是该集合中ID最大的点，那么我们需要将其它所有与之碰撞的点都加入pointsToHide（因为它们的ID更小，应被隐藏）。</p>
+<p>最后，我们通过过滤掉pointsToHide集合中的点，得到了visiblePoints列表，其中保存的就是所有未被隐藏的点。打印输出这些点的ID，可以验证算法的正确性。</p>
+<p>效果对比示例</p>
+<p>根据上面的示例数据，我们可以验证算法的效果。最初，我们有以下三个点（以及它们的范围）：</p>
+<ul>
+<li>点1：ID=1，坐标(1.0, 1.0)，范围矩形(1.0,1.0)-(2.0,2.0)</li>
+<li>点2：ID=2，坐标(2.0, 2.0)，范围矩形(2.0,2.0)-(3.0,3.0)</li>
+<li>点3：ID=3，坐标(1.5, 1.5)，范围矩形(1.5,1.5)-(2.5,2.5)</li>
+</ul>
+<p>可以看出，点3的范围同时与点1和点2的范围发生了重叠。因此，根据算法，{点1, 点2, 点3}构成了一个重叠集合，其ID最大的点是点3。那么，点1和点2将被标记为隐藏，最终可见的点只有点3（ID=3）。算法输出的结果将是：</p>
+<blockquote><code>可见点 ID 列表:</code><br>
+<code>  - Point 3</code></blockquote><p>如果我们再添加一些彼此不重叠的点，例如一个远离上述区域的点4（ID=4，坐标(10.0, 10.0)），它没有与任何其它点重叠，那么它也会保留下来。因此，对于没有重叠的点，算法不会将其隐藏。</p>
+<h2>性能分析</h2>
+<p>通过上述过程可以看到，R-Tree在这一问题中发挥了重要作用。在没有使用空间索引的情况下，如果我们想找出重叠的点集，需要将每个点与其他所有点进行比较，其时间复杂度大约为O(N^2)（N为点的数量）。当N很大时，这样的算法难以接受。而使用R-Tree后，我们能够将大部分无关的点排除在查询之外，每次查询只遍历那些在空间上相近的点。</p>
+<p>对于每个点执行一次范围查询的复杂度平均约为O(log N)，加上遍历冲突点集合的时间。如果空间中点的分布比较均匀且每个点的碰撞范围较小，那么大部分查询只会返回很少的结果，整体算法的平均复杂度接近O(N log N)。即使在最坏情况下（比如所有点都在同一个区域重叠在一起，这几乎等价于最差的退化情形），R-Tree的性能可能退化，但此时问题本身已经不可避免地接近O(N^2)复杂度。不过，总的来说，R-Tree能够让常见分布下的去重算法高效运行，对应的数据量越大，收益越明显。</p>
+<p>此外，R-Tree的内存开销相对适中，插入和查询操作的性能也能够满足实时性要求。因此，在需要频繁进行空间碰撞检测或邻近查询的系统中（如实时地图渲染、游戏引擎），R-Tree常常被用作核心的数据结构来提升性能。</p>
+<h2>实际应用场景</h2>
+<p>上述基于R-Tree的二维点去重与隐藏技术在实际中有多种应用场景：</p>
+<ul>
+<li><p><code>大规模地图标注优化：在数字地图或GIS系统中，同一地点可能存在多个兴趣点（POI）标记，或不同层级的数据叠加。在高缩放级别下，这些标记会重叠在一起，造成界面混乱。通过R-Tree索引，我们可以快速合并或隐藏重叠的标注，只显示其中较重要或最新的一个。例如，手机地图应用在缩小视野时会合并重叠的图标，正是类似思想的应用。</code></p></li>
+<li><p><code>游戏场景管理：在游戏开发中，需要管理大量对象的位置信息，例如NPC、掉落物品、特效等。使用空间索引结构可以加速碰撞检测和视野裁剪（culling）。对于重叠的对象（例如多个物品堆叠在同一坐标），可以选择只渲染最上层或最重要的对象，隐藏其余重叠的对象，从而降低绘制负担和避免视觉上的冗余。此外，R-Tree等空间结构也常用于实现碰撞检测和区域查询（比如检索一定范围内的敌人等），这些都与本文介绍的方法异曲同工。</code></p></li>
+<li><p><code>传感器与监控数据：在物联网或监控系统中，如果多个传感器安装在非常接近的位置，它们报告的数据点可能在地图上重合。通过去重，可以在界面上只保留一个测点，避免重复显示。同时如果引入时间维度，我们也可以扩展规则，例如保留最新的点数据，隐藏旧数据，实现时空上的数据压缩。</code></p></li>
+</ul>
+<h2>总结</h2>
+<p>通过本文的介绍，我们了解了如何利用R-Tree来高效地解决二维点重叠问题。R-Tree作为一种强大的空间索引结构，使我们能够在海量点数据中快速检索相邻关系，避免了昂贵的全局遍历。结合合理的算法逻辑，我们成功地筛选出重叠点中需要保留的点，大大优化了可视化效果。</p>
+<p>这一技术思路在地图可视化、游戏引擎和其它需要处理空间数据的领域都有广泛的价值。实际应用中，我们可以根据具体需求调整判定“重叠”的规则（例如定义碰撞区域的大小或形状），以及保留点的准则（例如选择最新更新的点而非简单ID最大）。但无论如何，借助R-Tree等空间索引，我们都能更从容地应对海量二维数据的管理和优化，在保证准确性的同时提升系统性能和用户体验。</p>
+
+</body>
+</html>

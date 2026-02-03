@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从康威生命游戏到数字达尔文主义：构建 GPU 加速的神经演化生态系统</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2026-01-28
+tags: [ai, evolutionary-computation, pytorch, artificial-life, gpu]
+description: 将康威生命游戏推向新维度：构建基于 PyTorch 的 GPU 加速神经演化生态系统，观察数字生命的达尔文式竞争。</h2>
+<h1>从康威生命游戏到数字达尔文主义：构建 GPU 加速的神经演化生态系统</h1>
+<p>我即将迎来约克大学人工智能硕士第二学期的课程，其中一门选课 <strong>Evolutionary Intelligence</strong> 引起了我极大的兴趣。利用假期这段时间，我将经典的&quot;康威生命游戏&quot;推向了一个全新的维度：一个由神经网络驱动、GPU 加速的大规模人工生命（ALife）演化系统。</p>
+<p><img src="/blog/images/neuroevo-life/demo.gif" alt="NeuroEvo-Life Demo"></p>
+<p><strong>视频演示</strong>: <a href="https://www.youtube.com/watch?v=CeMnTrSrS8k">YouTube</a></p>
+<h2>核心架构：当神经网络拥有&quot;基因&quot;</h2>
+<p>在我的模拟器 <strong>NeuroEvo-Life</strong> 中，数字生物不再是死板的像素，而是具有 <strong>12 维遗传特征 (12D Genome)</strong> 的智能代理：</p>
+<ul>
+<li><strong>神经指纹 (8维)</strong>：提取自神经网络权重的统计特征，决定了代理的决策风格。</li>
+<li><strong>化学亲和力 (4维)</strong>：决定了物种间的信号传递、兼容性以及捕食关系。</li>
+</ul>
+<h2>GPU 向量化优化</h2>
+<p>凭借多年的后端架构经验，我意识到大规模仿真的瓶颈在于计算效率。</p>
+<ul>
+<li>系统完全基于 <strong>PyTorch 向量化操作</strong>（如 <code>einsum</code> 和卷积内核）构建，将数以万计智能体的决策和化学场扩散全部卸载到 GPU 上。</li>
+<li>这种设计允许我们在极高的种群密度下，观察到实时发生的物种漂移和演化竞争。</li>
+</ul>
+<h2>演化结果：100% 的生态统治</h2>
+<p>通过引入 <strong>混合演化范式</strong>（结合强化学习的个体适应与遗传算法的族群突变），我观察到了显著的&quot;数字达尔文主义&quot;现象。</p>
+<ul>
+<li>经过数千代的优化，一个特定的&quot;超级谱系&quot;表现出了极强的环境塑性。</li>
+<li>在与随机权重的族群竞争中，该谱系最终占据了 <strong>100% 的生态位</strong>，展现了学习进化带来的绝对生存优势。</li>
+</ul>
+<hr>
+<p><strong>开源与存档</strong>：</p>
+<p>该项目已在 <strong>Zenodo</strong> 存档并获得 DOI 认证：<code>10.5281/zenodo.18397035</code>。</p>
+<p>源代码也已正式开源：<a href="https://github.com/geyuxu/yuxus-life-of-game">github.com/geyuxu/yuxus-life-of-game</a></p>
+
+</body>
+</html>

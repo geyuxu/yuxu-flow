@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding Multi-Language AI Translation to My Blog | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2026-01-28
+tags: [ai, translation, cloudflare-workers, javascript, llm]
+description: Adding real-time AI translation to a static blog with GPT-4o-mini and Cloudflare Workers, supporting 10 languages with dual-layer caching.</h2>
+<h1>Adding Multi-Language AI Translation to My Blog</h1>
+<p>After implementing the <a href="/blog/post.html?p=posts/2026/ai-assistant-rag">RAG-powered AI assistant</a>, I wanted to make my blog content accessible to a global audience. Instead of manually translating each post, I built an on-demand AI translation system that supports 10 languages.</p>
+<h2>The Goal</h2>
+<p>Create a seamless translation experience:</p>
+<ul>
+<li>Translate any blog post to 10 major languages on demand</li>
+<li>Preserve Markdown formatting (headers, code blocks, links)</li>
+<li>Cache translations to minimize API costs</li>
+<li>Show loading feedback during translation</li>
+</ul>
+<h2>Architecture</h2>
+<pre><code><span class="line">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="line">│                     Browser (Frontend)                          │</span>
+<span class="line">├─────────────────────────────────────────────────────────────────┤</span>
+<span class="line">│  Language Selector ──▶ Check localStorage cache                 │</span>
+<span class="line">│         │                     │                                 │</span>
+<span class="line">│         │◀── Cache hit ───────┘                                 │</span>
+<span class="line">│         │                                                       │</span>
+<span class="line">│         ▼ Cache miss                                            │</span>
+<span class="line">│  POST /api/translate { content, targetLang, slug }              │</span>
+<span class="line">└─────────┼───────────────────────────────────────────────────────┘</span>
+<span class="line">          │</span>
+<span class="line">          ▼</span>
+<span class="line">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="line">│              Cloudflare Worker (/api/translate)                 │</span>
+<span class="line">│  ┌─────────────────┐        ┌─────────────────┐                 │</span>
+<span class="line">│  │  Check KV Cache │───hit──▶│  Return cached  │                 │</span>
+<span class="line">│  └────────┬────────┘        └─────────────────┘                 │</span>
+<span class="line">│           │ miss                                                │</span>
+<span class="line">│           ▼                                                     │</span>
+<span class="line">│  ┌─────────────────┐        ┌─────────────────┐                 │</span>
+<span class="line">│  │ Call OpenAI API │───────▶│ Cache in KV     │                 │</span>
+<span class="line">│  │  (gpt-4o-mini)  │        │ (30 days TTL)   │                 │</span>
+<span class="line">│  └─────────────────┘        └─────────────────┘                 │</span>
+<span class="line">└─────────────────────────────────────────────────────────────────┘</span></code></pre>
+<h2>Supported Languages</h2>
+<p>The system supports 10 languages covering most of the world&#39;s population:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Language</th>
+<th>Code</th>
+<th>Language</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>en</td>
+<td>English</td>
+<td>fr</td>
+<td>Français</td>
+</tr>
+<tr>
+<td>zh</td>
+<td>中文</td>
+<td>de</td>
+<td>Deutsch</td>
+</tr>
+<tr>
+<td>ja</td>
+<td>日本語</td>
+<td>pt</td>
+<td>Português</td>
+</tr>
+<tr>
+<td>ko</td>
+<td>한국어</td>
+<td>ru</td>
+<td>Русский</td>
+</tr>
+<tr>
+<td>es</td>
+<td>Español</td>
+<td>ar</td>
+<td>العربية</td>
+</tr>
+</tbody></table>
+<h2>Implementation</h2>
+<h3>1. Language Selector UI</h3>
+<p>A clean dropdown that appears on every blog post:</p>
+<pre><code class="language-html"><span class="line">&lt;div class=&quot;lang-selector&quot; id=&quot;lang-selector&quot;&gt;</span>
+<span class="line">    &lt;span class=&quot;lang-selector-label&quot;&gt;</span>
+<span class="line">        &lt;svg&gt;&lt;!-- translate icon --&gt;&lt;/svg&gt;</span>
+<span class="line">        Language</span>
+<span class="line">    &lt;/span&gt;</span>
+<span class="line">    &lt;select class=&quot;lang-select&quot; id=&quot;lang-select&quot;&gt;</span>
+<span class="line">        &lt;option value=&quot;en&quot;&gt;🇺🇸 English&lt;/option&gt;</span>
+<span class="line">        &lt;option value=&quot;zh&quot;&gt;🇨🇳 中文&lt;/option&gt;</span>
+<span class="line">        &lt;option value=&quot;ja&quot;&gt;🇯🇵 日本語&lt;/option&gt;</span>
+<span class="line">        &lt;!-- ... more languages --&gt;</span>
+<span class="line">    &lt;/select&gt;</span>
+<span class="line">    &lt;button class=&quot;lang-original-btn&quot; id=&quot;lang-original-btn&quot;&gt;</span>
+<span class="line">        Show Original</span>
+<span class="line">    &lt;/button&gt;</span>
+<span class="line">    &lt;span class=&quot;lang-status&quot; id=&quot;lang-status&quot;&gt;&lt;/span&gt;</span>
+<span class="line">&lt;/div&gt;</span></code></pre>
+<h3>2. Loading Animation</h3>
+<p>A CSS-only spinner that shows during translation:</p>
+<pre><code class="language-css"><span class="line">.lang-status.translating {</span>
+<span class="line">    color: var(--vermilion);</span>
+<span class="line">    display: flex;</span>
+<span class="line">    align-items: center;</span>
+<span class="line">    gap: 0.5rem;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">.lang-status.translating::before {</span>
+<span class="line">    content: &#39;&#39;;</span>
+<span class="line">    width: 14px;</span>
+<span class="line">    height: 14px;</span>
+<span class="line">    border: 2px solid #f0f0f0;</span>
+<span class="line">    border-top-color: var(--vermilion);</span>
+<span class="line">    border-radius: 50%;</span>
+<span class="line">    animation: spin 0.8s linear infinite;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">@keyframes spin {</span>
+<span class="line">    to { transform: rotate(360deg); }</span>
+<span class="line">}</span></code></pre>
+<h3>3. Dual-Layer Caching Strategy</h3>
+<p>To minimize API costs, I implemented caching at two levels:</p>
+<p><strong>Frontend (localStorage)</strong> - 7 day TTL:</p>
+<pre><code class="language-javascript"><span class="line">function getTranslationCache(key) {</span>
+<span class="line">    const raw = localStorage.getItem(key);</span>
+<span class="line">    if (!raw) return null;</span>
+<span class="line"></span>
+<span class="line">    const data = JSON.parse(raw);</span>
+<span class="line">    if (Date.now() - data.timestamp &gt; 7 * 24 * 60 * 60 * 1000) {</span>
+<span class="line">        localStorage.removeItem(key);</span>
+<span class="line">        return null;</span>
+<span class="line">    }</span>
+<span class="line">    return data.content;</span>
+<span class="line">}</span></code></pre>
+<p><strong>Backend (Cloudflare KV)</strong> - 30 day TTL:</p>
+<pre><code class="language-javascript"><span class="line">// Check cache</span>
+<span class="line">const cached = await env.TRANSLATIONS.get(cacheKey);</span>
+<span class="line">if (cached) {</span>
+<span class="line">    return Response.json({ translated: cached, cached: true });</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// After translation, cache result</span>
+<span class="line">await env.TRANSLATIONS.put(cacheKey, translated, {</span>
+<span class="line">    expirationTtl: 30 * 24 * 60 * 60</span>
+<span class="line">});</span></code></pre>
+<h3>4. Translation API (Cloudflare Worker)</h3>
+<p>The worker handles translation requests with careful prompt engineering:</p>
+<pre><code class="language-javascript"><span class="line">if (path === &quot;/api/translate&quot;) {</span>
+<span class="line">    const { content, targetLang, slug } = await request.json();</span>
+<span class="line"></span>
+<span class="line">    const response = await fetch(&quot;https://api.openai.com/v1/chat/completions&quot;, {</span>
+<span class="line">        method: &quot;POST&quot;,</span>
+<span class="line">        headers: {</span>
+<span class="line">            &quot;Authorization&quot;: `Bearer ${env.OPENAI_API_KEY}`,</span>
+<span class="line">            &quot;Content-Type&quot;: &quot;application/json&quot;,</span>
+<span class="line">        },</span>
+<span class="line">        body: JSON.stringify({</span>
+<span class="line">            model: &quot;gpt-4o-mini&quot;,</span>
+<span class="line">            messages: [{</span>
+<span class="line">                role: &quot;system&quot;,</span>
+<span class="line">                content: `You are a professional translator. Translate to ${langName}.</span>
+<span class="line"></span>
+<span class="line">Rules:</span>
+<span class="line">- Preserve all Markdown formatting</span>
+<span class="line">- Keep code blocks unchanged</span>
+<span class="line">- Keep technical terms in original form when appropriate</span>
+<span class="line">- Do not add explanations</span>
+<span class="line">- Return only the translated content`</span>
+<span class="line">            }, {</span>
+<span class="line">                role: &quot;user&quot;,</span>
+<span class="line">                content</span>
+<span class="line">            }],</span>
+<span class="line">            max_tokens: 4096,</span>
+<span class="line">            temperature: 0.3,</span>
+<span class="line">        }),</span>
+<span class="line">    });</span>
+<span class="line"></span>
+<span class="line">    const data = await response.json();</span>
+<span class="line">    return Response.json({ translated: data.choices[0].message.content });</span>
+<span class="line">}</span></code></pre>
+<h3>5. Smart Language Detection</h3>
+<p>The frontend auto-detects the original language to set the correct default:</p>
+<pre><code class="language-javascript"><span class="line">function detectLanguage(text) {</span>
+<span class="line">    const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;</span>
+<span class="line">    const totalChars = text.length;</span>
+<span class="line">    if (chineseChars / totalChars &gt; 0.3) return &#39;zh&#39;;</span>
+<span class="line">    return &#39;en&#39;;</span>
+<span class="line">}</span></code></pre>
+<h2>Key Design Decisions</h2>
+<ol>
+<li><p><strong>Translate Markdown, not HTML</strong>: When available, I translate the raw Markdown source and re-render it. This preserves formatting better than translating rendered HTML.</p>
+</li>
+<li><p><strong>Low temperature (0.3)</strong>: Translation needs consistency, not creativity. A low temperature produces more reliable results.</p>
+</li>
+<li><p><strong>Content hash for cache keys</strong>: Using <code>slug_hash_lang</code> as the cache key ensures that if the original content changes, the translation cache is automatically invalidated.</p>
+</li>
+<li><p><strong>Optional KV binding</strong>: The worker works without KV storage - it just won&#39;t have server-side caching. This makes development easier.</p>
+</li>
+</ol>
+<h2>Cost Analysis</h2>
+<p>Using <code>gpt-4o-mini</code> for translation:</p>
+<ul>
+<li>Average blog post: ~3000 tokens input, ~3000 tokens output</li>
+<li>Cost per translation: ~$0.003</li>
+<li>With caching, repeated requests are free</li>
+</ul>
+<p>For a blog with moderate traffic, expect &lt; $5/month in translation costs.</p>
+<h2>Future Improvements</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Pre-translate popular posts at build time</li>
+<li><input disabled="" type="checkbox"> Add streaming for long articles</li>
+<li><input disabled="" type="checkbox"> Support RTL languages (Arabic) with proper CSS</li>
+<li><input disabled="" type="checkbox"> Add translation quality feedback</li>
+</ul>
+<p>The complete implementation is in my <a href="https://github.com/geyuxu/yuxu.ge">website repository</a>.</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

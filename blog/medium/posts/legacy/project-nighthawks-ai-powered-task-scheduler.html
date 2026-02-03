@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nighthawks项目揭秘：构建下一代AI智能任务调度系统</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, ai, python, fastapi, system design, devops, openai]
+legacy: true</h2>
+<h1>Nighthawks项目揭秘：构建下一代AI智能任务调度系统</h1>
+<ul>
+<li><strong>🤖 AI驱动的调度</strong>：集成OpenAI GPT和Graphiti知识图谱，实现从自然语言到Cron表达式的智能转换。</li>
+<li><strong>🧠 上下文感知执行</strong>：任务执行不再是孤立的，系统能够记忆历史执行模式，并根据上下文进行优化。</li>
+<li><strong>🏗️ 企业级架构</strong>：基于FastAPI构建，采用微服务设计，支持Docker和Kubernetes进行高可用、可扩展的生产环境部署。</li>
+<li><strong>📊 全面可观测性</strong>：深度集成Prometheus和Grafana，提供从应用到系统的全方位监控。</li>
+<li><strong>🔒 多层安全防护</strong>：提供JWT、API密钥、角色权限控制等全面的安全机制。</li>
+</ul>
+<h2>系统架构深度剖析</h2>
+<p>Nighthawks的架构设计遵循高可用、可扩展、安全可靠的原则。下面是其分层架构的概览。</p>
+<pre><code>
++--------------------------------+
+|      用户界面与接入层          |
+|  +-----------+   +-----------+ |
+|  | Web界面   |-->| RESTful API | |
+|  +-----------+   +-----------+ |
++--------------------------------+
+                 |
+                 v
++--------------------------------+
+|      应用服务层 (FastAPI)      |
+|  +-----------+                 |
+|  |  主应用   |-----------------+
+|  +-----------+                 |
+|   | |   |   |                  |
+|   v v   v   v                  |
+| [认证][调度器][NLP][指标]      |
++--------------------------------+
+    |      |      |      |
+    |      |      |      +------>[Prometheus]-->[Grafana]
+    |      |      |
+    |      |      +------------->[AI智能层: OpenAI, Graphiti]
+    |      |
+    |      +--------------------->[AI Agent]
+    |      +--------------------->[执行日志]
+    |
+    +---------------------------->[数据存储: PostgreSQL, Redis]
+
+</code></pre>
+
+<h3>关键模块解析</h3>
+<ol>
+<li><p><strong>自然语言处理模块 (NLP)</strong>
+这是系统的“大脑”。当用户输入 &quot;每周五下午5点生成并发送销售报告&quot; 时，该模块会调用OpenAI GPT模型，不仅解析出Cron表达式 <code>0 17 * * 5</code>，还会提取出核心任务 <code>生成并发送销售报告</code> 作为AI Agent的执行指令。我们通过精心设计的Prompt Engineering，使其解析准确率达到了95%以上。</p>
+</li>
+<li><p><strong>AI Agent与知识图谱</strong>
+每个任务都由一个独立的AI Agent负责执行。这个Agent在执行前会查询<strong>Graphiti知识图谱</strong>，获取与该任务相关的历史信息、用户偏好或上下文数据。例如，如果之前的报告因数据源延迟而失败，Agent可能会自动学习到在执行前先检查数据源状态。这种机制使得Nighthawks具备了持续学习和进化的能力。</p>
+</li>
+<li><p><strong>任务调度器 (APScheduler)</strong>
+我们选择APScheduler作为底层的执行引擎，它提供了稳定可靠的分布式任务调度能力。AI层负责“决定做什么和什么时候做”，而调度器则负责“准时执行”。</p>
+</li>
+<li><p><strong>数据模型 (SQLModel)</strong>
+我们使用SQLModel来定义数据结构，它结合了Pydantic和SQLAlchemy的优点，提供了类型安全的ORM操作，极大地提升了开发效率和代码健壮性。</p>
+</li>
+</ol>
+<h2>技术栈亮点</h2>
+<p><img src="__TABLE_-4ba9369__" alt="Table"></p><h2>从想法到现实：一个使用示例</h2>
+<p>让我们通过一个具体的例子，看看Nighthawks是如何工作的。</p>
+<p><strong>1. 用户输入自然语言指令：</strong></p>
+<blockquote><code>curl -X POST http://localhost:9527/api/v1/nlp/parse \</code><br>
+<code>  -d &#039;{&quot;text&quot;: &quot;每个工作日的早上9点，检查服务器健康状况并发送邮件通知&quot;}&#039;</code></blockquote><p><strong>2. Nighthawks的AI进行解析：</strong></p>
+<p>系统返回结构化的任务定义：</p>
+<blockquote><code>{</code><br>
+<code>  &quot;success&quot;: true,</code><br>
+<code>  &quot;task_name&quot;: &quot;服务器健康检查&quot;,</code><br>
+<code>  &quot;cron_expression&quot;: &quot;0 9 * * 1-5&quot;,</code><br>
+<code>  &quot;agent_prompt&quot;: &quot;检查服务器健康状况，并将结果通过邮件发送给管理员。&quot;,</code><br>
+<code>  &quot;confidence&quot;: 0.98</code><br>
+<code>}</code></blockquote><p><strong>3. 创建并调度任务：</strong></p>
+<p>用户确认后，该任务被持久化到数据库，并由APScheduler进行调度。</p>
+<p><strong>4. 任务执行：</strong></p>
+<p>在每个工作日的早上9点，调度器触发对应的AI Agent。Agent首先查询知识图谱，可能会发现“上周的服务器B在9点时CPU占用率很高”，于是它会优先检查服务器B。执行完健康检查后，它会生成报告并通过邮件发送。所有执行的细节，包括Token消耗、执行时长等，都会被记录下来用于未来的优化。</p>
+<h2>结语</h2>
+<p>Nighthawks项目不仅仅是一次技术上的探索，更是我们对于未来自动化工作模式的一次思考。它证明了通过将大型语言模型、知识图谱与传统软件工程相结合，我们能够创造出远比以往更智能、更人性化的工具。</p>
+<p>我们相信，未来的软件将不再仅仅是冰冷的指令执行者，而是能够理解、学习并与人类高效协作的智能伙伴。Nighthawks正是朝着这个方向迈出的坚实一步。</p>
+
+</body>
+</html>

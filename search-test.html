@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Test | yuxu.ge</title>
+    <link rel="stylesheet" href="/components/search.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background: #f4f4f4;
+        }
+        h1 { margin-bottom: 1rem; }
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .status.loading { background: #fff3cd; color: #856404; }
+        .status.ready { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .test-queries {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #fff;
+            border-radius: 8px;
+        }
+        .test-queries h3 { margin-bottom: 0.5rem; }
+        .test-queries button {
+            margin: 0.25rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+        }
+        .test-queries button:hover {
+            background: #f0f0f0;
+        }
+        .note {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #e7f3ff;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vector Search Test</h1>
+
+    <div id="status" class="status loading">Loading search index...</div>
+
+    <div id="search-container"></div>
+
+    <div class="test-queries">
+        <h3>Test Queries:</h3>
+        <button onclick="testSearch('rate limiting')">rate limiting</button>
+        <button onclick="testSearch('coordinate transformation')">coordinate transformation</button>
+        <button onclick="testSearch('HTTP connection pool')">HTTP connection pool</button>
+        <button onclick="testSearch('geocoding API')">geocoding API</button>
+        <button onclick="testSearch('缓存穿透')">缓存穿透</button>
+        <button onclick="testSearch('useEffect依赖')">useEffect依赖</button>
+        <button onclick="testSearch('Docker镜像安全')">Docker镜像安全</button>
+    </div>
+
+    <div class="note">
+        <strong>Note:</strong> Search queries are processed via Cloudflare Worker.
+        Make sure to update <code>workerUrl</code> in <code>search-client.js</code> with your Worker URL.
+    </div>
+
+    <script type="module">
+        import { SearchClient, SearchUI } from '/components/search-client.js';
+
+        const statusEl = document.getElementById('status');
+
+        // Initialize search client
+        const client = new SearchClient();
+
+        try {
+            await client.init();
+            statusEl.textContent = '✓ Search index loaded! Start searching.';
+            statusEl.className = 'status ready';
+
+            // Create search UI
+            const ui = new SearchUI('search-container', client);
+            ui.render();
+
+            // Expose for test buttons
+            window.testSearch = async (query) => {
+                const input = document.querySelector('.search-input');
+                input.value = query;
+                input.dispatchEvent(new Event('input'));
+            };
+
+        } catch (err) {
+            statusEl.textContent = `✗ Error: ${err.message}`;
+            statusEl.className = 'status error';
+            console.error(err);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cassandra 索引重建实践</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2022-04-01
+tags: [search]
+legacy: true</h2>
+<h1>Cassandra 索引重建实践</h1>
+<p>值得注意的是，Cassandra 二级索引并不适合所有查询场景。如果滥用，可能导致写入性能下降（因为每次写入还需更新索引表），查询延迟增大，甚至给集群增加负担。在 Cassandra 3.x 中，引入了 SAI（Storage-Attached Indexing）等改进的索引机制，但经典的二级索引仍然被广泛使用。理解其工作原理有助于判断何时该使用索引、何时应考虑其他方案。</p>
+<h2>为什么需要手动重建索引</h2>
+<p>理想情况下，Cassandra 的二级索引会随着数据更新自动维护，不需要额外干预。然而，在实际生产环境中，可能出现索引异常或性能问题，需要我们手动干预重建索引。以下是常见的原因：</p>
+<ul>
+<li>索引不一致或损坏：由于集群故障、Bug 或其它异常情况，索引数据可能与实际数据不同步。例如，某些写入在索引表中未正确记录，导致通过索引查询无法找到实际存在的数据，或者已经删除的数据仍通过索引查询出现。这种索引数据不一致的情况需要重建索引来修复。</li>
+<li>性能下降：长时间运行后，索引表可能积累大量过期或无效条目（例如对应已删除或过期的数据），从而充斥大量墓碑（tombstone）记录，影响查询性能。如果索引列上的数据分布发生显著变化（例如大量插入删除），索引的查询效率可能下降。这时，重新索引可以清理无效数据、压缩索引结构，从而提升性能。</li>
+<li>数据批量导入或迁移：在通过 SSTable 离线导入数据、节点扩容/缩容或灾备数据恢复等操作后，二级索引可能没有及时构建完全。例如，将某节点数据文件拷贝恢复到新集群时，索引数据不会自动生成，需要手动重建索引以涵盖所有导入的数据。</li>
+<li>索引设计调整：有时为了优化查询，我们可能修改索引策略或列。在删除旧索引、更换新索引时，手动删除和重建索引是必要步骤。此外，Cassandra 提供了 nodetool rebuild_index 命令，可以在不删除索引定义的情况下重建索引，但在某些版本中可能不稳定。所以，删除后重新创建 often 是更直接可靠的做法。</li>
+</ul>
+<p>总之，当出现索引无法正常服务（查询结果不正确或超时）或者索引本身导致写入/读取性能显著下降时，手动重建索引是一种有效的修复手段。</p>
+<h2>索引重建的实践步骤</h2>
+<p>下面以实际案例为背景，介绍 Cassandra 二级索引重建的一般步骤和实践方法。假设我们在 Keyspace keyspace_xxx 的表 table_xxx 上有一个索引 index_xxx，索引目标列为 field_xxx。近期监控发现，针对该索引列的查询出现异常（查询不到应有的数据），同时写入延迟升高，怀疑索引出现问题。我们计划在维护时间窗对其进行重建。大体步骤如下：</p>
+<h3>确认索引状况</h3>
+<p>在动手之前，先评估索引的当前状态。例如，可以登录节点服务器检查索引文件占用的磁盘大小，以评估索引规模。Cassandra 的数据目录通常位于 <code>.../data/data/&lt;keyspace&gt;/&lt;table&gt; </code>下，其中二级索引数据会存储在类似 <code>&lt;table&gt;.&lt;index_name&gt;</code> 的子目录中。通过如下一条命令可以查看索引相关目录大小：</p>
+<blockquote><code>cd /path/to/cassandra-data/data/data/keyspace_xxx</code><br>
+<code>du -h --max-depth=1 | grep index_xxx</code></blockquote><p>如果发现索引数据文件异常庞大（例如数十GB），或与预期不符，说明索引可能累积了大量历史数据。这进一步佐证了需要重建索引的判断。</p>
+<h3>通知并停止相关应用</h3>
+<p>因为重建索引需要删除并重新创建索引，在此过程中依赖该索引的查询将不可用。为避免影响业务，应该提前通知相关方并在维护窗口执行。关闭或暂停使用该索引的应用服务（例如我们的案例中相关的 service_xxx 等微服务）以避免在索引重建期间收到错误查询结果。同时停止写入该表的数据也有助于保证重建期间数据一致性（虽然Cassandra允许在线重建索引，但静默数据环境下操作风险更低）。</p>
+<h3>连接到 Cassandra 集群</h3>
+<p>使用 CQL 工具或驱动连接到 Cassandra 执行索引重建操作。可以通过 cqlsh 连接，或者如下一样使用 Python Driver 脚本连接。这里以 cqlsh 为例：</p>
+<p><code>$ cqlsh 10.x.x.x    # 连接到集群某节点的 CQL 接口，IP已脱敏为10.x.x.x</code></p><p>连接后，切换到目标 Keyspace：</p>
+<p><code>USE keyspace_xxx;</code></p><h3>备份表模式（可选）</h3>
+<p>在删除索引前，建议使用 DESCRIBE TABLE table_xxx; 保存表的 schema 定义。这有助于了解表结构和索引信息，防止误操作。如果需要，也可以备份当前索引的定义。</p>
+<h3>删除索引</h3>
+<p>执行索引删除语句，将异常的索引移除：</p>
+<p><code>DROP INDEX IF EXISTS index_xxx;</code></p><p>使用 IF EXISTS 可以避免索引不存在时的错误。删除索引会从系统中移除索引的元数据，并触发集群各节点删掉本地索引数据（这个过程可能需要一点时间来清理磁盘上的索引SSTable文件）。</p>
+<h3>创建索引</h3>
+<p>确认索引已删除后，重新创建索引：</p>
+<p><code>CREATE INDEX index_xxx ON table_xxx (field_xxx);</code></p><p>Cassandra 会为已有的数据异步重建索引。在我们案例中，索引重建开始后，集群各节点会扫描表 table_xxx 上的 field_xxx 列数据并插入索引条目。这个过程对大表来说可能比较耗时。在重建过程中，新的索引查询可能仍然无法返回完整结果，直到重建完成。</p>
+<h3>监控重建进度</h3>
+<p>索引创建语句提交后，需等待索引重建完成。可以通过以下方式监控：</p>
+<ul>
+<li>日志观察：检查各节点的 Cassandra 日志（system.log），搜索关于索引重建的消息。例如 Cassandra 会记录索引建立完成的时间点。我们的实践中，从开始到索引构建完毕耗时约数小时，需耐心等待。</li>
+<li>目录大小变化：再次查看数据目录中索引目录的大小增长情况。如果索引文件大小趋于稳定，且接近原表数据体量的预期比例，表明重建接近完成。</li>
+<li>性能监控：重建索引期间，节点 CPU 和 IO 可能显著升高。待这些指标恢复正常水平，也暗示重建结束。</li>
+</ul>
+<h3>验证索引</h3>
+<p>索引重建完成后，使用查询验证索引是否正常工作。可以使用之前存在的一些实际值进行测试。例如，我们知道在表 table_xxx 中存在一条记录，其 field_xxx 字段值为 &#39;some_value&#39;（这里用示例值代替实际值）。我们尝试用索引列来查询它：</p>
+<blockquote><code>SELECT * </code><br>
+<code>FROM table_xxx </code><br>
+<code>WHERE field_xxx = &#039;some_value&#039; </code><br>
+<code>LIMIT 1;</code></blockquote><p>如果返回结果包含该记录（或至少不再超时），说明索引查询功能恢复正常。对于数值类型的字段查询时无需加引号，这里要根据字段类型调整查询语句。</p>
+<h3>恢复应用服务</h3>
+<p>确认索引功能恢复后，重新启动先前暂停的应用服务。例如：</p>
+<blockquote><code># 重启相关应用服务</code><br>
+<code>$ cd /path/to/service_xxx1 &amp;&amp; sh startup.sh start</code><br>
+<code>$ cd /path/to/service_xxx2 &amp;&amp; sh startup.sh start</code><br>
+<code>$ cd /path/to/service_xxx3 &amp;&amp; sh startup.sh start</code></blockquote><p>让应用重新与 Cassandra 建立连接，并验证业务查询正常。此时索引重建流程全部完成。</p>
+<p>经过上述步骤，我们成功修复并重建了 Cassandra 的二级索引 index_xxx。在实践中，我们的索引在 DROP 时释放了大量磁盘空间，重建后查询恢复正常、写入性能也有所改善。这印证了手动重建索引在解决索引异常问题上的有效性。</p>
+<h2>Python索引重建自动化小工具</h2>
+<p>上述过程可以通过人工逐步执行，但在某些情况下，我们希望将其工具化，以便更快捷且可重复地对索引进行操作。下面提供一个使用 Python 和 DataStax Cassandra Driver (cassandra-driver) 的小工具示例，用于自动化地连接集群并重建指定索引。这个脚本可以执行以下工作：</p>
+<ul>
+<li>连接 Cassandra 集群（支持指定节点地址列表）。</li>
+<li>删除指定索引（若存在）。</li>
+<li>创建指定索引。</li>
+<li>（可选）使用给定的测试值查询索引列，验证索引是否有效。</li>
+</ul>
+<p>在使用该脚本之前，请确保已通过 pip install cassandra-driver 安装 Cassandra Python 驱动，并根据需要配置好 Cassandra 集群的网络连通性和认证信息（如果集群启用了用户名/密码验证，需要在代码中添加认证支持，例如使用 PlainTextAuthProvider）。</p>
+<p>下面是脚本源码：</p>
+<blockquote><code>#!/usr/bin/env python3</code><br>
+<code># -*- coding: utf-8 -*-</code><br>
+<code>&quot;&quot;&quot;</code><br>
+<code>Cassandra 二级索引重建工具</code><br>
+<code>&quot;&quot;&quot;</code><br>
+<code>import argparse</code><br>
+<code>from cassandra.cluster import Cluster</code><br>
+<code># 如果需要认证，可启用以下导入并在 Cluster 时加入 auth_provider</code><br>
+<code># ... (50 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/b7b7602e9074c45c157ad5089cac64b6">GitHub Gist</a></em></p><p>上述脚本通过命令行参数指定要连接的节点、Keyspace、表、列和索引名称，并执行重建操作。我们使用 DROP INDEX IF EXISTS 确保在索引存在时删除它，随后用 CREATE INDEX 重建。cassandra-driver 会等待集群元数据同步（Schema agreement），确保索引在整个集群中创建。注意：创建索引会立即返回，但索引的数据重建在后台异步进行，因此脚本返回后索引可能还在构建中；如果数据量大，可能需要等待一段时间才能查询出结果。</p>
+<p>在验证环节中，若提供了 --test-value 参数，脚本会使用该值对索引列执行一次查询（等价于 SELECT ... WHERE column = &#39;value&#39; LIMIT 1），并输出是否查找到结果。这可以简单地检验索引查询是否生效。但需要注意，这个验证依赖于提供的值确实存在于表中。如果值不存在或者索引尚未完全重建，查询可能得不到结果。</p>
+<h2>示例：使用Python脚本重建索引</h2>
+<p>假设我们希望对前述的 index_xxx 索引执行重建，索引目标列 field_xxx 我们已知存在值 &#39;some_value&#39; 用于测试。集群的某节点 IP 为 10.x.x.x（已脱敏）。我们可以按照如下方式运行脚本：</p>
+<blockquote><code>$ python cass_rebuild_index.py \</code><br>
+<code>    --hosts 10.x.x.x \</code><br>
+<code>    --keyspace keyspace_xxx \</code><br>
+<code>    --table table_xxx \</code><br>
+<code>    --column field_xxx \</code><br>
+<code>    --index index_xxx \</code><br>
+<code>    --test-value some_value</code></blockquote><p>运行后，脚本会依次输出连接信息、索引删除/创建进度以及验证结果。例如，预期输出如下：</p>
+<blockquote><code>Connected to cluster at [&#039;10.x.x.x&#039;], keyspace keyspace_xxx  </code><br>
+<code>Index index_xxx dropped (if existed).  </code><br>
+<code>Index index_xxx created on table_xxx(field_xxx).  </code><br>
+<code>Index query successful, found field_xxx = some_value.  </code><br>
+<code>Index rebuild completed.  </code></blockquote><p>从输出可以看到索引已成功重建，并且能够通过索引查询到测试值。此时，我们还需要留意实际集群中索引重建的完成情况。如果数据量很大，脚本可能在索引完全建好之前就返回了“查询成功”（因为刚好测试值所在的部分已经建索引完成）。对于生产环境中的大型索引，建议在脚本执行后，通过监控或日志进一步确认索引重建的完成，然后再恢复业务流量。</p>
+<h2>结论</h2>
+<p>在 Cassandra 集群中，二级索引的异常修复与重建是一项需要谨慎对待的维护操作。本文通过介绍 Cassandra 和二级索引的原理，阐述了手动重建索引的原因和重要性，并给出了实际操作步骤和自动化脚本示例。在实际应用中，我们应尽量避免二级索引失效或性能问题的发生，例如合理评估索引列的基数和查询模式，定期关注索引相关的监控指标。一旦索引出现问题，按照上述流程重建索引能够有效恢复集群的查询能力。但需要注意的是，重建索引对集群有一定性能影响，应在业务低谷期进行，并做好应用停机或流量切换的准备。</p>
+<p>通过对 Cassandra 索引重建实践 的深入了解，我们可以更从容地应对分布式数据库运维中的索引挑战，保障数据库服务的稳定可靠运行。</p>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Claude Code to Notion MCP with a Single Command</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, claude, notion, api, automation, cli, mcp]
+legacy: true</h2>
+<h1>Connect Claude Code to Notion MCP with a Single Command</h1>
+<p>Let&#39;s get started.</p>
+<h2>2. Prerequisites</h2>
+<p>Before you begin, please ensure you&#39;ve completed these two simple preparation steps.</p>
+<h3>2.1 Update Claude CLI / Desktop</h3>
+<p>MCP (Message-based Communication Protocol) is a newer feature in Claude Code that manages secure communication with external services. Please ensure your client is updated to a recent version (<strong>≥ v0.7.0</strong>) to support this feature.</p>
+<p><strong>For CLI Users:</strong></p>
+<p>Open your terminal and run the following command to upgrade:</p>
+<p><code>pip install --upgrade claude-cli</code></p><p><strong>For Claude Desktop Users:</strong></p>
+<p>Open the desktop application and check for updates via the menu bar to ensure you are running the latest version.</p>
+<h3>2.2 Check Your Notion Permissions</h3>
+<p>To allow Claude to access your Notion content, you will need to:</p>
+<ol>
+<li><strong>Have the right permissions</strong>: Ensure you are an Admin or Member of the Notion workspace you want Claude to operate on.</li>
+<li><strong>Pre-select the authorization scope</strong>: Think about which specific pages or databases you want to grant Claude access to. A best practice is to create a dedicated database (e.g., named &quot;AI Drafts&quot;) or a top-level page (e.g., &quot;Claude Inbox&quot;) and grant the Claude Integration access only to that specific scope. This adheres to the principle of least privilege.</li>
+</ol>
+<h2>3. Add the MCP Server with a Single Command</h2>
+<p>With the prerequisites out of the way, open your terminal and execute this single, crucial command:</p>
+<p><code>claude mcp add --transport http notion https://mcp.notion.com/mcp</code></p><p>Let&#39;s break down this command:</p>
+<ul>
+<li><code>claude mcp add</code>: This is the <code>claude-cli</code> instruction for adding a new MCP service.</li>
+<li><code>--transport http</code>: Specifies the communication protocol as standard HTTP/S requests. This is the most common and versatile method.</li>
+<li><code>notion</code>: This is the <strong>local alias</strong> you are setting for this connection. You can name it whatever you like, such as <code>my-notion</code> or <code>work-notion</code>. All future commands related to Notion will use this alias as a prefix (e.g., <code>notion.help</code>).</li>
+<li><code>https://mcp.notion.com/mcp</code>: This is the official public MCP endpoint provided by Claude for connecting to Notion. It&#39;s a secure, cloud-hosted proxy that handles the OAuth flow and data exchange between Claude and the Notion API.</li>
+</ul>
+<blockquote>
+<p><strong>Advanced Option</strong>: If you prefer using Server-Sent Events (SSE) for a more real-time, bidirectional communication experience, you can adjust the command to:
+<code>claude mcp add --transport sse notion https://mcp.notion.com/mcp/sse</code></p>
+</blockquote>
+<p>After executing the command, the CLI will confirm that the MCP server has been added, but its status will be &quot;unconnected&quot; for now.</p>
+<h2>4. The First-Time OAuth Authorization Flow</h2>
+<p>Now, we need to trigger an authorization flow so that Notion knows you are allowing Claude to access your account.</p>
+<ol>
+<li><p>In your Claude conversation or terminal, try to call any tool command that starts with the alias you just set. The simplest one is to ask for help:</p>
+<p><code>notion.help</code></p></li>
+<li><p>At this point, the Claude CLI or desktop app will detect that the <code>notion</code> service is not yet authorized and will <strong>automatically open your default browser</strong>, redirecting you to Notion&#39;s login and authorization page.</p>
+</li>
+<li><p>In the browser, log in to your Notion account (if you aren&#39;t already), select the <strong>Workspace</strong> you want to authorize, and then choose the <strong>specific pages or databases</strong> you wish to grant access to.</p>
+</li>
+<li><p>Click the <strong>&quot;Allow access&quot;</strong> button.</p>
+</li>
+<li><p>After successful authorization, the browser will display a success page, indicating that you can return to your application. You can now close this browser tab.</p>
+</li>
+</ol>
+<p>Back in Claude, the connection has been established silently in the background. You haven&#39;t touched a single API Token throughout this entire secure process.</p>
+<h2>5. Verifying the Connection</h2>
+<p>How can you confirm the connection was successful? We can use the <code>mcp</code> subcommand to check. Note that the following commands <strong>only check the status and will not write to or modify any of your Notion content</strong>.</p>
+<p>First, list all configured MCP services:</p>
+<p><code>claude mcp list</code></p><p>You should see the <code>notion</code> service you just added, along with its communication method:</p>
+<blockquote><code>Available MCP servers:</code><br>
+<code>- notion (http)</code></blockquote><p>Next, get the detailed information for the <code>notion</code> service:</p>
+<p><code>claude mcp get notion</code></p><p>You will see a JSON output, where the most important field is <code>status</code>. If everything went well, it should show as <code>connected</code>.</p>
+<blockquote><code>{</code><br>
+<code>  &quot;name&quot;: &quot;notion&quot;,</code><br>
+<code>  &quot;transport&quot;: &quot;http&quot;,</code><br>
+<code>  &quot;url&quot;: &quot;https://mcp.notion.com/mcp&quot;,</code><br>
+<code>  &quot;status&quot;: &quot;connected&quot;,</code><br>
+<code>  &quot;last_error&quot;: null</code><br>
+<code>}</code></blockquote><p>If you see <code>status: &quot;connected&quot;</code>, congratulations! Claude now has the ability to communicate securely with your Notion account.</p>
+<h2>6. Common Issues &amp; Troubleshooting</h2>
+<p>If you encounter problems during setup, refer to the table below for troubleshooting.</p>
+<p><img src="__TABLE_7437fa8e__" alt="Table"></p><h2>7. What&#39;s Next (A Teaser)</h2>
+<p>Now that the bridge is built, a wide range of automation possibilities are open for exploration. In upcoming articles, we will demonstrate how to use this connection to do some really cool things:</p>
+<ul>
+<li><strong>Manage notes and tasks</strong>: Use tools like <code>notion.create_page</code>, <code>notion.append_block_children</code>, and <code>notion.search</code> to create, update, and find Notion content directly from your conversation.</li>
+<li><strong>Build an automation pipeline</strong>: Combine this with local file system tools to create a &quot;Markdown → Notion&quot; summarization pipeline that automatically summarizes local <code>*.md</code> files and writes the content to a Notion database.</li>
+<li><strong>Self-host an MCP service</strong>: For developers with special requirements (like private deployments, offline environments, or enterprise compliance), we will explore how to self-host an MCP server for a fully controllable, end-to-end connection.</li>
+</ul>
+<h2>8. Conclusion</h2>
+<p>With just <strong>one command</strong> and a simple <strong>OAuth web authorization</strong>, we have established a trusted connection between Claude and Notion. This modern integration method does away with the cumbersome and insecure process of manually managing access tokens.</p>
+<p>This connection is the bedrock for all future Notion automation. Your Claude is now ready to become your true Notion assistant.</p>
+<p>In the next article, we will dive deep into how to actually call Notion&#39;s various tool commands to perform content creation, queries, and synchronization. Stay tuned!</p>
+
+</body>
+</html>

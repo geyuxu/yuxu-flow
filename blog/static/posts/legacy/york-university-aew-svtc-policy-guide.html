@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解构约克大学双轨制：学术参与与签证合规深度指南 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2025-07-24
+tags: [manage]
+legacy: true</h2>
+<h1>解构约克大学双轨制：学术参与与签证合规深度指南</h1>
+<h2>2. 核心支柱一：学术参与与健康福祉政策 (AEW) 精解</h2>
+<p>AEW 是保障学生学术体验与个人福祉的基础框架，其监测要点构成了整个系统的&quot;数据源&quot;。</p>
+<h3>课堂参与监测 (Attendance Monitoring)</h3>
+<p>学生必须使用大学的 Check-In 系统为所有线下教学活动（如讲座、研讨会）进行电子打卡。系统会自动记录出勤情况。一旦出现缺勤，院系将通过邮件发出初步提醒。若低出勤率持续，将触发正式的风险评估，并可能启动个案干预程序。</p>
+<h3>学业进度跟踪 (Assessment Submission)</h3>
+<p>所有计分评估（作业、论文等）的提交状态都会被系统记录。未能按时提交将会被标记。多次或连续的缺交行为将被视为潜在的学术脱节信号，院系学术支持团队将介入，以了解情况并提供帮助，防止问题升级。</p>
+<h3>学术督导互动 (Academic Supervision)</h3>
+<p>定期的导师互动是学术引导和支持的关键环节。</p>
+<ul>
+<li><strong>授课型硕士 (PGT):</strong> 要求每学期至少进行 2 次学术督导，其中至少 1 次为线下一对一会面。在暑期毕业设计/论文阶段，则要求至少有 3 个&quot;参与点&quot;(engagement points)。</li>
+<li><strong>研究型学生 (PGR):</strong> 要求与导师保持更频繁的联系，通常为每 6-7 周一次，确保全年不少于 8 次正式督导。此外，每半年需举行一次正式的学业进展评估会议 (TAP)。</li>
+</ul>
+<p>所有督导记录必须在会面后两周内由导师或学生录入 eVision 或 SkillsForge 系统。</p>
+<h3>早期支持机制 (Early Support)</h3>
+<p>该政策强调以公平和包容为原则。当学生因健康或其他合理原因影响学术参与时，学校提供评估延期 (extension)、自我证明病假 (self-certification)，以及链接到学生福利与支持中心 (Student Hub) 等多种支持路径。</p>
+<h2>3. 核心支柱二：学生签证条款 (SVTC) 详解</h2>
+<p>SVTC 是国际学生必须严格遵守的法律义务清单，直接关系到签证的有效性。</p>
+<h3>CAS 与签证的专属性 (CAS &amp; Visa Usage)</h3>
+<p>学生的 CAS (Confirmation of Acceptance for Studies) 具有高度专属性，仅可用于申请其录取通知书上指定的约克大学课程。任何更换学校或专业的决定，通常需要重新申请签证。违规使用将导致大学向 UKVI 报告，现有签证和学籍可能被终止。</p>
+<h3>身份文件验证 (Document Upload &amp; Verification)</h3>
+<p>学生有责任在开课前通过 eVision 系统上传签证申请凭证。抵达英国后，必须在三周内携带护照、签证批文 (BRP letter) 等所有相关文件原件，亲身参加校内的学生签证注册 (Student Visa Registration) 以完成身份验证。未能按时完成验证，可能导致强制退学。</p>
+<h3>学术参与的移民合规 (Attendance &amp; Engagement for Compliance)</h3>
+<p>SVTC 明确要求国际学生必须完全遵守 AEW 的所有监测流程。任何由 AEW 系统标记的缺勤或学术脱节，都会自动触发移民合规团队的审查。若学生对校方的联系持续不作回应，大学有法律义务向 UKVI 报告，这可能对签证状态产生严重影响。</p>
+<h3>个人信息变更申报 (Reporting Changes in Circumstances)</h3>
+<p>学生必须在 10 个工作日内，通过 eVision 系统主动向学校申报任何关键信息变更。这包括但不限于：课程或研究方向的重大调整、学习/研究地点的变更、签证类型的更新、参加带薪实习 (placement) 或休学/延期等。瞒报或漏报将被视为违反签证条款。</p>
+<h3>在英工作限制 (Work Restrictions)</h3>
+<p>学生必须严格遵守签证上注明的每周工作时数上限和工作类型限制。从事超出许可范围的雇佣活动属于严重违规，一旦发现，大学有权撤销其学生签证担保 (Sponsorship)。</p>
+<h2>4. 双轨协同：政策如何联动运行</h2>
+<p>AEW 和 SVTC 通过数据共享和流程衔接，形成一个从预警到干预再到合规上报的闭环。</p>
+<h3>数据联动：从学术监测到合规审查</h3>
+<p>AEW 系统产生的出勤打卡、作业提交和导师会面记录，是 SVTC 判断学生是否&quot;真实并持续参与学习&quot;的核心证据链。当学术支持团队发现学生可能脱离学术轨道时，会同步知会签证合规团队，共同评估潜在的移民风险。</p>
+<h3>逐级响应的风险管理机制</h3>
+<p>系统被设计为分级响应模式：</p>
+<ul>
+<li><strong>一级（预警）:</strong> 轻微或单次缺勤，触发院系自动邮件提醒。</li>
+<li><strong>二级（干预）:</strong> 持续缺勤或无回应，升级至学生支持团队进行人工介入和沟通。</li>
+<li><strong>三级（合规）:</strong> 若学生情况仍无改善且无法取得联系，签证合规团队 (Visa Compliance Team) 将正式介入，并根据法律义务决定是否向 UKVI 报告。</li>
+</ul>
+<h3>灵活的豁免与记录机制</h3>
+<p>该体系并非僵化不变。如学生因健康问题需要缺勤，可以通过自我证明或官方的请假流程 (Leave of Absence) 来暂停 AEW 的&quot;缺勤计数&quot;。然而，所有此类申请和批准都必须在 eVision 系统中留下正式记录，以满足 SVTC 的文档存证义务，证明缺勤的合理性。</p>
+<h2>5. 实用清单：关键时间点的核心操作</h2>
+<table>
+<thead>
+<tr>
+<th align="left">时间节点 (Timeline)</th>
+<th align="left">核心操作 (Core Actions)</th>
+<th align="left">对应政策条款 (Corresponding Policy Clauses)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>抵英前</strong></td>
+<td align="left">在 eVision 系统上传：签证申请证明、ATAS 证书 (如适用)、护照个人信息页扫描件。</td>
+<td align="left">SVTC § 5-9, 16-18</td>
+</tr>
+<tr>
+<td align="left"><strong>到校三周内</strong></td>
+<td align="left">携带所有签证和身份文件原件，参加 Student Visa Registration，完成身份验证并激活 Check-In 账户。</td>
+<td align="left">SVTC § 10-12</td>
+</tr>
+<tr>
+<td align="left"><strong>学期进行中</strong></td>
+<td align="left">为所有线下课程 Check-In 打卡；按时提交所有评估；每学期与导师会面至少 2 次并确保记录在案。</td>
+<td align="left">AEW § 25 a-c</td>
+</tr>
+<tr>
+<td align="left"><strong>任何信息变更时</strong></td>
+<td align="left">在 10 个工作日内，通过 eVision 报告课程、地点、签证或就业状态的任何变化。</td>
+<td align="left">SVTC &quot;Changes in circumstances&quot;</td>
+</tr>
+</tbody></table>
+<h2>6. 寻求支持：关键联系方式与求助渠道</h2>
+<ul>
+<li><strong>签证合规团队 (Visa Compliance Team):</strong> 处理所有与签证条款、合规审查及向 UKVI 报告相关的问题。<ul>
+<li><strong>邮箱:</strong> <a href="mailto:student-visa@york.ac.uk">student-visa@york.ac.uk</a></li>
+<li><strong>电话:</strong> +44 (0)1904 328 025</li>
+</ul>
+</li>
+<li><strong>移民法律咨询服务 (Immigration Advice Service):</strong> 为学生提供专业的移民法律建议，尤其适用于拒签、行政复议或复杂的 ATAS 问题。</li>
+<li><strong>学生福利与学术支持中心 (Student Hub):</strong> 提供一站式支持，包括申请评估延期、心理健康辅导、残障服务等。</li>
+<li><strong>院系办公室 / 学术导师:</strong> 处理日常学术问题的首要联系人，如短期缺勤、课程理解困难等。</li>
+</ul>
+<h2>7. 关键提醒：规避风险的四个要点</h2>
+<h3>签到打卡：不可忽视的核心证据链</h3>
+<p>Check-In 记录是证明你积极参与学习的最直接证据。任何&quot;忘记打卡&quot;都可能在后续的合规审查中造成不必要的麻烦。务必养成准时打卡的习惯。</p>
+<h3>文件更新：保持信息的即时性</h3>
+<p>一旦更换了新护照、获得了新的签证卡 (BRP) 或更新了 ATAS 证书，必须第一时间上传至 eVision 系统。信息的滞后可能导致记录不符。</p>
+<h3>主动沟通：预防问题升级的最佳策略</h3>
+<p>在遇到任何可能影响学术参与的困难时（无论是健康、家庭还是学业问题），提前、主动地与你的学术导师或相关支持部门沟通。绝大多数问题在早期沟通后都能得到妥善解决，远胜于事后被动解释。</p>
+<h3>关注政策动态：保持信息同步</h3>
+<p>UKVI 的移民法规和大学的执行细则都可能发生变化。定期查收学校邮件，并留意官网 AEW 和 SVTC 页面的更新，是每位学生的责任。</p>
+<h2>结论</h2>
+<p>约克大学的 AEW 与 SVTC 政策共同构成了一个旨在保障学生福祉与维护法律合规的严谨体系。对国际学生而言，成功的关键在于理解并融入这个体系。通过在日常学习中坚持**&quot;按时打卡、准时提交、记录督导、主动报备&quot;**这四个简单原则，便能轻松实现学术与签证的双重合规。当挑战出现时，请牢记，大学的众多支持渠道为你而设。尽早求助，不仅能保护你的学业，更能捍卫你的签证安全。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

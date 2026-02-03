@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding Multi-Language AI Translation to My Blog</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2026-01-28
+tags: [ai, translation, cloudflare-workers, javascript, llm]
+description: Adding real-time AI translation to a static blog with GPT-4o-mini and Cloudflare Workers, supporting 10 languages with dual-layer caching.</h2>
+<h1>Adding Multi-Language AI Translation to My Blog</h1>
+<p>After implementing the <a href="/blog/post.html?p=posts/2026/ai-assistant-rag">RAG-powered AI assistant</a>, I wanted to make my blog content accessible to a global audience. Instead of manually translating each post, I built an on-demand AI translation system that supports 10 languages.</p>
+<h2>The Goal</h2>
+<p>Create a seamless translation experience:</p>
+<ul>
+<li>Translate any blog post to 10 major languages on demand</li>
+<li>Preserve Markdown formatting (headers, code blocks, links)</li>
+<li>Cache translations to minimize API costs</li>
+<li>Show loading feedback during translation</li>
+</ul>
+<h2>Architecture</h2>
+<blockquote><code>┌─────────────────────────────────────────────────────────────────┐</code><br>
+<code>│                     Browser (Frontend)                          │</code><br>
+<code>├─────────────────────────────────────────────────────────────────┤</code><br>
+<code>│  Language Selector ──▶ Check localStorage cache                 │</code><br>
+<code>│         │                     │                                 │</code><br>
+<code>│         │◀── Cache hit ───────┘                                 │</code><br>
+<code>│         │                                                       │</code><br>
+<code>│         ▼ Cache miss                                            │</code><br>
+<code># ... (16 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/658ffd157eb0c43f14c9430f963bdd9b">GitHub Gist</a></em></p><h2>Supported Languages</h2>
+<p>The system supports 10 languages covering most of the world&#39;s population:</p>
+<p><img src="__TABLE_464e2d11__" alt="Table"></p><h2>Implementation</h2>
+<h3>1. Language Selector UI</h3>
+<p>A clean dropdown that appears on every blog post:</p>
+<blockquote><code>&lt;div class=&quot;lang-selector&quot; id=&quot;lang-selector&quot;&gt;</code><br>
+<code>    &lt;span class=&quot;lang-selector-label&quot;&gt;</code><br>
+<code>        &lt;svg&gt;&lt;!-- translate icon --&gt;&lt;/svg&gt;</code><br>
+<code>        Language</code><br>
+<code>    &lt;/span&gt;</code><br>
+<code>    &lt;select class=&quot;lang-select&quot; id=&quot;lang-select&quot;&gt;</code><br>
+<code>        &lt;option value=&quot;en&quot;&gt;🇺🇸 English&lt;/option&gt;</code><br>
+<code>        &lt;option value=&quot;zh&quot;&gt;🇨🇳 中文&lt;/option&gt;</code><br>
+<code># ... (8 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/2233e2e6eb84fd4886e889fb8f68e74f">GitHub Gist</a></em></p><h3>2. Loading Animation</h3>
+<p>A CSS-only spinner that shows during translation:</p>
+<blockquote><code>.lang-status.translating {</code><br>
+<code>    color: var(--vermilion);</code><br>
+<code>    display: flex;</code><br>
+<code>    align-items: center;</code><br>
+<code>    gap: 0.5rem;</code><br>
+<code>}</code><br>
+<code></code><br>
+<code>.lang-status.translating::before {</code><br>
+<code># ... (12 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/caafe8de61eef1cc159f30cfd5661355">GitHub Gist</a></em></p><h3>3. Dual-Layer Caching Strategy</h3>
+<p>To minimize API costs, I implemented caching at two levels:</p>
+<p><strong>Frontend (localStorage)</strong> - 7 day TTL:</p>
+<blockquote><code>function getTranslationCache(key) {</code><br>
+<code>    const raw = localStorage.getItem(key);</code><br>
+<code>    if (!raw) return null;</code><br>
+<code></code><br>
+<code>    const data = JSON.parse(raw);</code><br>
+<code>    if (Date.now() - data.timestamp &gt; 7 * 24 * 60 * 60 * 1000) {</code><br>
+<code>        localStorage.removeItem(key);</code><br>
+<code>        return null;</code><br>
+<code>    }</code><br>
+<code>    return data.content;</code><br>
+<code>}</code></blockquote><p><strong>Backend (Cloudflare KV)</strong> - 30 day TTL:</p>
+<blockquote><code>// Check cache</code><br>
+<code>const cached = await env.TRANSLATIONS.get(cacheKey);</code><br>
+<code>if (cached) {</code><br>
+<code>    return Response.json({ translated: cached, cached: true });</code><br>
+<code>}</code><br>
+<code></code><br>
+<code>// After translation, cache result</code><br>
+<code>await env.TRANSLATIONS.put(cacheKey, translated, {</code><br>
+<code>    expirationTtl: 30 * 24 * 60 * 60</code><br>
+<code>});</code></blockquote><h3>4. Translation API (Cloudflare Worker)</h3>
+<p>The worker handles translation requests with careful prompt engineering:</p>
+<blockquote><code>if (path === &quot;/api/translate&quot;) {</code><br>
+<code>    const { content, targetLang, slug } = await request.json();</code><br>
+<code></code><br>
+<code>    const response = await fetch(&quot;https://api.openai.com/v1/chat/completions&quot;, {</code><br>
+<code>        method: &quot;POST&quot;,</code><br>
+<code>        headers: {</code><br>
+<code>            &quot;Authorization&quot;: `Bearer ${env.OPENAI_API_KEY}`,</code><br>
+<code>            &quot;Content-Type&quot;: &quot;application/json&quot;,</code><br>
+<code># ... (25 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/e1c82d7c1efa8574ad80b4950cd0010d">GitHub Gist</a></em></p><h3>5. Smart Language Detection</h3>
+<p>The frontend auto-detects the original language to set the correct default:</p>
+<blockquote><code>function detectLanguage(text) {</code><br>
+<code>    const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;</code><br>
+<code>    const totalChars = text.length;</code><br>
+<code>    if (chineseChars / totalChars &gt; 0.3) return &#039;zh&#039;;</code><br>
+<code>    return &#039;en&#039;;</code><br>
+<code>}</code></blockquote><h2>Key Design Decisions</h2>
+<ol>
+<li><p><strong>Translate Markdown, not HTML</strong>: When available, I translate the raw Markdown source and re-render it. This preserves formatting better than translating rendered HTML.</p>
+</li>
+<li><p><strong>Low temperature (0.3)</strong>: Translation needs consistency, not creativity. A low temperature produces more reliable results.</p>
+</li>
+<li><p><strong>Content hash for cache keys</strong>: Using <code>slug_hash_lang</code> as the cache key ensures that if the original content changes, the translation cache is automatically invalidated.</p>
+</li>
+<li><p><strong>Optional KV binding</strong>: The worker works without KV storage - it just won&#39;t have server-side caching. This makes development easier.</p>
+</li>
+</ol>
+<h2>Cost Analysis</h2>
+<p>Using <code>gpt-4o-mini</code> for translation:</p>
+<ul>
+<li>Average blog post: ~3000 tokens input, ~3000 tokens output</li>
+<li>Cost per translation: ~$0.003</li>
+<li>With caching, repeated requests are free</li>
+</ul>
+<p>For a blog with moderate traffic, expect &lt; $5/month in translation costs.</p>
+<h2>Future Improvements</h2>
+<ul>
+<li><input disabled="" type="checkbox"> Pre-translate popular posts at build time</li>
+<li><input disabled="" type="checkbox"> Add streaming for long articles</li>
+<li><input disabled="" type="checkbox"> Support RTL languages (Arabic) with proper CSS</li>
+<li><input disabled="" type="checkbox"> Add translation quality feedback</li>
+</ul>
+<p>The complete implementation is in my <a href="https://github.com/geyuxu/yuxu.ge">website repository</a>.</p>
+
+</body>
+</html>

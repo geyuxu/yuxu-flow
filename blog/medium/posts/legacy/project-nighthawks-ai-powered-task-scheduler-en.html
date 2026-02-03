@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unveiling Project Nighthawks: Building the Next-Generation AI-Powered Task Scheduler</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, ai, python, fastapi, system design, devops, openai]
+legacy: true</h2>
+<h1>Unveiling Project Nighthawks: Building the Next-Generation AI-Powered Task Scheduler</h1>
+<ul>
+<li><strong>🤖 AI-Driven Scheduling</strong>: Integrates OpenAI GPT and the Graphiti knowledge graph to achieve intelligent conversion from natural language to Cron expressions.</li>
+<li><strong>🧠 Context-Aware Execution</strong>: Task execution is no longer isolated; the system can remember historical execution patterns and optimize based on context.</li>
+<li><strong>🏗️ Enterprise-Grade Architecture</strong>: Built on FastAPI with a microservices design, supporting high-availability, scalable production deployments with Docker and Kubernetes.</li>
+<li><strong>📊 Comprehensive Observability</strong>: Deeply integrated with Prometheus and Grafana to provide full-stack monitoring from the application to the system level.</li>
+<li><strong>🔒 Multi-Layered Security</strong>: Offers comprehensive security mechanisms, including JWT, API keys, and role-based access control.</li>
+</ul>
+<h2>A Deep Dive into the System Architecture</h2>
+<p>The architecture of Nighthawks is designed on principles of high availability, scalability, and security. Below is an overview of its layered architecture.</p>
+<pre><code>
++--------------------------------+
+|        UI & Access Layer       |
+|  +-----------+   +-----------+ |
+|  |  Web UI   |-->| RESTful API | |
+|  +-----------+   +-----------+ |
++--------------------------------+
+                 |
+                 v
++--------------------------------+
+| Application Service Layer (FastAPI) |
+|  +-----------+                 |
+|  | Main App  |-----------------+
+|  +-----------+                 |
+|   | |   |   |                  |
+|   v v   v   v                  |
+| [Auth][Scheduler][NLP][Metrics]|
++--------------------------------+
+    |      |      |      |
+    |      |      |      +------>[Prometheus]-->[Grafana]
+    |      |      |
+    |      |      +------------->[AI Layer: OpenAI, Graphiti]
+    |      |
+    |      +--------------------->[AI Agent]
+    |      +--------------------->[Execution Logs]
+    |
+    +---------------------------->[Data Storage: PostgreSQL, Redis]
+
+</code></pre>
+
+<h3>Key Module Analysis</h3>
+<ol>
+<li><p><strong>Natural Language Processing (NLP) Module</strong>
+This is the &quot;brain&quot; of the system. When a user inputs &quot;Generate and send the sales report every Friday at 5 PM,&quot; this module calls the OpenAI GPT model. It not only parses the Cron expression <code>0 17 * * 5</code> but also extracts the core task &quot;generate and send sales report&quot; as the execution directive for the AI Agent. Through carefully designed Prompt Engineering, we have achieved a parsing accuracy of over 95%.</p>
+</li>
+<li><p><strong>AI Agent and Knowledge Graph</strong>
+Each task is executed by an independent AI Agent. Before execution, this Agent queries the <strong>Graphiti knowledge graph</strong> to retrieve relevant historical information, user preferences, or contextual data for the task. For example, if a previous report failed due to data source delays, the Agent might automatically learn to check the data source status before execution. This mechanism enables Nighthawks to have continuous learning and evolution capabilities.</p>
+</li>
+<li><p><strong>Task Scheduler (APScheduler)</strong>
+We chose APScheduler as the underlying execution engine. It provides stable and reliable distributed task scheduling capabilities. The AI layer is responsible for &quot;deciding what to do and when,&quot; while the scheduler is responsible for &quot;executing on time.&quot;</p>
+</li>
+<li><p><strong>Data Model (SQLModel)</strong>
+We use SQLModel to define our data structures. It combines the advantages of Pydantic and SQLAlchemy, providing type-safe ORM operations that significantly improve development efficiency and code robustness.</p>
+</li>
+</ol>
+<h2>Technology Stack Highlights</h2>
+<p><img src="__TABLE_-b858420__" alt="Table"></p><h2>From Idea to Reality: A Usage Example</h2>
+<p>Let&#39;s walk through a concrete example to see how Nighthawks works.</p>
+<p><strong>1. User inputs a natural language command:</strong></p>
+<blockquote><code>curl -X POST http://localhost:9527/api/v1/nlp/parse \</code><br>
+<code>  -d &#039;{&quot;text&quot;: &quot;Check server health and send an email notification every weekday at 9 AM&quot;}&#039;</code></blockquote><p><strong>2. Nighthawks&#39; AI parses the request:</strong></p>
+<p>The system returns a structured task definition:</p>
+<blockquote><code>{</code><br>
+<code>  &quot;success&quot;: true,</code><br>
+<code>  &quot;task_name&quot;: &quot;Server Health Check&quot;,</code><br>
+<code>  &quot;cron_expression&quot;: &quot;0 9 * * 1-5&quot;,</code><br>
+<code>  &quot;agent_prompt&quot;: &quot;Check server health status and email the results to the administrator.&quot;,</code><br>
+<code>  &quot;confidence&quot;: 0.98</code><br>
+<code>}</code></blockquote><p><strong>3. Create and schedule the task:</strong></p>
+<p>After user confirmation, the task is persisted to the database and scheduled by APScheduler.</p>
+<p><strong>4. Task execution:</strong></p>
+<p>At 9 AM every weekday, the scheduler triggers the corresponding AI Agent. The Agent first queries the knowledge graph and might discover that &quot;Server B had high CPU usage at 9 AM last week,&quot; so it prioritizes checking Server B. After completing the health check, it generates a report and sends it via email. All execution details, including token consumption and execution time, are logged for future optimization.</p>
+<h2>Conclusion</h2>
+<p>The Nighthawks project is more than just a technical exploration; it is a reflection on the future of automated work patterns. It demonstrates that by combining large language models, knowledge graphs, and traditional software engineering, we can create tools that are far more intelligent and user-friendly than ever before.</p>
+<p>We believe that the software of the future will no longer be just a cold executor of instructions but an intelligent partner capable of understanding, learning, and collaborating efficiently with humans. Nighthawks is a solid step in this direction.</p>
+
+</body>
+</html>

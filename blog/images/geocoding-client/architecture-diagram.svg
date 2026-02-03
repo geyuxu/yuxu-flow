@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a365d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c5282;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="moduleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f7fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#edf2f7;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" fill="#f8fafc"/>
+  
+  <!-- Main Container -->
+  <rect x="40" y="30" width="720" height="420" rx="12" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+  
+  <!-- Header -->
+  <rect x="40" y="30" width="720" height="50" rx="12" fill="url(#headerGrad)"/>
+  <rect x="40" y="60" width="720" height="20" fill="url(#headerGrad)"/>
+  <text x="400" y="62" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">SpatialDataEngine</text>
+  
+  <!-- Three Modules -->
+  <!-- CRS Module -->
+  <rect x="70" y="100" width="200" height="180" rx="8" fill="url(#moduleGrad)" stroke="#cbd5e0" stroke-width="1.5"/>
+  <rect x="70" y="100" width="200" height="36" rx="8" fill="#3182ce"/>
+  <rect x="70" y="128" width="200" height="8" fill="#3182ce"/>
+  <text x="170" y="124" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">CRS Module</text>
+  
+  <text x="170" y="165" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">WGS-84 ↔ GCJ-02</text>
+  <text x="170" y="185" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">Transformation</text>
+  <line x1="100" y1="200" x2="240" y2="200" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="170" y="225" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">Iterative Inversion</text>
+  <text x="170" y="245" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">tol &lt; 10⁻⁶ deg</text>
+  <text x="170" y="265" font-family="Arial, sans-serif" font-size="10" fill="#718096" text-anchor="middle">(~0.1m accuracy)</text>
+  
+  <!-- HTTP Client Module -->
+  <rect x="300" y="100" width="200" height="180" rx="8" fill="url(#moduleGrad)" stroke="#cbd5e0" stroke-width="1.5"/>
+  <rect x="300" y="100" width="200" height="36" rx="8" fill="#38a169"/>
+  <rect x="300" y="128" width="200" height="8" fill="#38a169"/>
+  <text x="400" y="124" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">HTTP Client</text>
+  
+  <text x="400" y="165" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">Connection Pool</text>
+  <text x="400" y="185" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">(pool_size=50)</text>
+  <line x1="330" y1="200" x2="470" y2="200" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="400" y="225" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">Exponential Backoff</text>
+  <text x="400" y="245" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">+ Jitter Retry</text>
+  <text x="400" y="265" font-family="Arial, sans-serif" font-size="10" fill="#718096" text-anchor="middle">(429, 5xx handling)</text>
+  
+  <!-- Rate Limiter Module -->
+  <rect x="530" y="100" width="200" height="180" rx="8" fill="url(#moduleGrad)" stroke="#cbd5e0" stroke-width="1.5"/>
+  <rect x="530" y="100" width="200" height="36" rx="8" fill="#d69e2e"/>
+  <rect x="530" y="128" width="200" height="8" fill="#d69e2e"/>
+  <text x="630" y="124" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Rate Limiter</text>
+  
+  <text x="630" y="165" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">Token Bucket</text>
+  <text x="630" y="185" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">Algorithm</text>
+  <line x1="560" y1="200" x2="700" y2="200" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="630" y="225" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">rate=100 QPS</text>
+  <text x="630" y="245" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" text-anchor="middle">capacity=200 (burst)</text>
+  <text x="630" y="265" font-family="Arial, sans-serif" font-size="10" fill="#718096" text-anchor="middle">(Local / Redis)</text>
+  
+  <!-- Arrows -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#718096"/>
+    </marker>
+  </defs>
+  
+  <!-- Arrow from HTTP Client to API -->
+  <line x1="400" y1="280" x2="400" y2="330" stroke="#718096" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrow from Rate Limiter to API (curved) -->
+  <path d="M 630 280 L 630 310 Q 630 320, 550 320 L 410 320" stroke="#718096" stroke-width="1.5" fill="none" stroke-dasharray="4,2"/>
+  <text x="520" y="312" font-family="Arial, sans-serif" font-size="9" fill="#718096">quota check</text>
+  
+  <!-- API Box -->
+  <rect x="200" y="340" width="400" height="80" rx="8" fill="#2d3748" filter="url(#shadow)"/>
+  <text x="400" y="375" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Geocoding API Provider</text>
+  <text x="400" y="400" font-family="Arial, sans-serif" font-size="12" fill="#a0aec0" text-anchor="middle">Amap · Baidu · Google Maps · Mapbox</text>
+  
+  <!-- Legend -->
+  <rect x="60" y="440" width="12" height="12" rx="2" fill="#3182ce"/>
+  <text x="80" y="450" font-family="Arial, sans-serif" font-size="10" fill="#4a5568">Coordinate Transform</text>
+  
+  <rect x="220" y="440" width="12" height="12" rx="2" fill="#38a169"/>
+  <text x="240" y="450" font-family="Arial, sans-serif" font-size="10" fill="#4a5568">Network Resilience</text>
+  
+  <rect x="380" y="440" width="12" height="12" rx="2" fill="#d69e2e"/>
+  <text x="400" y="450" font-family="Arial, sans-serif" font-size="10" fill="#4a5568">Traffic Control</text>
+  
+  <!-- Data flow labels -->
+  <text x="170" y="310" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">coords in/out</text>
+  <path d="M 170 280 L 170 340 Q 170 355, 200 355" stroke="#718096" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+</svg>

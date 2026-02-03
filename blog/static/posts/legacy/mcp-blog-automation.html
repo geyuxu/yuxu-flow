@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP-Blog：一键搞定 Astro 博客发布，告别繁琐流程 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [devops, mcp, astro, 自动化, github pages, devops]
+legacy: true</h2>
+<h1>MCP-Blog：一键搞定 Astro 博客发布，告别繁琐流程</h1>
+<ol>
+<li>在博客项目 <code>geyuxu.com</code> 中写完文章</li>
+<li>执行 <code>git add .</code>、<code>git commit -m &quot;...&quot;</code>、<code>git push</code> 将源码推送到主分支</li>
+<li>执行 <code>npm run build</code> 构建静态文件到 <code>dist</code> 目录</li>
+<li>将 <code>dist</code> 目录中的内容推送到 <code>gh-pages</code> 分支以完成部署</li>
+</ol>
+<p>这个过程不仅涉及多个命令，还可能因为 <code>dist</code> 目录未被 Git 正确管理而引发各种问题。更重要的是，我希望有一个&quot;管理中心&quot;来统一处理这类任务，而不是在项目目录中堆积各种脚本。</p>
+<p>于是，我创建了 <strong>MCP-Blog</strong> 项目。它的核心目标是：<strong>在一个独立的、专门的目录中，通过一个命令，自动化完成另一个目录（博客项目）的全部提交流程。</strong></p>
+<p>这解决了两大痛点：</p>
+<ol>
+<li><strong>操作隔离</strong>：将管理脚本与博客内容分离，保持博客仓库的纯净</li>
+<li><strong>流程自动化</strong>：将多步操作简化为一步，减少人为错误，提升效率</li>
+</ol>
+<h2>二、技术架构：MCP 的设计哲学</h2>
+<h3>什么是 MCP (Model Context Protocol)？</h3>
+<p>&quot;模型上下文协议&quot;（Model Context Protocol）并非一个公开的网络协议，而是我为本项目设计的一套<strong>命令行交互规范</strong>。它的核心思想是：</p>
+<blockquote>
+<p>让一个独立的执行脚本（模型），能够理解并操作特定上下文（Context）中的目标项目。</p>
+</blockquote>
+<p>在这个项目中：</p>
+<ul>
+<li><strong>模型 (Model)</strong>：就是我们的 <code>mcp-blog</code> 项目，它是一个主动的执行者</li>
+<li><strong>上下文 (Context)</strong>：指的是我们的 <code>geyuxu.com</code> 博客项目，它是被操作的对象</li>
+<li><strong>协议 (Protocol)</strong>：是我们定义的命令行接口和脚本执行逻辑。例如，<code>./mcp.sh &quot;commit message&quot;</code> 就是一个协议的实现</li>
+</ul>
+<h3>架构图</h3>
+<p>整个工作流非常直观：</p>
+<pre><code><span class="line">+-----------+       +-------------------------+       +---------------------+       +----------------+</span>
+<span class="line">|           |       |                         |       |                     |       |                |</span>
+<span class="line">|   用户     |------&gt;|  MCP 脚本 (mcp.sh)      |------&gt;|  Astro 博客项目     |------&gt;|  GitHub 仓库   |</span>
+<span class="line">|           |       |                         |       | (geyuxu.com)        |       | (main/gh-pages)|</span>
+<span class="line">+-----------+       +-------------------------+       +---------------------+       +----------------+</span>
+<span class="line">      |                        |                                |                           |</span>
+<span class="line">      | 1. 提供 commit 消息    | 2. cd 到博客目录              | 3. 执行 Git 操作 &amp; build | 4. 部署到 Pages</span>
+<span class="line">      |                        | 4. 执行部署命令               |                           |</span></code></pre>
+<p>这个架构的关键在于 <strong>MCP 脚本</strong> 如何有效地&quot;穿越&quot;到 <strong>Astro 博客项目</strong> 的目录中去执行操作。</p>
+<h2>三、实现细节：一步步构建自动化利器</h2>
+<p>现在，我们来看最核心的代码实现。整个项目由一个 Shell 脚本驱动。</p>
+<p><strong>项目结构:</strong></p>
+<pre><code><span class="line">/Users/geyuxu/repo/blog/</span>
+<span class="line">├── mcp-blog/         # MCP 项目</span>
+<span class="line">│   └── mcp.sh</span>
+<span class="line">└── geyuxu.com/       # Astro 博客项目</span>
+<span class="line">    ├── src/</span>
+<span class="line">    ├── public/</span>
+<span class="line">    ├── package.json</span>
+<span class="line">    └── ...</span></code></pre>
+<h3>1. 核心脚本 <code>mcp.sh</code></h3>
+<p>这是我们所有自动化的心脏。它负责接收参数、切换目录、执行命令和处理错误。</p>
+<pre><code class="language-bash"><span class="line">#!/bin/bash</span>
+<span class="line"></span>
+<span class="line"># 脚本出错时立即退出</span>
+<span class="line">set -e</span>
+<span class="line"></span>
+<span class="line"># --- 配置区 ---</span>
+<span class="line"># 定义 MCP 项目路径 (脚本所在位置)</span>
+<span class="line">MCP_PROJECT_PATH=&quot;/Users/geyuxu/repo/blog/mcp-blog&quot;</span>
+<span class="line"># 定义博客仓库路径 (需要操作的目标)</span>
+<span class="line">BLOG_REPO_PATH=&quot;/Users/geyuxu/repo/blog/geyuxu.com&quot;</span>
+<span class="line"># --- 配置区结束 ---</span>
+<span class="line"></span>
+<span class="line"># 1. 检查输入参数：必须提供 commit message</span>
+<span class="line">if [ -z &quot;$1&quot; ]; then</span>
+<span class="line">  echo &quot;❌ 错误: 请提供一个 commit message.&quot;</span>
+<span class="line">  echo &quot;用法: ./mcp.sh \&quot;你的提交信息\&quot;&quot;</span>
+<span class="line">  exit 1</span>
+<span class="line">fi</span>
+<span class="line"></span>
+<span class="line">COMMIT_MESSAGE=$1</span>
+<span class="line"></span>
+<span class="line">echo &quot;🚀 MCP-Blog 任务启动...&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line"></span>
+<span class="line"># 2. 跨目录权限管理与操作核心</span>
+<span class="line">echo &quot;📂 正在进入博客仓库目录: $BLOG_REPO_PATH&quot;</span>
+<span class="line">cd &quot;$BLOG_REPO_PATH&quot;</span>
+<span class="line"></span>
+<span class="line"># 3. Git 自动化操作：提交源码</span>
+<span class="line">echo &quot;🔄 正在同步源码到 main 分支...&quot;</span>
+<span class="line">git add .</span>
+<span class="line">git commit -m &quot;$COMMIT_MESSAGE&quot;</span>
+<span class="line">git push origin main</span>
+<span class="line"></span>
+<span class="line">echo &quot;✅ 源码同步完成。&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line"></span>
+<span class="line"># 4. Astro 博客系统集成：构建项目</span>
+<span class="line">echo &quot;🛠️  正在构建 Astro 项目...&quot;</span>
+<span class="line">npm run build</span>
+<span class="line"></span>
+<span class="line">echo &quot;✅ 构建完成。&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line"></span>
+<span class="line"># 5. GitHub Pages 部署</span>
+<span class="line">echo &quot;🚀 部署到 GitHub Pages...&quot;</span>
+<span class="line"># 这里我们使用 gh-pages 包来简化部署</span>
+<span class="line"># 它会自动将 dist 目录的内容推送到 gh-pages 分支</span>
+<span class="line">npm run deploy</span>
+<span class="line"></span>
+<span class="line">echo &quot;✅ 部署成功！&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line">echo &quot;🎉 所有任务完成，博客已更新！&quot;</span>
+<span class="line"></span>
+<span class="line"># 返回原始目录 (可选，良好实践)</span>
+<span class="line">cd &quot;$MCP_PROJECT_PATH&quot;</span></code></pre>
+<h3>2. 关键技术点解析</h3>
+<ul>
+<li><p><strong>跨目录权限管理 (<code>cd &quot;$BLOG_REPO_PATH&quot;</code>)</strong>:
+这看似简单的一行 <code>cd</code> 是实现跨目录操作的关键。脚本启动后，它首先将当前的工作目录切换到博客项目下。这样，后续所有的 <code>git</code> 和 <code>npm</code> 命令就好像是直接在 <code>geyuxu.com</code> 目录里执行的一样，自然就拥有了操作该目录文件的&quot;上下文权限&quot;。</p>
+</li>
+<li><p><strong>Git 自动化 (<code>git add/commit/push</code>)</strong>:
+脚本通过标准的 Git 命令来处理源码的提交。将 commit message 作为脚本的第一个参数 (<code>$1</code>) 传入，增加了灵活性。</p>
+</li>
+<li><p><strong>Astro 集成 (<code>npm run build</code>)</strong>:
+每个 Astro 项目都有一个 <code>build</code> 脚本定义在 <code>package.json</code> 中。我们的自动化脚本直接调用它，无需关心其内部复杂的构建过程，实现了完美的解耦。</p>
+</li>
+<li><p><strong>GitHub Pages 部署 (<code>npm run deploy</code>)</strong>:
+为了简化部署，我强烈推荐使用 <code>gh-pages</code> 这个 npm 包。</p>
+<p>首先，在你的 <strong>Astro 项目 (<code>geyuxu.com</code>)</strong> 中安装它：</p>
+<pre><code class="language-bash"><span class="line">npm install gh-pages --save-dev</span></code></pre>
+<p>然后，在 <code>geyuxu.com/package.json</code> 的 <code>scripts</code> 中添加一个 <code>deploy</code> 命令：</p>
+<pre><code class="language-json"><span class="line">{</span>
+<span class="line">  &quot;scripts&quot;: {</span>
+<span class="line">    &quot;dev&quot;: &quot;astro dev&quot;,</span>
+<span class="line">    &quot;start&quot;: &quot;astro dev&quot;,</span>
+<span class="line">    &quot;build&quot;: &quot;astro build&quot;,</span>
+<span class="line">    &quot;preview&quot;: &quot;astro preview&quot;,</span>
+<span class="line">    &quot;astro&quot;: &quot;astro&quot;,</span>
+<span class="line">    &quot;deploy&quot;: &quot;gh-pages -d dist&quot; </span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+<p><code>gh-pages -d dist</code> 命令会自动将 <code>dist</code> 目录的内容推送到名为 <code>gh-pages</code> 的分支。</p>
+</li>
+</ul>
+<h2>四、使用示例：如何运行 MCP-Blog</h2>
+<p>假设你已经完成了上述配置，现在发布一篇新博客就像呼吸一样简单。</p>
+<ol>
+<li><p><strong>赋予脚本执行权限</strong> (只需做一次):</p>
+<pre><code class="language-bash"><span class="line">cd /Users/geyuxu/repo/blog/mcp-blog</span>
+<span class="line">chmod +x mcp.sh</span></code></pre>
+</li>
+<li><p><strong>一键发布</strong>:
+当你在 <code>geyuxu.com</code> 中完成写作后，打开终端，执行以下命令：</p>
+<pre><code class="language-bash"><span class="line">./mcp.sh &quot;feat: 添加关于 MCP-Blog 的新文章&quot;</span></code></pre>
+</li>
+</ol>
+<p>然后，你就可以泡杯咖啡，看着终端自动完成所有工作：</p>
+<pre><code><span class="line">🚀 MCP-Blog 任务启动...</span>
+<span class="line">=================================</span>
+<span class="line">📂 正在进入博客仓库目录: /Users/geyuxu/repo/blog/geyuxu.com</span>
+<span class="line">🔄 正在同步源码到 main 分支...</span>
+<span class="line">[main 1234567] feat: 添加关于 MCP-Blog 的新文章</span>
+<span class="line"> 1 file changed, 1 insertion(+)</span>
+<span class="line"> ...</span>
+<span class="line">✅ 源码同步完成。</span>
+<span class="line">=================================</span>
+<span class="line">🛠️  正在构建 Astro 项目...</span>
+<span class="line">&gt; geyuxu.com@0.0.1 build</span>
+<span class="line">&gt; astro build</span>
+<span class="line">...</span>
+<span class="line">✅ 构建完成。</span>
+<span class="line">=================================</span>
+<span class="line">🚀 部署到 GitHub Pages...</span>
+<span class="line">&gt; geyuxu.com@0.0.1 deploy</span>
+<span class="line">&gt; gh-pages -d dist</span>
+<span class="line">Published</span>
+<span class="line">✅ 部署成功！</span>
+<span class="line">=================================</span>
+<span class="line">🎉 所有任务完成，博客已更新！</span></code></pre>
+<p>几分钟后，你的新文章就会出现在线上。</p>
+<h2>五、总结与展望</h2>
+<p><strong>MCP-Blog</strong> 项目通过一个简单的 Shell 脚本，成功地将复杂的博客发布流程自动化，实现了：</p>
+<ul>
+<li><strong>效率提升</strong>：将 5-6 个步骤简化为 1 个命令</li>
+<li><strong>降低错误率</strong>：程序化的操作避免了手动执行时的遗漏或失误</li>
+<li><strong>代码整洁</strong>：将管理逻辑与业务逻辑（博客内容）分离</li>
+</ul>
+<p><strong>未来可以探索的方向：</strong></p>
+<ol>
+<li><strong>功能增强</strong>：增加创建新文章的命令，例如 <code>./mcp.sh new &quot;文章标题&quot;</code>，自动生成带有 frontmatter 的 Markdown 模板</li>
+<li><strong>平台化</strong>：将 Shell 脚本升级为更健壮的 Node.js 或 Python CLI 工具，提供更丰富的交互和错误处理</li>
+<li><strong>CI/CD 集成</strong>：虽然本地脚本很方便，但最终极的自动化方案是将其迁移到 GitHub Actions。当 <code>main</code> 分支有新的 push 时，自动触发构建和部署流程</li>
+</ol>
+<p>希望这个小项目能给你带来启发。自动化是我们工程师的第二天性，把重复的工作交给机器，我们才能专注于创造更有价值的内容。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

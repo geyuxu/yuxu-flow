@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量处理证照图片的实战笔记：加水印、上传与批量SQL生成</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2021-01-25
+tags: [devops]
+legacy: true</h2>
+<h1>批量处理证照图片的实战笔记：加水印、上传与批量SQL生成</h1>
+<p>在处理前，需确保服务器已安装ImageMagick（如Ubuntu下执行apt-get install imagemagick）。接下来，我们编写一个简单的Shell脚本batch_watermark.sh，遍历目标目录下的所有图片文件，并对每个文件执行加水印操作。示例脚本代码如下：</p>
+<blockquote><code>#!/bin/bash</code><br>
+<code>WATERMARK=&quot;watermark.png&quot;               # 预先准备好的水印图片路径</code><br>
+<code>SRC_DIR=&quot;./cert_images_original&quot;        # 原始证照图片目录</code><br>
+<code>DST_DIR=&quot;./cert_images_watermarked&quot;     # 加水印后的输出目录</code><br>
+<code></code><br>
+<code>mkdir -p &quot;$DST_DIR&quot;</code><br>
+<code>for img in &quot;$SRC_DIR&quot;/*.jpg; do</code><br>
+<code>  filename=$(basename &quot;$img&quot;)</code><br>
+<code># ... (8 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/d19282ff07195240fd627b6d80ed2809">GitHub Gist</a></em></p><p>上述脚本对每张图片调用了一次ImageMagick的composite命令进行水印叠加：-gravity southeast指定将水印放置在原图的右下角，-dissolve 80表示水印的不透明度为80（数值越小表示水印越透明） 。我们将处理后的图片输出到新的目录以保留原始文件。脚本执行时会输出每个文件的处理结果，方便观察进度。</p>
+<p>经验提示： 批量处理前，先用几张样例图片测试脚本效果，检查水印位置和清晰度是否符合预期。如果需要调整水印大小或位置，可修改ImageMagick命令参数后再批量运行。</p>
+<h2>离线压缩与SCP传输</h2>
+<p>完成水印添加后，我们得到了一批已加水印的图片文件。下一步准备将这些文件上传到远程的对象存储服务器。考虑到直接逐文件传输效率较低，我们选择先在本地将所有图片打包压缩，然后通过scp一次性传输。在压缩过程中还顺便进一步减小了文件体积，减少上传耗时。</p>
+<p>具体做法是使用tar命令将目录打包并使用gzip压缩：</p>
+<blockquote><code># 将加水印后的图片目录打包压缩</code><br>
+<code>tar -czvf cert_images_watermarked.tar.gz ./cert_images_watermarked</code></blockquote><p>压缩完成后，会生成一个cert_images_watermarked.tar.gz文件。接着，使用scp将该文件传输到目标服务器（假设目标服务器域名为yourserver.example.com）：</p>
+<blockquote><code># 将压缩包通过scp传输到远程服务器</code><br>
+<code>scp cert_images_watermarked.tar.gz user@yourserver.example.com:/tmp/</code></blockquote><p>scp传输前请确保网络畅通、带宽充足。如果文件较大，添加-C参数还能在传输过程中启用压缩。传输完成后，在服务器上使用tar -xzvf解压出图片文件，以准备后续的上传入库步骤。</p>
+<p>注意： scp本身不支持断点续传，如果网络中断传输会从头开始 。因此对于几十GB的大文件，推荐使用支持断点续传的rsync工具进行传输，以避免中途中断造成重复耗时 。</p>
+<h2>图片上传至对象存储（Java 工具）</h2>
+<p>图片文件抵达服务器并解压后，需要批量上传到对象存储（如公司内部的云存储服务）。在本次实践中，我们编写了一个简单的Java小工具来完成批量上传。之所以使用Java，是因为项目现有的对象存储SDK和权限控制封装在Java环境中，利用现有接口可以确保上传过程安全可靠。</p>
+<p>上传流程概述： Java工具会读取指定目录下的所有图片文件，逐一调用对象存储的API上传。对于每个上传的文件，存储服务会返回一个访问URL或键值。我们将这些URL与对应的图片、门店信息关联起来，为生成数据库SQL做准备。伪代码流程如下：</p>
+<blockquote><code>List&lt;File&gt; files = listFiles(&quot;/tmp/cert_images_watermarked&quot;);</code><br>
+<code>for (File file : files) {</code><br>
+<code>    String key = file.getName();  // 使用文件名作为对象存储中的键</code><br>
+<code>    // 调用对象存储SDK上传文件并获取URL</code><br>
+<code>    String url = objectStorageClient.upload(file, key);</code><br>
+<code>    // 记录映射关系，后续用于生成SQL，例如保存在列表或写入文件</code><br>
+<code>    recordMapping(file.getName(), url);</code><br>
+<code>}</code></blockquote><p>实际实现中，objectStorageClient.upload封装了对象存储服务的HTTP上传过程，并返回文件的公网访问URL。为简化流程，我们直接用文件名作为存储键，这样URL往往可以由固定的域名加上文件名拼接得到。例如，如果对象存储的访问域名为<code>https://files.example.com/</code>, 某张图片文件<code>store001_license.jpg</code>上传后的访问路径可能为<code>https://files.example.com/store001_license.jpg</code>。这种命名策略使我们在生成SQL时无需额外查询映射，减少了工作量。</p>
+<p>批量上传时要考虑失败重试机制。例如可以对每个文件上传设置重试次数，或将失败的文件记录下来以便稍后手工或脚本重新上传，确保所有文件最终都成功进入对象存储。</p>
+<h2>批量生成SQL脚本</h2>
+<p>最后一项任务是根据上传后的图片信息生成对应的SQL插入语句，以将图片关联数据写入数据库中。我们需要针对每张证照图片生成一条INSERT语句，包含诸如门店ID、证照类型、图片URL等字段。由于图片数量多，手工编写SQL既繁琐又容易出错，因此再度借助脚本来批量生成。</p>
+<p>假设我们的数据库表结构为：store_certificates(store_id, cert_type, image_url, upload_date)，每条记录存储一个门店的一张证照图片及其类型。我们可以编写Shell脚本读取之前记录的文件名和URL映射关系，然后拼接SQL语句。以下是一个示例脚本generate_sql.sh片段：</p>
+<blockquote><code>#!/bin/bash</code><br>
+<code>OUTPUT_FILE=&quot;insert_pics.sql&quot;</code><br>
+<code>BASE_URL=&quot;https://files.example.com/&quot;  # 对象存储访问域名</code><br>
+<code></code><br>
+<code>&gt; $OUTPUT_FILE  # 清空输出文件</code><br>
+<code>for file_path in ./cert_images_watermarked/*.jpg; do</code><br>
+<code>  filename=$(basename &quot;$file_path&quot;)</code><br>
+<code>  # 假设文件名格式为 storeId_certCode.jpg，例如 &quot;001_yingye.jpg&quot;</code><br>
+<code>  store_id=$(echo &quot;$filename&quot; | cut -d&#039;_&#039; -f1)</code><br>
+<code>  cert_code=$(echo &quot;$filename&quot; | cut -d&#039;_&#039; -f2 | sed &#039;s/\..*//&#039;)</code><br>
+<code>  image_url=&quot;${BASE_URL}${filename}&quot;</code><br>
+<code>  echo &quot;INSERT INTO store_certificates (store_id, cert_type, image_url, upload_date) VALUES (&#039;$store_id&#039;, &#039;$cert_code&#039;, &#039;$image_url&#039;, NOW());&quot; &gt;&gt; $OUTPUT_FILE</code><br>
+<code>done</code><br>
+<code>echo &quot;生成完毕：`wc -l &lt; $OUTPUT_FILE` 条SQL语句已写入$OUTPUT_FILE&quot;</code></blockquote><p>这个脚本假定文件名中包含门店ID和证照类型编码（如001_yingye.jpg表示门店001的营业执照）。脚本通过字符串截取得到所需字段，并拼接生成INSERT语句，最终将所有语句输出到insert_pics.sql文件中。最后一行还简单打印了生成的SQL数量，便于核对。生成完成后，只需将该SQL脚本在目标数据库上执行，即可批量插入所有图片的记录。</p>
+<p>注意： 在生成SQL时，确保正确转义字符和引用字符串。例如，字符串值要用引号括起来，避免文件名中如果含特殊字符导致SQL语法错误。另外，大批量插入操作建议在业务低峰期进行，并做好备份。</p>
+<h2>遇到的问题及解决方案</h2>
+<p>在实际执行上述批处理流程时，我们也遇到了一些问题，以下列举几个典型问题和解决方案：</p>
+<ul>
+<li>脚本兼容性问题： 起初编写的Shell脚本在处理文件名包含空格或特殊符号的图片时失败。这是因为for循环分隔文件名时遇到了空格。解决方案： 在脚本中使用引号包裹文件路径变量（例如<code>for img in &quot;$SRC_DIR&quot;/*</code>并在后续引用时用&quot;$img&quot;），或改用<code>while read</code>配合<code>find -print0</code>处理，确保文件名作为整体被识别。</li>
+<li>图片处理错误： 部分图片由于格式不符合预期（例如PNG格式或损坏文件）导致ImageMagick报错中止。解决方案： 在脚本中增加格式过滤，只处理.jpg或指定格式文件；对于损坏文件提前筛除。同时在composite命令后加上错误捕获（如上述脚本中用$?判断），出错时记录日志而不中断整个批处理。</li>
+<li>SCP中断： 在第一次尝试传输时，由于网络波动导致scp中途中断，需重新传输整个压缩包。正如前文所述，scp无法断点续传 ，这种情况下只能重新开始或换用其他工具。解决方案： 改用rsync替代scp来传输大文件 。rsync支持断点续传和校验，在网络不稳定情况下更可靠。我们实际采用rsync重新传输，顺利完成了大文件的续传。</li>
+<li>上传超时： 批量上传过程中，某些文件由于网络原因上传耗时过长甚至超时失败。解决方案： 在Java上传工具中实现重试机制，例如对失败的上传重试2-3次。如果仍失败则跳过并在最后汇总失败文件名单。这些失败文件稍后可重新运行工具专门上传，或人工检查网络环境后再处理。</li>
+<li>SQL导入问题： 在将生成的SQL文件导入数据库时，发现个别记录插入失败。检查发现是由于少数字段内容超长或格式不符数据库约束（比如证照类型字段长度不够）。解决方案： 提前在生成SQL阶段校验字段长度或内容合法性，或者在数据库插入前对SQL脚本做一次审查清理。另外，超大SQL脚本执行可能比较慢，可以考虑拆分为多段执行或使用数据库批量导入工具。</li>
+</ul>
+<h2>优化思考</h2>
+<p>虽然此次批处理任务顺利完成，但回顾整个流程，仍有一些可以优化改进的地方：</p>
+<ul>
+<li>提高图片处理并发度： 当前Shell脚本按顺序逐张处理图片，在图片数量非常多时效率不高。可以考虑利用GNU Parallel或Shell的后台执行 (&amp;) 实现多线程并发处理，充分利用多核CPU。同时也可以尝试使用更高效的图像处理库或命令参数（如ImageMagick的mogrify直接批量处理目录）。</li>
+<li>使用更高级语言统筹：  Shell脚本虽然方便，但在复杂流程和错误处理上有局限。可以使用Python脚本替代，将加水印、上传和SQL生成整合到一个脚本中。Python的Pillow库可以方便地添加水印，结合请求库调用对象存储API，一站式完成所有步骤。此外，Python更易实现细粒度的异常处理和日志记录。</li>
+<li>日志和监控： 为了方便排查问题，建议为批处理过程增加详细日志记录。可以将Shell脚本的输出重定向到日志文件，Java工具也记录每个文件的上传结果。若有条件，还可以加入简单的进度监控（例如每处理100张输出提示）或邮件通知，方便及时了解批处理进展。</li>
+<li>进一步自动化和容错： 可以设计整个流程的一键脚本或工作流，减少人工介入。例如编写一个主脚本依次调用各步骤，并在出现错误时自动尝试重试或回滚。同时考虑极端情况下的容错，例如某步骤多次失败则跳过并标记处理结果，以免整批任务卡死在个别文件上。</li>
+<li>性能与资源利用： 如果图片总量巨大，需要考虑批处理对系统IO和内存的影响。可以在非业务高峰时段执行，或者分批多次执行以降低单次压力。另外，对象存储的上传也可以考虑启用并发或分片上传提高速度。</li>
+</ul>
+<h2>经验总结</h2>
+<p>通过这次证照图片批量处理的实践，我们总结出了一些通用的经验教训：</p>
+<ul>
+<li>批量任务做好失败回滚设计： 在大批量任务中，务必考虑中途失败的情况，设计可以重启续作或回滚的机制。例如记录已处理项，使得脚本再次运行时能跳过已完成部分，或者在数据库操作前后实现事务或检查，避免部分成功部分失败造成数据不一致。</li>
+<li>小规模测试先行： 在对海量数据进行批处理之前，先拿一小部分数据进行端到端测试。通过预演流程可以及时发现脚本错误、参数不当或环境配置问题，避免大规模运行时才暴露致命问题。</li>
+<li>自动化优于手工： 能用脚本解决的尽量用脚本，实现一次调试，多次运行。批处理脚本应尽量通用和可复用，同时增加必要的日志输出，方便在无人值守执行时也能事后追溯过程。</li>
+<li>关注数据和安全： 处理涉及证照等重要文件时，要注意文件权限和传输安全。采用scp/rsync等通过SSH的方式传输保证了安全性，上线前也需确保对象存储的访问权限正确配置，避免敏感图片泄露。此外，加水印本身也是一种保护手段，可以在一定程度上防止未授权的文件使用。</li>
+<li>跨团队协作： 这类批量处理往往涉及运维、开发等多个团队配合。例如部署环境、上传权限、数据库字段定义等都需要沟通确认。在动手之前，多和相关人员确认细节（如存储路径、命名规范、数据格式），可以避免返工。</li>
+</ul>
+<p>通过以上步骤和经验，这次批量处理任务最终圆满完成：所有门店证照图片都成功添加了水印并上传至对象存储，数据库也正确记录了每张图片的位置索引。这次实战不仅达成了目标，也为日后处理类似批量任务积累了宝贵经验。</p>
+
+</body>
+</html>

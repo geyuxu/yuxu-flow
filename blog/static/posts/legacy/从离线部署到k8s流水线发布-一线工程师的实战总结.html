@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从离线部署到K8s流水线发布：一线工程师的实战总结 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2022-03-10
+tags: [devops]
+legacy: true</h2>
+<h1>从离线部署到K8s流水线发布：一线工程师的实战总结</h1>
+<p>在没有联网的环境中部署应用，我们采取了一套离线部署 Jar 包的方案。主要步骤包括：</p>
+<ul>
+<li>准备可执行 Jar：通过 CI 在内网构建出可执行的 uber JAR（将依赖打包），或将所有依赖手动下载好。确保版本正确且依赖完整，避免部署后因无法联网下载依赖而失败。</li>
+<li>离线传输包：将 Jar 包传输至目标服务器。传输前后使用 MD5 校验保证文件完整性。例如，通过 scp 将文件拷贝到服务器：</li>
+</ul>
+<pre><code class="language-sh"><span class="line">scp app-1.0.jar user@192.168.1.10:/opt/deploy/app-1.0.jar</span></code></pre>
+<ul>
+<li>配置运行环境：在目标服务器上离线安装所需的 JDK 环境。如需特定配置（例如数据库连接、缓存地址等），通过配置文件或环境变量预先准备好。我们采用在 Jar 同目录放置 application.properties 或使用启动参数指定配置路径的方式。</li>
+<li>启动应用进程：使用 nohup 或 systemd 启动 Jar 并确保其在后台持续运行：</li>
+</ul>
+<pre><code class="language-sh"><span class="line">nohup java -jar /opt/deploy/app-1.0.jar --spring.config.location=/opt/deploy/config/ &amp;</span></code></pre>
+<p>这样即使终端关闭，应用仍持续运行，日志输出重定向到 nohup.out 或指定的日志文件。</p>
+<ul>
+<li>验证部署结果：检查应用日志和端口监听确保启动成功。例如，通过 tail -f nohup.out 实时查看日志确认没有报错，以及使用 netstat -tunlp | grep 8080 确认服务端口已被监听。</li>
+</ul>
+<p>以上流程保证了在无外网环境下顺利部署应用。但该手工方式也存在明显缺点：每次更新都需人工介入，多台服务器部署容易出现版本不一致或遗漏步骤的问题。随着发布频率提高，我们意识到需要更加自动化和标准化的方式。</p>
+<h2>Cassandra 大表导出</h2>
+<p>项目运营过程中，我们曾需要将 Cassandra 数据库中某张包含亿级记录的“大表”导出备份。这项任务在没有合适工具时非常棘手：</p>
+<ul>
+<li>初始尝试与问题：一开始我们尝试直接用 CQL 查询全部数据并写入文件，但由于数据量太大，这种方式在客户端经常导致内存溢出或超时。随后尝试使用 cqlsh 自带的 COPY 命令：</li>
+</ul>
+<pre><code class="language-sql"><span class="line">COPY keyspace_name.table_name TO &#39;export.csv&#39;;</span></code></pre>
+<p>该命令可以将查询结果直接导出为 CSV 文件。然而在面对数亿行数据时，COPY TO 运行非常缓慢，中途容易因为网络波动或超时失败，恢复起来也麻烦。</p>
+<ul>
+<li>优化方案：分片批量导出：我们决定采用分批导出策略，将大表拆分为小块依次导出。具体做法是利用主键或时间范围分段：编写脚本按范围查询数据，每次导出几十万行追加到文件。这种分段处理避免单次传输过多数据导致压力过大。在导出过程中，我们监控 Cassandra 节点的状态，错开业务高峰时间执行，以降低对线上读写的影响。</li>
+<li>借助专业工具：后来我们引入了 DataStax 提供的 Bulk Loader (DSBulk) 工具，它专门用于 Cassandra 的数据批量导入导出。使用 DSBulk，我们可以一条命令完成整个表的导出：</li>
+</ul>
+<pre><code class="language-sh"><span class="line">dsbulk unload -k keyspace_name -t table_name -url export_data/ -maxRetries 5</span></code></pre>
+<p>DSBulk 内部对读取进行了优化和并行处理，导出效率较高，并提供断点续传等功能。在一次测试中，使用 DSBulk 将一张约5千万行的表导出为 CSV，耗时从最初的数小时缩短到不到1小时，大大提升了效率。</p>
+<ul>
+<li>结果与验证：导出完成后，务必验证数据完整性。我们通过对比导出行数和 Cassandra 中记录数来校验是否有遗漏，并随机抽样对比内容。导出的 CSV 则压缩归档保存，以便日后可能的恢复或分析使用。</li>
+</ul>
+<p>通过上述方法，我们成功解决了 Cassandra 大表导出难题。在没有专用工具时，分段导出是可行的折中方案；而借助专业工具后，大规模数据迁移的可靠性和效率都显著提高。</p>
+<h2>常见启动故障案例</h2>
+<p>在应用部署和运行过程中，我们还遇到过Java 应用启动失败的情况。其中两类印象深刻的故障来自第三方组件：Atomikos 分布式事务管理器和 Curator Zookeeper 客户端。下面分别分享我们排查和解决问题的经过。</p>
+<h3>Atomikos 导致的启动异常</h3>
+<p>我们有一套服务使用 Atomikos 作为分布式事务管理器（用于多数据源事务）。某次在同一台服务器上启动两套服务时，应用在初始化 Atomikos 事务管理器时抛出了异常，导致启动失败。日志片段如下：</p>
+<pre><code class="language-log"><span class="line">com.atomikos.icatch.SysException: Error in init: Log already in use? tmlog in ./</span>
+<span class="line">    at com.atomikos.icatch.impux.TransactionServiceImp &lt;...&gt; </span>
+<span class="line">Caused by: com.atomikos.recovery.LogException: Log already in use by another process.</span></code></pre>
+<p>从错误可以看出，Atomikos 尝试创建事务日志文件时发生冲突（Log already in use）。原因是同一环境中同时运行了多个使用 Atomikos 的应用，且它们默认使用相同路径的事务日志文件，导致后启动的进程无法获取文件锁。</p>
+<p>解决过程：我们确认前一个服务正在使用 Atomikos 默认的事务日志（通常存放于应用运行目录下的 transaction-logs 文件夹）。为了解决冲突，我们采取了两种措施之一：</p>
+<ul>
+<li>方案一：分隔事务日志路径 – 修改每个应用的 Atomikos 日志配置，使其使用不同的日志目录或文件名称。比如在 Spring Boot 配置中指定：</li>
+</ul>
+<pre><code><span class="line">spring.jta.atomikos.log-dir=./transaction-logs-app2</span></code></pre>
+<p>这样第二个应用的事务日志将写入独立目录，避免与第一个应用争用同一文件。</p>
+<ul>
+<li>方案二：错开启动顺序或合并应用 – 如业务允许，将相关模块合并部署到同一个 JVM 内，避免多个进程争夺资源；或者确保同时运行的只有一个 Atomikos 实例。如果必须分开部署，也可以通过容器化等方式隔离运行环境。</li>
+</ul>
+<p>采用了修改日志路径的方法后，我们重新启动应用，Atomikos 初始化成功，冲突不再发生。这个案例提醒我们：中间件的默认配置不一定适用于特殊场景，需根据部署情况做适当调整。例如，对于需要在同一主机部署多实例的组件，要检查是否有共享资源（文件、端口等）冲突，并通过配置加以区分。</p>
+<h3>Curator 导致的启动卡顿</h3>
+<p>另一问题来自于 Apache Curator，一个常用的 ZooKeeper 客户端框架。某微服务在启动时使用 Curator 连接 ZooKeeper 做服务注册，但我们发现在某环境下启动过程长时间卡住，日志不断打印异常：</p>
+<pre><code class="language-log"><span class="line">org.apache.curator.CuratorConnectionLossException: KeeperErrorCode = ConnectionLoss</span>
+<span class="line">	at org.apache.curator.ConnectionState.getZooKeeper(ConnectionState.java:123)</span>
+<span class="line">	... </span></code></pre>
+<p>日志提示 Curator 连接丢失，一直在重试 (ConnectionLoss 表明无法连接 ZooKeeper 集群)。这种情况导致应用阻塞在启动阶段。经过排查，我们找到以下原因：</p>
+<ul>
+<li>ZooKeeper 服务未启动：首先怀疑 ZooKeeper 本身不可用。我们登陆到 ZooKeeper 所在服务器，运行 zkServer.sh status 发现服务确实没有启动。在这个测试环境中，ZooKeeper 被意外关闭而我们没有注意。</li>
+<li>防火墙或网络问题：在确认启动 ZooKeeper 服务后，依然出现连接失败。这让我们检查服务器防火墙设置，结果发现 ZooKeeper 默认端口被防火墙拦截。关闭或开放防火墙相关端口后，Curator 客户端才成功连上 ZooKeeper。</li>
+<li>错误的连接配置：另一种常见原因是配置的连接字符串不正确。例如写错了 ZooKeeper 集群的 IP 地址或端口，或者 DNS 无法解析。在本次事件中虽未出现这种错误，但我们在自查过程中也验证了配置项以排除这类因素。</li>
+</ul>
+<p>解决方案：针对上述原因采取了相应措施——启动 ZooKeeper 服务进程，并调整防火墙策略允许访问 ZooKeeper 的端口（例如2181）。随后重启微服务，Curator 成功建立连接，应用顺利启动。为防止此类问题再次发生，我们还完善了启动脚本：在部署应用前增加对依赖服务的健康检查，如自动检测 ZooKeeper 的状态，如果未就绪则给予提示或延迟启动。同时，将 Curator 客户端的超时和重试参数调得更加合理，使其在连接异常时能及早抛出错误而非无限卡顿。</p>
+<p>通过以上两个案例，我们深刻体会到启动故障排查需要结合日志迅速定位，并关注依赖组件的配置与运行环境。无论是事务管理器还是注册中心客户端，理解其工作机制和配置项，有助于快速找到问题根源并加以解决。</p>
+<h2>Kubernetes 标准发布流程</h2>
+<p>在解决了初步的部署和运行问题后，我们着手引入 Kubernetes (K8s) 来重构发布流程。目标是实现从构建、部署到发布的流水线自动化，将过去繁琐的手工步骤标准化。下面介绍我们落地 K8s 标准发布的实践过程：</p>
+<ul>
+<li>容器化应用：首先，我们为应用创建了 Docker 镜像。编写了简洁的 Dockerfile，将可执行 Jar 包打入镜像。例如：</li>
+</ul>
+<pre><code class="language-Dockerfile"><span class="line">FROM openjdk:8-jre-slim</span>
+<span class="line">COPY app-1.0.jar /app/app.jar</span>
+<span class="line">CMD [&quot;java&quot;, &quot;-jar&quot;, &quot;/app/app.jar&quot;, &quot;--spring.config.location=/app/config/&quot;]</span></code></pre>
+<p>我们将应用运行所需的配置文件也打包进镜像的 /app/config/ 目录（或挂载 ConfigMap，见后续），以确保容器启动时能找到正确配置。完成 Dockerfile 后，通过内网的 CI 工具构建镜像并推送到私有镜像仓库（如 registry.example.com/myteam/app:1.0）。</p>
+<ul>
+<li>编写 K8s 部署清单：接着，我们编写 Kubernetes 清单文件，包括 Deployment、Service 等资源。示例 Deployment 清单片段：</li>
+</ul>
+<pre><code class="language-yaml"><span class="line">apiVersion: apps/v1</span>
+<span class="line">kind: Deployment</span>
+<span class="line">metadata:</span>
+<span class="line">  name: myapp-deployment</span>
+<span class="line">spec:</span>
+<span class="line">  replicas: 2</span>
+<span class="line">  selector:</span>
+<span class="line">    matchLabels:</span>
+<span class="line">      app: myapp</span>
+<span class="line">  template:</span>
+<span class="line">    metadata:</span>
+<span class="line">      labels:</span>
+<span class="line">        app: myapp</span>
+<span class="line">    spec:</span>
+<span class="line">      containers:</span>
+<span class="line">      - name: myapp-container</span>
+<span class="line">        image: registry.example.com/myteam/app:1.0</span>
+<span class="line">        ports:</span>
+<span class="line">        - containerPort: 8080</span>
+<span class="line">        env:</span>
+<span class="line">        - name: JAVA_OPTS</span>
+<span class="line">          value: &quot;-Xms512m -Xmx512m&quot;</span>
+<span class="line">        readinessProbe:</span>
+<span class="line">          httpGet:</span>
+<span class="line">            path: /health</span>
+<span class="line">            port: 8080</span>
+<span class="line">          initialDelaySeconds: 15</span>
+<span class="line">          periodSeconds: 5</span>
+<span class="line">        livenessProbe:</span>
+<span class="line">          httpGet:</span>
+<span class="line">            path: /health</span>
+<span class="line">            port: 8080</span>
+<span class="line">          initialDelaySeconds: 30</span>
+<span class="line">          periodSeconds: 10</span></code></pre>
+<p>上述清单定义了两个副本的部署，并配置了应用容器使用我们构建的镜像。同时设置了 就绪探针 (Readiness Probe) 和 存活探针 (Liveness Probe)，定期访问应用的健康检查接口 /health。这些探针确保应用只有在健康时才接受流量，并在异常时自动重启容器，提高发布过程的可靠性。</p>
+<ul>
+<li>配置管理：对于应用需要的配置和敏感信息，我们避免硬编码进镜像，而是使用 ConfigMap 和 Secret 来提供。在 Deployment 清单中通过挂载方式或环境变量引用这些配置。例如数据库连接字符串用 Secret 存储，启动时通过环境变量注入。这样在不同环境下（测试、生产）可以使用不同的配置而不需更改镜像。</li>
+<li>CI/CD 流水线：我们将构建和部署步骤集成到 CI/CD 工具（如 Jenkins 或 GitLab CI）的流水线中。当代码合并到主干分支时，流水线自动执行：编译测试 -&gt; 构建Docker镜像 -&gt; 推送镜像 -&gt; 部署到 K8s 集群。部署阶段通过 kubectl apply -f 或 Helmsman 等工具将预先编写的 K8s 清单应用到集群。配合 Deployment 控制器的滚动更新策略，发布新版本时旧容器逐步替换为新容器，实现零停机发布或最小化服务中断。</li>
+<li>发布规范和审核：为了保障每次发布质量，我们制定了发布前的检查清单，例如：<ul>
+<li>确认新版本在测试环境通过完整回归测试；</li>
+<li>镜像扫描无高危漏洞；</li>
+<li>YAML 清单遵循公司内部规范（如标签、资源配额Requests/Limits设置齐全等）；</li>
+<li>灰度发布策略：对于重大版本采用分批发布，先在一小部分实例上部署观察运行状况，再逐步扩至全量。</li>
+</ul>
+</li>
+</ul>
+<p>通过 Kubernetes 的标准化部署，我们的应用发布从此进入流水线作业，实现了一键部署和回滚，减少了人为失误。每次部署都有记录和监控，使得问题追溯和快速恢复更加方便。</p>
+<h2>日志监控体系搭建</h2>
+<p>随着系统逐步走向容器化和分布式，我们同步建立了完善的日志和监控体系，用于运维过程中的故障诊断和性能调优。</p>
+<ul>
+<li>集中式日志系统：过去日志分散在各台服务器，出问题时需要逐台登录检索。我们引入了 ELK/EFK 日志系统，将容器日志集中收集。具体做法是在 Kubernetes 集群部署 Filebeat/Fluentd 日志收集器，从各容器的 stdout 和 stderr 获取日志流，发送到集中存储（Elasticsearch 日志库）。在应用中，我们使用统一的日志格式（例如 JSON 格式日志），包含时间戳、级别、线程、请求ID等字段，方便在 Kibana 中检索和过滤。现在，当某服务发生错误，我们可以在 Kibana 一处查看该服务所有实例的日志，按照时间线追踪问题，大大提升排查效率。</li>
+<li>性能指标监控：我们搭建了基于 Prometheus + Grafana 的监控系统。Prometheus 定时抓取各服务的指标数据（包括基础资源如CPU、内存，及应用自定义指标如请求次数、错误率），Grafana 则用来可视化展示。我们在应用中集成了 Micrometer 库，将业务指标暴露给 Prometheus。通过定制仪表盘，可以实时看到系统的 QPS、响应时间分布、数据库连接数等关键指标。配合 Alertmanager 设置告警规则，一旦某指标超过阈值（如 CPU 长时间过高、错误率突增），系统会自动通过短信或钉钉机器人通知相关人员及时响应。</li>
+<li>链路追踪和分析：除了日志和指标，我们还评估了链路追踪工具（如 SkyWalking、Jaeger）用于分布式调用跟踪。在复杂的微服务环境中，这类工具可以帮助我们追踪一次用户请求经过的多个服务，定位在哪一环节出现瓶颈或错误。不过由于部署和使用成本较高，我们团队根据实际需要选择了逐步试点部分核心链路的追踪，而日志和指标监控仍是主要的运维手段。</li>
+</ul>
+<p>通过日志和监控体系的搭建，我们实现了对系统 <strong>可观察性（Observability）</strong> 的极大提升。从以前出故障“盲人摸象”式的猜测，转变为现在有数据支撑的精准分析。不仅故障恢复时间（MTTR）降低了，日常性能调优也有据可依，整体运行维护更加从容。</p>
+<h2>效果评估（优化前后对比）</h2>
+<p>通过上述一系列改进，我们对比了优化前后的效果：</p>
+<table>
+<thead>
+<tr>
+<th><strong>方面</strong></th>
+<th><strong>改进前（传统离线/手工方式）</strong></th>
+<th><strong>改进后（自动化流水线 + K8s）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>部署方式</td>
+<td>手工传输 Jar 包，人工执行启动脚本；每次发布耗时长，易出错</td>
+<td>标准化容器镜像部署，CI/CD 自动完成构建发布；速度快且可重复</td>
+</tr>
+<tr>
+<td>发布可靠性</td>
+<td>缺乏统一流程，遇到错误需人工回退；多台机器配置可能不一致</td>
+<td>Kubernetes 滚动更新，无缝发布，失败自动回滚；环境配置一致</td>
+</tr>
+<tr>
+<td>大数据处理</td>
+<td>手工导出大表费时费力，过程中容易中断</td>
+<td>使用工具批量导出，效率提升数倍；大型数据迁移更可控</td>
+</tr>
+<tr>
+<td>故障排查</td>
+<td>日志分散在各服务器，定位问题耗时</td>
+<td>日志集中检索，监控实时告警；几分钟内即可发现并定位问题</td>
+</tr>
+<tr>
+<td>系统监控</td>
+<td>基本依赖人工观察，缺乏预警机制</td>
+<td>完善的监控看板与告警策略，问题未发生已能提前预警</td>
+</tr>
+</tbody></table>
+<p>（表：系统在部署和运维方面优化前后的对比）</p>
+<p>从上表可以看出，系统经过改造后在发布效率、可靠性和可维护性方面都有了显著提升。例如发布效率方面，由原来的每次发布耗时半小时、需多人配合，优化为流水线后通常几分钟即可完成，且基本零人工干预。再如故障排查，以前可能需要1-2小时集中分析日志才能找到问题，现在借助集中日志和监控报警，很多问题在几分钟内就能检测并通知相关人员。总体而言，这些实践优化了团队的 DevOps 工作模式，为业务快速迭代提供了坚实保障。</p>
+<h2>总结提升</h2>
+<p>通过这次从离线部署到 K8s 流水线发布的实践，我们团队收获了宝贵的经验教训，也验证了新技术在生产环境中的价值。在总结几点体会的同时，我们也展望未来的改进方向：</p>
+<ul>
+<li>实践体会：<ol>
+<li>基础设施即代码的重要性：无论是部署脚本、K8s 清单还是监控告警配置，都应纳入版本管理，通过代码审阅和流水线执行确保一致性。</li>
+<li>工具选型需结合实际：例如在大数据导出时，选择专业工具大幅提高效率；在监控方面，不盲目追新，而是根据团队能力循序渐进地引入适合的组件。</li>
+<li>故障演练和预案：在实现了自动化和监控后，更应定期演练故障场景（如单点故障、发布失败回滚等），确保团队对新体系下的异常处理熟练有素。</li>
+</ol>
+</li>
+<li>未来改进：我们计划进一步完善持续交付，实现一键部署到多环境和蓝绿发布/金丝雀发布等高级策略。同时，在 Observability 方面引入分布式追踪全面监控请求链路，并评估服务网格(Service Mesh)等技术来增强流量控制和安全治理。这些将成为下一步提升的方向。</li>
+</ul>
+<p>最后，希望本次实战总结对各位读者有所启发。技术改进是一个渐进的过程，从离线部署的摸索到云原生实践的落地，每一步都伴随着挑战和收获。作为一线工程师，我们应当拥抱新技术带来的变革，同时保持对细节问题的敏感，积累经验，不断优化系统的稳定性和交付效率。在未来的项目中，我们将继续沉淀更多实践案例，与大家分享交流！</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

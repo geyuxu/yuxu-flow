@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP-Blog：一键搞定 Astro 博客发布，告别繁琐流程</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [devops, mcp, astro, 自动化, github pages, devops]
+legacy: true</h2>
+<h1>MCP-Blog：一键搞定 Astro 博客发布，告别繁琐流程</h1>
+<ol>
+<li>在博客项目 <code>geyuxu.com</code> 中写完文章</li>
+<li>执行 <code>git add .</code>、<code>git commit -m &quot;...&quot;</code>、<code>git push</code> 将源码推送到主分支</li>
+<li>执行 <code>npm run build</code> 构建静态文件到 <code>dist</code> 目录</li>
+<li>将 <code>dist</code> 目录中的内容推送到 <code>gh-pages</code> 分支以完成部署</li>
+</ol>
+<p>这个过程不仅涉及多个命令，还可能因为 <code>dist</code> 目录未被 Git 正确管理而引发各种问题。更重要的是，我希望有一个&quot;管理中心&quot;来统一处理这类任务，而不是在项目目录中堆积各种脚本。</p>
+<p>于是，我创建了 <strong>MCP-Blog</strong> 项目。它的核心目标是：<strong>在一个独立的、专门的目录中，通过一个命令，自动化完成另一个目录（博客项目）的全部提交流程。</strong></p>
+<p>这解决了两大痛点：</p>
+<ol>
+<li><strong>操作隔离</strong>：将管理脚本与博客内容分离，保持博客仓库的纯净</li>
+<li><strong>流程自动化</strong>：将多步操作简化为一步，减少人为错误，提升效率</li>
+</ol>
+<h2>二、技术架构：MCP 的设计哲学</h2>
+<h3>什么是 MCP (Model Context Protocol)？</h3>
+<p>&quot;模型上下文协议&quot;（Model Context Protocol）并非一个公开的网络协议，而是我为本项目设计的一套<strong>命令行交互规范</strong>。它的核心思想是：</p>
+<blockquote>
+<p>让一个独立的执行脚本（模型），能够理解并操作特定上下文（Context）中的目标项目。</p>
+</blockquote>
+<p>在这个项目中：</p>
+<ul>
+<li><strong>模型 (Model)</strong>：就是我们的 <code>mcp-blog</code> 项目，它是一个主动的执行者</li>
+<li><strong>上下文 (Context)</strong>：指的是我们的 <code>geyuxu.com</code> 博客项目，它是被操作的对象</li>
+<li><strong>协议 (Protocol)</strong>：是我们定义的命令行接口和脚本执行逻辑。例如，<code>./mcp.sh &quot;commit message&quot;</code> 就是一个协议的实现</li>
+</ul>
+<h3>架构图</h3>
+<p>整个工作流非常直观：</p>
+<blockquote><code>+-----------+       +-------------------------+       +---------------------+       +----------------+</code><br>
+<code>|           |       |                         |       |                     |       |                |</code><br>
+<code>|   用户     |------&gt;|  MCP 脚本 (mcp.sh)      |------&gt;|  Astro 博客项目     |------&gt;|  GitHub 仓库   |</code><br>
+<code>|           |       |                         |       | (geyuxu.com)        |       | (main/gh-pages)|</code><br>
+<code>+-----------+       +-------------------------+       +---------------------+       +----------------+</code><br>
+<code>      |                        |                                |                           |</code><br>
+<code>      | 1. 提供 commit 消息    | 2. cd 到博客目录              | 3. 执行 Git 操作 &amp; build | 4. 部署到 Pages</code><br>
+<code>      |                        | 4. 执行部署命令               |                           |</code></blockquote><p>这个架构的关键在于 <strong>MCP 脚本</strong> 如何有效地&quot;穿越&quot;到 <strong>Astro 博客项目</strong> 的目录中去执行操作。</p>
+<h2>三、实现细节：一步步构建自动化利器</h2>
+<p>现在，我们来看最核心的代码实现。整个项目由一个 Shell 脚本驱动。</p>
+<p><strong>项目结构:</strong></p>
+<blockquote><code>/Users/geyuxu/repo/blog/</code><br>
+<code>├── mcp-blog/         # MCP 项目</code><br>
+<code>│   └── mcp.sh</code><br>
+<code>└── geyuxu.com/       # Astro 博客项目</code><br>
+<code>    ├── src/</code><br>
+<code>    ├── public/</code><br>
+<code>    ├── package.json</code><br>
+<code>    └── ...</code></blockquote><h3>1. 核心脚本 <code>mcp.sh</code></h3>
+<p>这是我们所有自动化的心脏。它负责接收参数、切换目录、执行命令和处理错误。</p>
+<blockquote><code>#!/bin/bash</code><br>
+<code></code><br>
+<code># 脚本出错时立即退出</code><br>
+<code>set -e</code><br>
+<code></code><br>
+<code># --- 配置区 ---</code><br>
+<code># 定义 MCP 项目路径 (脚本所在位置)</code><br>
+<code>MCP_PROJECT_PATH=&quot;/Users/geyuxu/repo/blog/mcp-blog&quot;</code><br>
+<code># ... (48 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/aa78814f2a0f4b39ae97540c31c6f14f">GitHub Gist</a></em></p><h3>2. 关键技术点解析</h3>
+<ul>
+<li><p><strong>跨目录权限管理 (<code>cd &quot;$BLOG_REPO_PATH&quot;</code>)</strong>:
+这看似简单的一行 <code>cd</code> 是实现跨目录操作的关键。脚本启动后，它首先将当前的工作目录切换到博客项目下。这样，后续所有的 <code>git</code> 和 <code>npm</code> 命令就好像是直接在 <code>geyuxu.com</code> 目录里执行的一样，自然就拥有了操作该目录文件的&quot;上下文权限&quot;。</p>
+</li>
+<li><p><strong>Git 自动化 (<code>git add/commit/push</code>)</strong>:
+脚本通过标准的 Git 命令来处理源码的提交。将 commit message 作为脚本的第一个参数 (<code>$1</code>) 传入，增加了灵活性。</p>
+</li>
+<li><p><strong>Astro 集成 (<code>npm run build</code>)</strong>:
+每个 Astro 项目都有一个 <code>build</code> 脚本定义在 <code>package.json</code> 中。我们的自动化脚本直接调用它，无需关心其内部复杂的构建过程，实现了完美的解耦。</p>
+</li>
+<li><p><strong>GitHub Pages 部署 (<code>npm run deploy</code>)</strong>:
+为了简化部署，我强烈推荐使用 <code>gh-pages</code> 这个 npm 包。</p>
+<p>首先，在你的 <strong>Astro 项目 (<code>geyuxu.com</code>)</strong> 中安装它：</p>
+<p><code>npm install gh-pages --save-dev</code></p><p>然后，在 <code>geyuxu.com/package.json</code> 的 <code>scripts</code> 中添加一个 <code>deploy</code> 命令：</p>
+<blockquote><code>{</code><br>
+<code>  &quot;scripts&quot;: {</code><br>
+<code>    &quot;dev&quot;: &quot;astro dev&quot;,</code><br>
+<code>    &quot;start&quot;: &quot;astro dev&quot;,</code><br>
+<code>    &quot;build&quot;: &quot;astro build&quot;,</code><br>
+<code>    &quot;preview&quot;: &quot;astro preview&quot;,</code><br>
+<code>    &quot;astro&quot;: &quot;astro&quot;,</code><br>
+<code>    &quot;deploy&quot;: &quot;gh-pages -d dist&quot; </code><br>
+<code>  }</code><br>
+<code>}</code></blockquote><p><code>gh-pages -d dist</code> 命令会自动将 <code>dist</code> 目录的内容推送到名为 <code>gh-pages</code> 的分支。</p>
+</li>
+</ul>
+<h2>四、使用示例：如何运行 MCP-Blog</h2>
+<p>假设你已经完成了上述配置，现在发布一篇新博客就像呼吸一样简单。</p>
+<ol>
+<li><p><strong>赋予脚本执行权限</strong> (只需做一次):</p>
+<blockquote><code>cd /Users/geyuxu/repo/blog/mcp-blog</code><br>
+<code>chmod +x mcp.sh</code></blockquote></li>
+<li><p><strong>一键发布</strong>:
+当你在 <code>geyuxu.com</code> 中完成写作后，打开终端，执行以下命令：</p>
+<p><code>./mcp.sh &quot;feat: 添加关于 MCP-Blog 的新文章&quot;</code></p></li>
+</ol>
+<p>然后，你就可以泡杯咖啡，看着终端自动完成所有工作：</p>
+<blockquote><code>🚀 MCP-Blog 任务启动...</code><br>
+<code>=================================</code><br>
+<code>📂 正在进入博客仓库目录: /Users/geyuxu/repo/blog/geyuxu.com</code><br>
+<code>🔄 正在同步源码到 main 分支...</code><br>
+<code>[main 1234567] feat: 添加关于 MCP-Blog 的新文章</code><br>
+<code> 1 file changed, 1 insertion(+)</code><br>
+<code> ...</code><br>
+<code>✅ 源码同步完成。</code><br>
+<code># ... (14 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/a129d8e831af7659db822f77b9ad0e56">GitHub Gist</a></em></p><p>几分钟后，你的新文章就会出现在线上。</p>
+<h2>五、总结与展望</h2>
+<p><strong>MCP-Blog</strong> 项目通过一个简单的 Shell 脚本，成功地将复杂的博客发布流程自动化，实现了：</p>
+<ul>
+<li><strong>效率提升</strong>：将 5-6 个步骤简化为 1 个命令</li>
+<li><strong>降低错误率</strong>：程序化的操作避免了手动执行时的遗漏或失误</li>
+<li><strong>代码整洁</strong>：将管理逻辑与业务逻辑（博客内容）分离</li>
+</ul>
+<p><strong>未来可以探索的方向：</strong></p>
+<ol>
+<li><strong>功能增强</strong>：增加创建新文章的命令，例如 <code>./mcp.sh new &quot;文章标题&quot;</code>，自动生成带有 frontmatter 的 Markdown 模板</li>
+<li><strong>平台化</strong>：将 Shell 脚本升级为更健壮的 Node.js 或 Python CLI 工具，提供更丰富的交互和错误处理</li>
+<li><strong>CI/CD 集成</strong>：虽然本地脚本很方便，但最终极的自动化方案是将其迁移到 GitHub Actions。当 <code>main</code> 分支有新的 push 时，自动触发构建和部署流程</li>
+</ol>
+<p>希望这个小项目能给你带来启发。自动化是我们工程师的第二天性，把重复的工作交给机器，我们才能专注于创造更有价值的内容。</p>
+
+</body>
+</html>

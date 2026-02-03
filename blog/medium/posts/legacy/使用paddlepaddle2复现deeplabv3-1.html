@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用 PaddlePaddle 2.x 复现 DeepLabV3+（1）：从构建到训练</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2025-04-03
+tags: [ai]
+legacy: true</h2>
+<h1>使用 PaddlePaddle 2.x 复现 DeepLabV3+（1）：从构建到训练</h1>
+<ul>
+<li>✅ 模块化重构 DeepLabV3+，包含 SeparableConv、ASPP、XceptionBlock</li>
+<li>✅ 兼容动态图与标准 Layer 接口</li>
+<li>✅ 编写训练脚本，可扩展至真实数据集</li>
+</ul>
+<hr>
+<h2>2. 模型构建：面向对象实现 DeepLabV3+</h2>
+<p>我们从头构建了一个名为 <code>DeepLabV3Plus</code> 的模型类，遵循 <code>paddle.nn.Layer</code> 设计接口。</p>
+<p><strong>核心模块包括：</strong></p>
+<ul>
+<li><code>SeparableConv2D</code>: 模拟深度可分离卷积（depthwise + pointwise）</li>
+<li><code>XceptionBlock</code>: 3 层堆叠的可分离卷积单元，可选残差连接</li>
+<li><code>ASPP</code>: 多尺度特征融合结构，膨胀卷积率为 6、12、18</li>
+<li><code>Decoder</code>: 结合浅层与深层特征，提升边界感知能力</li>
+</ul>
+<p>最终模型为典型的 encoder-decoder 结构，可直接输出等大小的分割图。</p>
+<p><strong>代码结构示例：</strong></p>
+<blockquote><code>class DeepLabV3Plus(nn.Layer):</code><br>
+<code>    def __init__(self, num_classes):</code><br>
+<code>        super().__init__()</code><br>
+<code>        self.entry = ...</code><br>
+<code>        self.block1 = XceptionBlock(...)</code><br>
+<code>        ...</code><br>
+<code>        self.aspp = ASPP(...)</code><br>
+<code>        self.decoder = ...</code><br>
+<code>        self.final = ...</code><br>
+<code></code><br>
+<code>    def forward(self, x):</code><br>
+<code>        ... # 完整结构见文末源码</code></blockquote><hr>
+<h2>3. 训练脚本：高效训练 + 模型保存</h2>
+<p>训练脚本使用 <code>paddle.io.DataLoader</code> 与标准 <code>nn.Layer</code> 接口完成：</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>动态创建模型实例与优化器</li>
+<li>支持 ignore_index 的自定义交叉熵损失函数</li>
+<li>自动保存模型参数（<code>.pdparams</code>）</li>
+</ul>
+<p><strong>示例结构：</strong></p>
+<blockquote><code>model = DeepLabV3Plus(num_classes=21)</code><br>
+<code>optimizer = paddle.optimizer.Adam(...)</code><br>
+<code>criterion = CrossEntropyLossWithMask(ignore_index=255)</code><br>
+<code></code><br>
+<code>for epoch in range(num_epochs):</code><br>
+<code>    for imgs, labels in dataloader:</code><br>
+<code>        preds = model(imgs)</code><br>
+<code>        loss = criterion(preds, labels)</code><br>
+<code>        loss.backward()</code><br>
+<code>        optimizer.step()</code><br>
+<code>        optimizer.clear_grad()</code></blockquote><p>目前使用的是伪造数据集 <code>DummySegDataset</code>，可很方便地替换为 VOC、ADE20K 等真实数据集。</p>
+<hr>
+<p><em>未完待续：本文后续将补充验证阶段、评价指标与部署流程。</em></p>
+
+</body>
+</html>

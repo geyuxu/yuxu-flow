@@ -1,0 +1,59 @@
+{
+    "hero": {
+        "subtitle": "Architecting Intelligence.",
+        "bio": "Senior Software Architect (12y+) transitioning into Embodied AI & Robotics. MSc Candidate at University of York. Building systems that bridge enterprise engineering with the frontier of machine intelligence.",
+        "greeting": "<span class=\"greeting-horse\">馬</span> Wishing you a prosperous Year of the Horse 2026"
+    },
+    "sections": [
+        {
+            "type": "work",
+            "title": "Selected Work",
+            "cols": 2,
+            "rows": 2
+        },
+        {
+            "type": "games",
+            "title": "Play Games",
+            "cols": 4,
+            "rows": 1
+        },
+        {
+            "type": "blog",
+            "title": "Latest Blog",
+            "cols": 2,
+            "rows": 4
+        },
+        {
+            "type": "stack",
+            "title": "The Stack",
+            "cols": 3,
+            "rows": 2,
+            "items": [
+                {
+                    "label": "Distributed Systems",
+                    "value": "High-concurrency architecture for 30M+ users"
+                },
+                {
+                    "label": "ROS 2",
+                    "value": "Robot Operating System middleware"
+                },
+                {
+                    "label": "Reinforcement Learning",
+                    "value": "Policy optimization & Sim2Real transfer"
+                },
+                {
+                    "label": "RAG Pipelines",
+                    "value": "Hybrid search & hallucination mitigation"
+                },
+                {
+                    "label": "AI / ML / DL",
+                    "value": "PyTorch, model training & deployment"
+                },
+                {
+                    "label": "Cloud Native",
+                    "value": "Kubernetes, Docker & microservices"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoDraft项目计划：音视频内容智能提炼利器 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [general_notes]
+legacy: true</h2>
+<h1>EchoDraft项目计划：音视频内容智能提炼利器</h1>
+<p>EchoDraft 项目应运而生，旨在通过自动化和智能化的手段，解决上述痛点。我们的目标是构建一个端到端的 CLI 工具，将音视频内容从下载、处理、转录到最终生成结构化文章的全过程自动化，极大地降低内容处理的门槛和成本，提升信息获取的效率。</p>
+<h2>技术架构设计：模块化与高效协同</h2>
+<p>EchoDraft 采用模块化设计，确保了各功能组件的独立性、可维护性和可扩展性。整个处理流程被精心划分为几个核心阶段，并通过 Typer 框架提供的命令行接口进行统一调度。</p>
+<p>其核心架构可以概括为以下流程：</p>
+<pre><code><span class="line">用户输入 (CLI)</span>
+<span class="line">    ↓</span>
+<span class="line">音视频下载 (Downloader)</span>
+<span class="line">    ↓</span>
+<span class="line">音频预处理 (Audio Processor)</span>
+<span class="line">    ↓</span>
+<span class="line">语音转文本 (Transcriber)</span>
+<span class="line">    ↓</span>
+<span class="line">智能内容分析与生成 (Analyzer)</span>
+<span class="line">    ↓</span>
+<span class="line">结构化文章输出</span></code></pre>
+<p>这种流水线式的设计使得每个模块专注于自身的核心任务，并通过清晰的接口进行数据传递，保证了整个系统的稳定性和效率。</p>
+<h2>核心功能模块介绍</h2>
+<h3>1. 音视频下载模块 (<code>modules/downloader.py</code>)</h3>
+<ul>
+<li><strong>核心技术</strong>：<code>yt-dlp</code></li>
+<li><strong>功能</strong>：作为项目的数据入口，该模块利用强大的 <code>yt-dlp</code> 库，支持从 YouTube、Bilibili 等主流音视频平台下载内容。<code>yt-dlp</code> 凭借其强大的兼容性和持续更新能力，能够应对各种复杂的下载场景，确保原始数据的可靠获取。</li>
+</ul>
+<h3>2. 音频处理模块 (<code>modules/audio_processor.py</code>)</h3>
+<ul>
+<li><strong>核心技术</strong>：<code>pydub</code></li>
+<li><strong>功能</strong>：这是 EchoDraft 降低转录成本的关键一环。我们利用 <code>pydub</code> 对下载的音频进行预处理，主要包括：<ul>
+<li><strong>音频加速</strong>：在不明显影响音质和可理解性的前提下，对音频进行倍速处理。这能够有效缩短音频时长，从而显著降低基于时长计费的转录服务（如某些云端 Whisper API）的成本。</li>
+<li><strong>格式转换与标准化</strong>：确保音频格式符合后续转录模块的要求。</li>
+</ul>
+</li>
+<li><strong>价值</strong>：通过智能的音频加速，我们能够在保证转录质量的同时，实现成本效益的最大化。</li>
+</ul>
+<h3>3. 语音转文本模块 (<code>modules/transcriber.py</code>)</h3>
+<ul>
+<li><strong>核心技术</strong>：<code>faster-whisper</code></li>
+<li><strong>功能</strong>：该模块负责将预处理后的音频转换为高质量的文本。我们选择了 <code>faster-whisper</code>，它是 OpenAI Whisper 模型的一个优化版本，具备以下优势：<ul>
+<li><strong>高性能</strong>：在相同的硬件条件下，<code>faster-whisper</code> 提供了比原版 Whisper 更快的推理速度。</li>
+<li><strong>本地部署</strong>：支持在本地 GPU 或 CPU 上运行，避免了数据隐私泄露的风险，并减少了对外部 API 的依赖。</li>
+<li><strong>高准确率</strong>：继承了 Whisper 模型在多语言和复杂音频环境下的卓越转录能力。</li>
+</ul>
+</li>
+<li><strong>价值</strong>：提供快速、准确且经济的本地转录服务，为后续的智能分析奠定坚实基础。</li>
+</ul>
+<h3>4. 智能内容分析模块 (<code>modules/analyzer.py</code>)</h3>
+<ul>
+<li><strong>核心技术</strong>：大型语言模型 (LLM) API</li>
+<li><strong>功能</strong>：这是 EchoDraft 的&quot;大脑&quot;，负责从转录文本中提炼知识并生成结构化内容。该模块通过调用 LLM API，实现以下功能：<ul>
+<li><strong>提纲生成</strong>：自动识别文本中的主题和关键点，生成清晰的章节提纲。</li>
+<li><strong>文章撰写</strong>：基于提纲和原始文本内容，生成连贯、有逻辑的结构化文章，可以是摘要、总结或深度分析报告。</li>
+<li><strong>信息提取</strong>：未来可扩展至关键词提取、实体识别、情感分析等。</li>
+</ul>
+</li>
+<li><strong>价值</strong>：将大量的非结构化语音数据转化为易于阅读和理解的结构化文本，极大地提升了内容的可利用性。</li>
+</ul>
+<h2>实现进度与里程碑</h2>
+<p>目前，EchoDraft 项目已完成了核心架构的搭建，并初步集成了所有关键技术模块。</p>
+<ul>
+<li><strong>里程碑 1 (已完成)</strong>：CLI 入口 (<code>main.py</code>)、音视频下载 (<code>downloader.py</code>)、音频处理 (<code>audio_processor.py</code>) 和语音转文本 (<code>transcriber.py</code>) 模块的基础功能集成与端到端流程验证。</li>
+<li><strong>里程碑 2 (进行中)</strong>：智能内容分析模块 (<code>analyzer.py</code>) 的 LLM API 集成，实现基础的提纲生成和文章草稿功能。</li>
+<li><strong>里程碑 3 (即将开始)</strong>：优化 LLM 输出质量，引入更精细的 Prompt Engineering 技术，提升生成文章的结构化程度、逻辑性和可读性。</li>
+<li><strong>里程碑 4 (未来)</strong>：完善 CLI 用户体验，增加错误处理、进度显示、配置管理等功能，并进行全面的测试。</li>
+</ul>
+<h2>技术挑战与解决方案</h2>
+<p>在 EchoDraft 的开发过程中，我们遇到并正在解决以下技术挑战：</p>
+<h3>1. 音视频兼容性与稳定性</h3>
+<ul>
+<li><strong>挑战</strong>：<code>yt-dlp</code> 虽然强大，但音视频平台的更新可能导致下载失败；不同音视频的编码、格式差异也增加了处理难度。</li>
+<li><strong>解决方案</strong>：持续关注 <code>yt-dlp</code> 的更新，及时升级；在 <code>audio_processor</code> 中增加更鲁棒的格式检测和转换逻辑，确保兼容性。</li>
+</ul>
+<h3>2. 音频加速的质量平衡</h3>
+<ul>
+<li><strong>挑战</strong>：过度加速可能导致音质受损或转录准确率下降。</li>
+<li><strong>解决方案</strong>：通过实验确定最佳加速倍数，平衡成本与质量；考虑引入智能算法，根据音频特性动态调整加速策略；未来可探索结合静音片段去除等技术进一步优化。</li>
+</ul>
+<h3>3. <code>faster-whisper</code> 的性能与准确率调优</h3>
+<ul>
+<li><strong>挑战</strong>：选择合适的模型大小（Tiny, Base, Small, Medium, Large）以平衡本地资源消耗和转录质量；处理口音、背景噪音等复杂场景。</li>
+<li><strong>解决方案</strong>：提供灵活的模型选择配置；对特定场景进行测试和调优；未来可考虑引入 VAD (Voice Activity Detection) 预处理，提升复杂环境下的转录效果。</li>
+</ul>
+<h3>4. LLM 生成内容的质量控制与成本优化</h3>
+<ul>
+<li><strong>挑战</strong>：LLM 可能出现&quot;幻觉&quot;、逻辑不连贯或内容冗余；API 调用成本需要控制。</li>
+<li><strong>解决方案</strong>：<ul>
+<li><strong>Prompt Engineering</strong>：投入大量精力设计和优化 Prompt，明确要求输出的结构、风格和内容限制，引导 LLM 生成高质量、符合预期的文章。</li>
+<li><strong>分段处理与迭代生成</strong>：对于长文本，考虑分段输入 LLM 进行处理，再进行整合和精炼。</li>
+<li><strong>成本控制</strong>：优化输入 token 数量，例如对转录文本进行初步摘要后再送入 LLM，或通过缓存机制减少重复调用。</li>
+</ul>
+</li>
+</ul>
+<h2>未来发展规划</h2>
+<p>EchoDraft 的未来充满无限可能，我们计划围绕以下方向进行迭代和扩展：</p>
+<ol>
+<li><strong>更丰富的输入源支持</strong>：除了在线平台，增加对本地音视频文件、直播流甚至会议记录工具的直接集成。</li>
+<li><strong>高级音频处理功能</strong>：引入降噪、人声分离、多说话人识别 (Speaker Diarization) 等功能，进一步提升转录和分析的准确性。</li>
+<li><strong>LLM 增强功能</strong>：<ul>
+<li><strong>多维度内容分析</strong>：如情感分析、关键词云、实体关系图谱等。</li>
+<li><strong>交互式问答</strong>：允许用户直接向音视频内容提问，LLM 提供精准回答。</li>
+<li><strong>多语言支持与翻译</strong>：实现跨语言的转录和内容生成。</li>
+</ul>
+</li>
+<li><strong>用户体验优化</strong>：<ul>
+<li>开发更友好的图形用户界面 (GUI) 或 Web 界面，降低非技术用户的上手门槛。</li>
+<li>提供更详细的进度反馈和可视化报告。</li>
+</ul>
+</li>
+<li><strong>插件化与生态建设</strong>：设计开放的插件接口，允许社区贡献者开发新的下载器、处理器或分析器模块。</li>
+<li><strong>性能与部署优化</strong>：探索使用 Docker 等容器技术简化部署；优化并行处理能力，进一步缩短处理时间。</li>
+</ol>
+<h2>结语</h2>
+<p>EchoDraft 致力于成为您处理音视频内容的得力助手，将繁琐的体力劳动转化为智能化的洞察力。我们相信，通过持续的迭代和社区的反馈，EchoDraft 将不断成长，为更多用户带来价值。</p>
+<p>项目目前处于积极开发阶段，欢迎对音视频处理和内容生成感兴趣的开发者关注我们的进展，并期待您的宝贵建议和贡献！</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Hybrid Search for Static Blogs: BM25 + Vector Search with Cloudflare Workers | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2026-01-26
+tags: [rag, search, cloudflare, javascript]
+description: Building a production-ready hybrid search for static blogs - combining BM25 keyword search with OpenAI embeddings, all without a backend server.</h2>
+<h1>Building Hybrid Search for Static Blogs: BM25 + Vector Search with Cloudflare Workers</h1>
+<p>Static site generators are great until you need search. Most solutions either require a backend server or rely on basic client-side text matching. This post walks through building a <strong>hybrid search system</strong> that combines instant BM25 keyword matching with semantic vector search - all while keeping your site fully static.</p>
+<h2>The Architecture</h2>
+<pre><code><span class="line">┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐</span>
+<span class="line">│   Build Time    │     │   Cloudflare     │     │    Browser      │</span>
+<span class="line">│                 │     │     Worker       │     │                 │</span>
+<span class="line">│  Markdown       │     │                  │     │  ┌───────────┐  │</span>
+<span class="line">│  Posts          │     │  /api/embedding  │     │  │ Keyword   │  │</span>
+<span class="line">│      ↓          │     │       ↓          │     │  │ Search    │  │</span>
+<span class="line">│  ┌─────────┐    │     │  OpenAI API      │     │  │ (instant) │  │</span>
+<span class="line">│  │ Index   │    │     │  (protected)     │     │  └─────┬─────┘  │</span>
+<span class="line">│  │ Builder │    │     │       ↓          │     │        │        │</span>
+<span class="line">│  └────┬────┘    │     │  512-dim vector  │     │        ▼        │</span>
+<span class="line">│       │         │     │                  │     │  ┌───────────┐  │</span>
+<span class="line">│       ▼         │     └──────────────────┘     │  │  Merge    │  │</span>
+<span class="line">│  search.dat     │◄────────────────────────────►│  │  Results  │  │</span>
+<span class="line">│  inverted.json  │                              │  └───────────┘  │</span>
+<span class="line">│  metadata.json  │                              │        ▲        │</span>
+<span class="line">│                 │                              │  ┌─────┴─────┐  │</span>
+<span class="line">└─────────────────┘                              │  │  Vector   │  │</span>
+<span class="line">                                                 │  │  Search   │  │</span>
+<span class="line">                                                 │  │  (Voy)    │  │</span>
+<span class="line">                                                 │  └───────────┘  │</span>
+<span class="line">                                                 └─────────────────┘</span></code></pre>
+<p><strong>Key design decisions:</strong></p>
+<ul>
+<li><strong>No backend required</strong> - everything runs in the browser or edge</li>
+<li><strong>API key protection</strong> - OpenAI calls go through Cloudflare Worker</li>
+<li><strong>Progressive UX</strong> - keyword results appear instantly, AI results merge in</li>
+<li><strong>Hybrid ranking</strong> - Reciprocal Rank Fusion combines both result sets</li>
+</ul>
+<h2>Part 1: Building the Search Index</h2>
+<p>At build time, we generate three files:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>search.dat</code></td>
+<td>Voy vector index</td>
+<td>~50KB</td>
+</tr>
+<tr>
+<td><code>search-inverted.json</code></td>
+<td>BM25 inverted index</td>
+<td>~10KB</td>
+</tr>
+<tr>
+<td><code>search-metadata.json</code></td>
+<td>Title, date, preview</td>
+<td>~5KB</td>
+</tr>
+</tbody></table>
+<h3>The Index Builder</h3>
+<pre><code class="language-javascript"><span class="line">// scripts/index-builder.mjs</span>
+<span class="line">import { Voy } from &#39;voy-search/voy_search.js&#39;;</span>
+<span class="line"></span>
+<span class="line">const CONFIG = {</span>
+<span class="line">    postsDir: &#39;blog/posts&#39;,</span>
+<span class="line">    dimensions: 512,        // text-embedding-3-small supports 512</span>
+<span class="line">    model: &#39;text-embedding-3-small&#39;,</span>
+<span class="line">    chunkSize: 500,</span>
+<span class="line">};</span>
+<span class="line"></span>
+<span class="line">// Tokenizer for both Chinese and English</span>
+<span class="line">function tokenize(text) {</span>
+<span class="line">    const normalized = text.toLowerCase().trim();</span>
+<span class="line">    const tokens = normalized.match(/[\u4e00-\u9fff]+|[a-z0-9]+/g) || [];</span>
+<span class="line"></span>
+<span class="line">    const result = [];</span>
+<span class="line">    for (const token of tokens) {</span>
+<span class="line">        if (/[\u4e00-\u9fff]/.test(token)) {</span>
+<span class="line">            // Chinese: unigrams + bigrams</span>
+<span class="line">            for (let i = 0; i &lt; token.length; i++) {</span>
+<span class="line">                result.push(token[i]);</span>
+<span class="line">                if (i &lt; token.length - 1) {</span>
+<span class="line">                    result.push(token.slice(i, i + 2));</span>
+<span class="line">                }</span>
+<span class="line">            }</span>
+<span class="line">        } else if (token.length &gt;= 2) {</span>
+<span class="line">            result.push(token);</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    return result.filter(t =&gt; t.length &gt;= 2 &amp;&amp; !STOPWORDS.has(t));</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// Build inverted index for BM25</span>
+<span class="line">function buildInvertedIndex(documents) {</span>
+<span class="line">    const index = {};</span>
+<span class="line">    const docLengths = {};</span>
+<span class="line"></span>
+<span class="line">    for (const doc of documents) {</span>
+<span class="line">        const tokens = tokenize(doc.title + &#39; &#39; + doc.content);</span>
+<span class="line">        const termFreq = {};</span>
+<span class="line"></span>
+<span class="line">        for (const token of tokens) {</span>
+<span class="line">            termFreq[token] = (termFreq[token] || 0) + 1;</span>
+<span class="line">        }</span>
+<span class="line"></span>
+<span class="line">        for (const [term, freq] of Object.entries(termFreq)) {</span>
+<span class="line">            if (!index[term]) index[term] = [];</span>
+<span class="line">            index[term].push({ id: doc.url, tf: freq });</span>
+<span class="line">        }</span>
+<span class="line"></span>
+<span class="line">        docLengths[doc.url] = tokens.length;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    return { index, docLengths, avgDocLength, docCount };</span>
+<span class="line">}</span></code></pre>
+<p>The bilingual tokenizer is crucial - it handles:</p>
+<ul>
+<li><strong>English</strong>: standard word tokenization with stopword removal</li>
+<li><strong>Chinese</strong>: character unigrams + bigrams (no word segmentation library needed)</li>
+</ul>
+<h3>Getting Embeddings from OpenAI</h3>
+<pre><code class="language-javascript"><span class="line">async function getEmbeddings(texts) {</span>
+<span class="line">    const response = await fetch(&#39;https://api.openai.com/v1/embeddings&#39;, {</span>
+<span class="line">        method: &#39;POST&#39;,</span>
+<span class="line">        headers: {</span>
+<span class="line">            &#39;Authorization&#39;: `Bearer ${process.env.OPENAI_API_KEY}`,</span>
+<span class="line">            &#39;Content-Type&#39;: &#39;application/json&#39;,</span>
+<span class="line">        },</span>
+<span class="line">        body: JSON.stringify({</span>
+<span class="line">            model: &#39;text-embedding-3-small&#39;,</span>
+<span class="line">            input: texts,</span>
+<span class="line">            dimensions: 512,  // Halves storage vs 1536</span>
+<span class="line">        }),</span>
+<span class="line">    });</span>
+<span class="line"></span>
+<span class="line">    return (await response.json()).data.map(item =&gt; item.embedding);</span>
+<span class="line">}</span></code></pre>
+<p><strong>Why 512 dimensions?</strong> OpenAI&#39;s text-embedding-3-small supports dimension reduction. Using 512 instead of 1536 cuts index size by ~65% with minimal quality loss.</p>
+<h3>Embedding Cache for Incremental Updates</h3>
+<p>Calling OpenAI API on every rebuild is slow and expensive. Content hashing enables incremental updates:</p>
+<pre><code class="language-javascript"><span class="line">import crypto from &#39;crypto&#39;;</span>
+<span class="line"></span>
+<span class="line">// Compute content hash</span>
+<span class="line">function contentHash(text) {</span>
+<span class="line">    return crypto.createHash(&#39;md5&#39;).update(text).digest(&#39;hex&#39;);</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// Cache format: { [chunkId]: { hash, embedding } }</span>
+<span class="line">const cache = loadCache(&#39;.cache/embeddings.json&#39;);</span>
+<span class="line"></span>
+<span class="line">for (const doc of documents) {</span>
+<span class="line">    const hash = contentHash(doc.embeddingText);</span>
+<span class="line"></span>
+<span class="line">    if (cache[doc.id]?.hash === hash) {</span>
+<span class="line">        // Cache hit - skip API call</span>
+<span class="line">        embeddings[i] = cache[doc.id].embedding;</span>
+<span class="line">    } else {</span>
+<span class="line">        // Content changed - needs re-embedding</span>
+<span class="line">        toEmbed.push({ index: i, text: doc.embeddingText, hash, id: doc.id });</span>
+<span class="line">    }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// Only call API for new/changed documents</span>
+<span class="line">const newEmbeddings = await batchGetEmbeddings(toEmbed.map(t =&gt; t.text));</span></code></pre>
+<p><strong>Result</strong>: First build requires full embedding (~93 batches), but subsequent updates only process changed articles. Adding one new post needs just 1-2 API calls instead of re-processing all 135 articles.</p>
+<h2>Part 2: The Cloudflare Worker</h2>
+<p>The Worker acts as a secure proxy, keeping your API key hidden from the browser.</p>
+<pre><code class="language-javascript"><span class="line">// workers/embed-worker.js</span>
+<span class="line">export default {</span>
+<span class="line">    async fetch(request, env) {</span>
+<span class="line">        const corsHeaders = {</span>
+<span class="line">            &quot;Access-Control-Allow-Origin&quot;: &quot;https://yuxu.ge&quot;,</span>
+<span class="line">            &quot;Access-Control-Allow-Methods&quot;: &quot;POST, OPTIONS&quot;,</span>
+<span class="line">            &quot;Access-Control-Allow-Headers&quot;: &quot;Content-Type&quot;,</span>
+<span class="line">        };</span>
+<span class="line"></span>
+<span class="line">        if (request.method === &quot;OPTIONS&quot;) {</span>
+<span class="line">            return new Response(null, { headers: corsHeaders });</span>
+<span class="line">        }</span>
+<span class="line"></span>
+<span class="line">        if (request.method !== &quot;POST&quot;) {</span>
+<span class="line">            return new Response(&quot;Method Not Allowed&quot;, { status: 405 });</span>
+<span class="line">        }</span>
+<span class="line"></span>
+<span class="line">        try {</span>
+<span class="line">            const { text } = await request.json();</span>
+<span class="line"></span>
+<span class="line">            const response = await fetch(&quot;https://api.openai.com/v1/embeddings&quot;, {</span>
+<span class="line">                method: &quot;POST&quot;,</span>
+<span class="line">                headers: {</span>
+<span class="line">                    &quot;Content-Type&quot;: &quot;application/json&quot;,</span>
+<span class="line">                    &quot;Authorization&quot;: `Bearer ${env.OPENAI_API_KEY}`,</span>
+<span class="line">                },</span>
+<span class="line">                body: JSON.stringify({</span>
+<span class="line">                    input: text,</span>
+<span class="line">                    model: &quot;text-embedding-3-small&quot;,</span>
+<span class="line">                    dimensions: 512,</span>
+<span class="line">                }),</span>
+<span class="line">            });</span>
+<span class="line"></span>
+<span class="line">            const data = await response.json();</span>
+<span class="line">            return new Response(</span>
+<span class="line">                JSON.stringify({ embedding: data.data[0].embedding }),</span>
+<span class="line">                { headers: { ...corsHeaders, &quot;Content-Type&quot;: &quot;application/json&quot; } }</span>
+<span class="line">            );</span>
+<span class="line">        } catch (err) {</span>
+<span class="line">            return new Response(</span>
+<span class="line">                JSON.stringify({ error: err.message }),</span>
+<span class="line">                { status: 500, headers: corsHeaders }</span>
+<span class="line">            );</span>
+<span class="line">        }</span>
+<span class="line">    },</span>
+<span class="line">};</span></code></pre>
+<p><strong>Cloudflare setup:</strong></p>
+<ol>
+<li>Create a Worker at <code>api-embedding.your-worker.workers.dev</code></li>
+<li>Add route: <code>yuxu.ge/api/*</code> → your Worker</li>
+<li>Set environment variable: <code>OPENAI_API_KEY</code></li>
+</ol>
+<p>Now your frontend calls <code>/api/embedding</code> and never sees the API key.</p>
+<h2>Part 3: The Hybrid Search Client</h2>
+<p>The magic happens in the browser. We run two searches in parallel:</p>
+<pre><code class="language-javascript"><span class="line">// components/search-client.js</span>
+<span class="line">export class SearchClient {</span>
+<span class="line">    async init() {</span>
+<span class="line">        // Load all indexes in parallel</span>
+<span class="line">        const [voyModule, indexRes, metaRes, invertedRes] = await Promise.all([</span>
+<span class="line">            import(&#39;/public/lib/voy-loader.js&#39;).then(m =&gt; m.getVoy()),</span>
+<span class="line">            fetch(&#39;/public/search.dat&#39;),</span>
+<span class="line">            fetch(&#39;/public/search-metadata.json&#39;),</span>
+<span class="line">            fetch(&#39;/public/search-inverted.json&#39;),</span>
+<span class="line">        ]);</span>
+<span class="line"></span>
+<span class="line">        this.voy = voyModule.deserialize(await indexRes.text());</span>
+<span class="line">        this.metadata = await metaRes.json();</span>
+<span class="line">        this.invertedIndex = await invertedRes.json();</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    // BM25 keyword search - instant, no API call</span>
+<span class="line">    keywordSearch(query, limit = 10) {</span>
+<span class="line">        const tokens = tokenize(query);</span>
+<span class="line">        const { idx, dl, avgDL, N } = this.invertedIndex;</span>
+<span class="line">        const scores = {};</span>
+<span class="line"></span>
+<span class="line">        for (const term of tokens) {</span>
+<span class="line">            const postings = idx[term];</span>
+<span class="line">            if (!postings) continue;</span>
+<span class="line"></span>
+<span class="line">            const df = postings.length;</span>
+<span class="line">            const idf = Math.log((N - df + 0.5) / (df + 0.5) + 1);</span>
+<span class="line"></span>
+<span class="line">            for (const { id, tf } of postings) {</span>
+<span class="line">                const docLen = dl[id] || avgDL;</span>
+<span class="line">                const k1 = 1.2, b = 0.75;</span>
+<span class="line">                const tfNorm = (tf * (k1 + 1)) /</span>
+<span class="line">                    (tf + k1 * (1 - b + b * docLen / avgDL));</span>
+<span class="line">                scores[id] = (scores[id] || 0) + idf * tfNorm;</span>
+<span class="line">            }</span>
+<span class="line">        }</span>
+<span class="line"></span>
+<span class="line">        return Object.entries(scores)</span>
+<span class="line">            .sort((a, b) =&gt; b[1] - a[1])</span>
+<span class="line">            .slice(0, limit);</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    // Semantic search - requires API call</span>
+<span class="line">    async semanticSearch(query, limit = 10) {</span>
+<span class="line">        const embedding = await this.getVector(query);</span>
+<span class="line">        const results = this.voy.search(embedding, limit * 3);</span>
+<span class="line">        // Deduplicate by URL...</span>
+<span class="line">        return deduplicated;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    // Hybrid search with Reciprocal Rank Fusion</span>
+<span class="line">    async search(query, limit = 5) {</span>
+<span class="line">        const [keywordResults, semanticResults] = await Promise.all([</span>
+<span class="line">            this.keywordSearch(query, limit * 2),</span>
+<span class="line">            this.semanticSearch(query, limit * 2),</span>
+<span class="line">        ]);</span>
+<span class="line"></span>
+<span class="line">        // RRF merging</span>
+<span class="line">        const rrfScores = {};</span>
+<span class="line">        const k = 60;</span>
+<span class="line"></span>
+<span class="line">        for (const r of keywordResults) {</span>
+<span class="line">            rrfScores[r.url] = (rrfScores[r.url] || 0) +</span>
+<span class="line">                0.4 / (k + r.rank);  // 40% weight</span>
+<span class="line">        }</span>
+<span class="line">        for (const r of semanticResults) {</span>
+<span class="line">            rrfScores[r.url] = (rrfScores[r.url] || 0) +</span>
+<span class="line">                0.6 / (k + r.rank);  // 60% weight</span>
+<span class="line">        }</span>
+<span class="line"></span>
+<span class="line">        return Object.entries(rrfScores)</span>
+<span class="line">            .sort((a, b) =&gt; b[1] - a[1])</span>
+<span class="line">            .slice(0, limit);</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h3>Why Reciprocal Rank Fusion?</h3>
+<p>RRF is elegantly simple: <code>score = Σ 1/(k + rank)</code> for each retriever. It doesn&#39;t require score normalization and handles the different scales of BM25 scores vs vector distances gracefully.</p>
+<h2>Part 4: Progressive UX</h2>
+<p>The key insight: <strong>keyword search is instant, semantic search needs an API call</strong>. We show keyword results immediately, then merge in AI results with animation:</p>
+<pre><code class="language-javascript"><span class="line">async function handleSearch(query) {</span>
+<span class="line">    // 1. Instant keyword results</span>
+<span class="line">    const keywordResults = client.searchKeywordOnly(query);</span>
+<span class="line">    showResults(query, keywordResults, showAiLoading: true);</span>
+<span class="line"></span>
+<span class="line">    // 2. AI search runs in background</span>
+<span class="line">    const semanticResults = await client.semanticSearch(query);</span>
+<span class="line"></span>
+<span class="line">    // 3. Merge with animation</span>
+<span class="line">    mergeResults(semanticResults, keywordResults);</span>
+<span class="line">}</span></code></pre>
+<p>The CSS animations make the experience feel polished:</p>
+<pre><code class="language-css"><span class="line">@keyframes slideIn {</span>
+<span class="line">    from { opacity: 0; transform: translateY(-10px); }</span>
+<span class="line">    to { opacity: 1; transform: translateY(0); }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">.search-result-item.new {</span>
+<span class="line">    animation: slideIn 0.3s ease-out;</span>
+<span class="line">}</span></code></pre>
+<p>Each result shows badges indicating its source:</p>
+<ul>
+<li><strong><code>keyword</code></strong> (blue) - matched via BM25</li>
+<li><strong><code>AI</code></strong> (pink) - matched via vector similarity</li>
+<li>Both badges if found by both methods</li>
+</ul>
+<h2>Performance Characteristics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Keyword Search</th>
+<th>Semantic Search</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Latency</td>
+<td>&lt;10ms</td>
+<td>200-500ms</td>
+</tr>
+<tr>
+<td>API calls</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Index size</td>
+<td>~10KB</td>
+<td>~50KB</td>
+</tr>
+<tr>
+<td>Ranking</td>
+<td>BM25 (exact match)</td>
+<td>Cosine similarity</td>
+</tr>
+</tbody></table>
+<p>The hybrid approach gives you the best of both worlds:</p>
+<ul>
+<li><strong>Exact matches</strong> via keyword search (searching &quot;Docker&quot; finds &quot;Docker&quot; immediately)</li>
+<li><strong>Semantic matches</strong> via vectors (searching &quot;container security&quot; finds Docker articles)</li>
+</ul>
+<h2>Deployment Checklist</h2>
+<ol>
+<li><strong>Build indexes</strong>: <code>OPENAI_API_KEY=sk-xxx node scripts/index-builder.mjs</code></li>
+<li><strong>Deploy Worker</strong>: Set up Cloudflare Worker with route mapping</li>
+<li><strong>Upload static files</strong>: <code>search.dat</code>, <code>search-inverted.json</code>, <code>search-metadata.json</code></li>
+<li><strong>Test</strong>: Open browser console, type in search box</li>
+</ol>
+<h2>Conclusion</h2>
+<p>This architecture proves you don&#39;t need a backend server for sophisticated search. By splitting the work between build-time indexing, edge compute (Cloudflare Worker), and browser-side retrieval (Voy WASM), we get:</p>
+<ul>
+<li><strong>Security</strong>: API keys never touch the browser</li>
+<li><strong>Speed</strong>: Keyword results appear instantly</li>
+<li><strong>Quality</strong>: Semantic search understands intent</li>
+<li><strong>Cost</strong>: Only pay for actual search queries, not server uptime</li>
+</ul>
+<p>The full source code is available at <a href="https://github.com/geyuxu/yuxu.ge">github.com/geyuxu/yuxu.ge</a>.</p>
+<hr>
+<p><em>Built with: OpenAI text-embedding-3-small, Voy WASM, Cloudflare Workers, vanilla JavaScript</em></p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ultimate Guide to Classification Model Evaluation Metrics</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, machine learning, classification, metrics, python]
+legacy: true</h2>
+<h1>The Ultimate Guide to Classification Model Evaluation Metrics</h1>
+<p><img src="__TABLE_295d704d__" alt="Table"></p><ul>
+<li><strong>TP (True Positive)</strong>: Correctly predicted positive.</li>
+<li><strong>FN (False Negative)</strong>: Actual positive, but predicted negative (Type I Error).</li>
+<li><strong>FP (False Positive)</strong>: Actual negative, but predicted positive (Type II Error).</li>
+<li><strong>TN (True Negative)</strong>: Correctly predicted negative.</li>
+</ul>
+<p>Nearly all subsequent classification metrics are derived from these four fundamental counts.</p>
+<h3>2. Point-Based Core Metrics (Threshold-Dependent)</h3>
+<p>These metrics are calculated based on a specific classification threshold (usually 0.5 by default).</p>
+<p><img src="__TABLE_-6162c9b__" alt="Table"></p><h3>3. Threshold-Curve Metrics (Threshold-Independent)</h3>
+<p>These metrics evaluate a model&#39;s performance across all possible classification thresholds.</p>
+<p><img src="__TABLE_5cce4cef__" alt="Table"></p><p><strong>Key Takeaway</strong>: For imbalanced datasets, the <strong>PR curve and its AUPRC</strong> are often more informative than the ROC-AUC. A high ROC-AUC can be misleadingly optimistic when the number of true negatives (TN) is massive.</p>
+<h3>4. Probability Quality Metrics</h3>
+<p>These metrics assess the quality of the predicted probabilities themselves, not the final class labels.</p>
+<p><img src="__TABLE_6b04c878__" alt="Table"></p><h3>5. Averaging Strategies for Multi-Class &amp; Imbalanced Data</h3>
+<ul>
+<li><strong>Micro Average</strong>: Aggregates the contributions of all classes to compute the average metric. It weights each <strong>sample</strong> equally. Best for assessing overall performance.</li>
+<li><strong>Macro Average</strong>: Calculates the metric independently for each class and then takes the average. It weights each <strong>class</strong> equally. Highlights performance on rare classes.</li>
+<li><strong>Weighted Average</strong>: A macro average where each class&#39;s score is weighted by its number of samples. A compromise between micro and macro.</li>
+</ul>
+<p><strong>Recommendation</strong>: Always plot the class distribution first. If it&#39;s a long-tail distribution, report both <strong>Macro-F1</strong> and <strong>Micro-F1</strong> to give a complete picture.</p>
+<h3>6. Common Pitfalls &amp; How to Avoid Them</h3>
+<ol>
+<li><strong>Confusing Precision &amp; Recall</strong>: Remember, Recall is about finding all positives (minimizing FN), while Precision is about not mislabeling negatives as positives (minimizing FP).</li>
+<li><strong>High Accuracy ≠ Good Model</strong>: On a 99:1 imbalanced dataset, a model that predicts &quot;negative&quot; every time has 99% accuracy but is useless.</li>
+<li><strong>F1 Isn&#39;t a Silver Bullet</strong>: If your business cares more about Recall (e.g., cancer screening), use the F2-Score. If Precision is paramount (e.g., legal document review), use the F0.5-Score.</li>
+<li><strong>Comparing AUC Across Datasets</strong>: The shape of ROC/PR curves depends on the dataset&#39;s class distribution. AUC scores are not directly comparable across different test sets.</li>
+<li><strong>Separation vs. Calibration</strong>: A model can have a high ROC-AUC (good at separating classes) but produce poorly calibrated probabilities. For production use, check both separation (AUC) and calibration (LogLoss/ECE).</li>
+</ol>
+<h3>7. Python Quick-Start Template</h3>
+<p>This template uses <code>scikit-learn</code> to compute multiple metrics for an imbalanced, multi-class classification problem.</p>
+<blockquote><code>import numpy as np</code><br>
+<code>from sklearn.metrics import (accuracy_score, precision_recall_fscore_support,</code><br>
+<code>                             roc_auc_score, average_precision_score,</code><br>
+<code>                             log_loss, brier_score_loss, confusion_matrix, matthews_corrcoef)</code><br>
+<code>from sklearn.datasets import make_classification</code><br>
+<code>from sklearn.model_selection import train_test_split</code><br>
+<code>from sklearn.linear_model import LogisticRegression</code><br>
+<code></code><br>
+<code># ... (40 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/7cb6f965267a91756777b9b80f3573b8">GitHub Gist</a></em></p><p><strong>Example Output</strong>:</p>
+<blockquote><code>--- Classification Metrics ---</code><br>
+<code>Accuracy (Weighted) : 0.8944</code><br>
+<code>Precision (Weighted): 0.8861</code><br>
+<code>Recall (Weighted)   : 0.8944</code><br>
+<code>F1-Score (Weighted) : 0.8862</code><br>
+<code>Matthews Corr Coef  : 0.7183</code><br>
+<code></code><br>
+<code>Precision (Macro)   : 0.7989</code><br>
+<code>Recall (Macro)      : 0.7311</code><br>
+<code>F1-Score (Macro)    : 0.7552</code><br>
+<code></code><br>
+<code>LogLoss             : 0.2819</code><br>
+<code>Brier Score (Avg)   : 0.0542</code></blockquote><p>Notice that the Macro-F1 (0.755) is significantly lower than the Weighted-F1 (0.886). This reveals that the model struggles with the rare classes—an insight easily missed by looking only at overall accuracy.</p>
+<h3>8. A Quick Flowchart for Choosing Metrics</h3>
+<ol>
+<li><strong>Define Business Cost</strong>: What is the cost of a False Positive vs. a False Negative?</li>
+<li><strong>Select Point-Based Metrics</strong>: If costs are known, tune your threshold and report Precision/Recall/Fβ. If costs are equal or unknown, F1-Score is a good default.</li>
+<li><strong>Evaluate Probability</strong>: Before deploying, check if your model&#39;s probabilities are calibrated using LogLoss and ECE/Brier Score.</li>
+<li><strong>Monitor Overall Quality</strong>: During model iteration or A/B testing, use AUPRC (for imbalanced data) or ROC-AUC (for balanced data) to assess overall ranking power.</li>
+<li><strong>Address Imbalance</strong>: If Macro-F1 is much lower than Micro-F1, analyze the confusion matrix to see which minority classes are failing. Consider using resampling, cost-sensitive learning, or Focal Loss to improve performance.</li>
+</ol>
+
+</body>
+</html>

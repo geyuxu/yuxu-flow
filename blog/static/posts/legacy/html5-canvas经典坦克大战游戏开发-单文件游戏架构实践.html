@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Canvas经典坦克大战游戏开发：单文件游戏架构实践 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2025-07-20
+tags: [frontend]
+legacy: true</h2>
+<h1>HTML5 Canvas经典坦克大战游戏开发：单文件游戏架构实践</h1>
+<h3>架构特点</h3>
+<ul>
+<li><strong>单文件设计</strong>: 所有代码集中在一个HTML文件中</li>
+<li><strong>面向对象</strong>: 使用ES6类语法组织代码结构</li>
+<li><strong>模块化思维</strong>: 清晰的功能分离和职责划分</li>
+<li><strong>零依赖</strong>: 无需任何外部库或框架</li>
+</ul>
+<h2>游戏系统设计</h2>
+<h3>核心类结构</h3>
+<pre><code class="language-javascript"><span class="line">// 游戏主类</span>
+<span class="line">class TankWarGame {</span>
+<span class="line">    constructor() {</span>
+<span class="line">        this.canvas = document.getElementById(&#39;gameCanvas&#39;);</span>
+<span class="line">        this.ctx = this.canvas.getContext(&#39;2d&#39;);</span>
+<span class="line">        this.width = 800;</span>
+<span class="line">        this.height = 600;</span>
+<span class="line">        </span>
+<span class="line">        this.player = new PlayerTank(100, 500);</span>
+<span class="line">        this.enemies = [];</span>
+<span class="line">        this.bullets = [];</span>
+<span class="line">        this.obstacles = [];</span>
+<span class="line">        </span>
+<span class="line">        this.gameState = &#39;playing&#39;; // playing, paused, gameOver</span>
+<span class="line">        this.score = 0;</span>
+<span class="line">        this.level = 1;</span>
+<span class="line">        this.enemiesRemaining = 20;</span>
+<span class="line">        </span>
+<span class="line">        this.keys = {};</span>
+<span class="line">        this.lastTime = 0;</span>
+<span class="line">        </span>
+<span class="line">        this.init();</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    init() {</span>
+<span class="line">        this.setupCanvas();</span>
+<span class="line">        this.bindEvents();</span>
+<span class="line">        this.createObstacles();</span>
+<span class="line">        this.spawnEnemies();</span>
+<span class="line">        this.gameLoop();</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    setupCanvas() {</span>
+<span class="line">        this.canvas.width = this.width;</span>
+<span class="line">        this.canvas.height = this.height;</span>
+<span class="line">        this.canvas.style.border = &#39;2px solid #333&#39;;</span>
+<span class="line">        this.canvas.style.background = &#39;#000&#39;;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    bindEvents() {</span>
+<span class="line">        // 键盘事件处理</span>
+<span class="line">        document.addEventListener(&#39;keydown&#39;, (e) =&gt; {</span>
+<span class="line">            this.keys[e.code] = true;</span>
+<span class="line">        });</span>
+<span class="line">        </span>
+<span class="line">        document.addEventListener(&#39;keyup&#39;, (e) =&gt; {</span>
+<span class="line">            this.keys[e.code] = false;</span>
+<span class="line">        });</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    gameLoop(currentTime = 0) {</span>
+<span class="line">        const deltaTime = currentTime - this.lastTime;</span>
+<span class="line">        this.lastTime = currentTime;</span>
+<span class="line">        </span>
+<span class="line">        if (this.gameState === &#39;playing&#39;) {</span>
+<span class="line">            this.update(deltaTime);</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        this.render();</span>
+<span class="line">        requestAnimationFrame((time) =&gt; this.gameLoop(time));</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    update(deltaTime) {</span>
+<span class="line">        // 更新玩家</span>
+<span class="line">        this.player.update(deltaTime, this.keys);</span>
+<span class="line">        </span>
+<span class="line">        // 更新敌人</span>
+<span class="line">        this.enemies.forEach(enemy =&gt; {</span>
+<span class="line">            enemy.update(deltaTime, this.player, this.obstacles);</span>
+<span class="line">        });</span>
+<span class="line">        </span>
+<span class="line">        // 更新子弹</span>
+<span class="line">        this.bullets.forEach(bullet =&gt; {</span>
+<span class="line">            bullet.update(deltaTime);</span>
+<span class="line">        });</span>
+<span class="line">        </span>
+<span class="line">        // 处理碰撞</span>
+<span class="line">        this.handleCollisions();</span>
+<span class="line">        </span>
+<span class="line">        // 清理无效对象</span>
+<span class="line">        this.cleanup();</span>
+<span class="line">        </span>
+<span class="line">        // 检查游戏状态</span>
+<span class="line">        this.checkGameState();</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    render() {</span>
+<span class="line">        // 清除画布</span>
+<span class="line">        this.ctx.fillStyle = &#39;#000&#39;;</span>
+<span class="line">        this.ctx.fillRect(0, 0, this.width, this.height);</span>
+<span class="line">        </span>
+<span class="line">        // 渲染障碍物</span>
+<span class="line">        this.obstacles.forEach(obstacle =&gt; obstacle.render(this.ctx));</span>
+<span class="line">        </span>
+<span class="line">        // 渲染坦克</span>
+<span class="line">        this.player.render(this.ctx);</span>
+<span class="line">        this.enemies.forEach(enemy =&gt; enemy.render(this.ctx));</span>
+<span class="line">        </span>
+<span class="line">        // 渲染子弹</span>
+<span class="line">        this.bullets.forEach(bullet =&gt; bullet.render(this.ctx));</span>
+<span class="line">        </span>
+<span class="line">        // 渲染UI</span>
+<span class="line">        this.renderUI();</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h3>坦克类实现</h3>
+<pre><code class="language-javascript"><span class="line">class Tank {</span>
+<span class="line">    constructor(x, y, color = &#39;#00FF00&#39;) {</span>
+<span class="line">        this.x = x;</span>
+<span class="line">        this.y = y;</span>
+<span class="line">        this.width = 32;</span>
+<span class="line">        this.height = 32;</span>
+<span class="line">        this.speed = 100; // pixels per second</span>
+<span class="line">        this.direction = 0; // 0:上, 1:右, 2:下, 3:左</span>
+<span class="line">        this.color = color;</span>
+<span class="line">        this.health = 1;</span>
+<span class="line">        this.fireRate = 500; // 毫秒</span>
+<span class="line">        this.lastFireTime = 0;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    move(direction, deltaTime, obstacles = []) {</span>
+<span class="line">        const speed = this.speed * (deltaTime / 1000);</span>
+<span class="line">        let newX = this.x;</span>
+<span class="line">        let newY = this.y;</span>
+<span class="line">        </span>
+<span class="line">        // 计算新位置</span>
+<span class="line">        switch(direction) {</span>
+<span class="line">            case 0: newY -= speed; break; // 上</span>
+<span class="line">            case 1: newX += speed; break; // 右</span>
+<span class="line">            case 2: newY += speed; break; // 下</span>
+<span class="line">            case 3: newX -= speed; break; // 左</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 边界检查</span>
+<span class="line">        if (newX &lt; 0 || newX + this.width &gt; 800 ||</span>
+<span class="line">            newY &lt; 0 || newY + this.height &gt; 600) {</span>
+<span class="line">            return false;</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 碰撞检测</span>
+<span class="line">        const tempTank = { </span>
+<span class="line">            x: newX, </span>
+<span class="line">            y: newY, </span>
+<span class="line">            width: this.width, </span>
+<span class="line">            height: this.height </span>
+<span class="line">        };</span>
+<span class="line">        </span>
+<span class="line">        if (this.checkCollisions(tempTank, obstacles)) {</span>
+<span class="line">            return false;</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 更新位置和方向</span>
+<span class="line">        this.x = newX;</span>
+<span class="line">        this.y = newY;</span>
+<span class="line">        this.direction = direction;</span>
+<span class="line">        return true;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    checkCollisions(rect, obstacles) {</span>
+<span class="line">        return obstacles.some(obstacle =&gt; </span>
+<span class="line">            this.isColliding(rect, obstacle)</span>
+<span class="line">        );</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    isColliding(rect1, rect2) {</span>
+<span class="line">        return rect1.x &lt; rect2.x + rect2.width &amp;&amp;</span>
+<span class="line">               rect1.x + rect1.width &gt; rect2.x &amp;&amp;</span>
+<span class="line">               rect1.y &lt; rect2.y + rect2.height &amp;&amp;</span>
+<span class="line">               rect1.y + rect1.height &gt; rect2.y;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    fire(currentTime) {</span>
+<span class="line">        if (currentTime - this.lastFireTime &lt; this.fireRate) {</span>
+<span class="line">            return null;</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        this.lastFireTime = currentTime;</span>
+<span class="line">        </span>
+<span class="line">        // 计算子弹起始位置和方向</span>
+<span class="line">        let bulletX = this.x + this.width / 2;</span>
+<span class="line">        let bulletY = this.y + this.height / 2;</span>
+<span class="line">        </span>
+<span class="line">        return new Bullet(bulletX, bulletY, this.direction, this);</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    render(ctx) {</span>
+<span class="line">        ctx.save();</span>
+<span class="line">        </span>
+<span class="line">        // 移动到坦克中心</span>
+<span class="line">        ctx.translate(this.x + this.width/2, this.y + this.height/2);</span>
+<span class="line">        </span>
+<span class="line">        // 根据方向旋转</span>
+<span class="line">        ctx.rotate(this.direction * Math.PI / 2);</span>
+<span class="line">        </span>
+<span class="line">        // 绘制坦克主体</span>
+<span class="line">        ctx.fillStyle = this.color;</span>
+<span class="line">        ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);</span>
+<span class="line">        </span>
+<span class="line">        // 绘制炮管</span>
+<span class="line">        ctx.fillStyle = &#39;#444&#39;;</span>
+<span class="line">        ctx.fillRect(-2, -this.height/2 - 8, 4, 12);</span>
+<span class="line">        </span>
+<span class="line">        // 绘制履带</span>
+<span class="line">        ctx.fillStyle = &#39;#333&#39;;</span>
+<span class="line">        ctx.fillRect(-this.width/2 - 2, -this.height/2, 2, this.height);</span>
+<span class="line">        ctx.fillRect(this.width/2, -this.height/2, 2, this.height);</span>
+<span class="line">        </span>
+<span class="line">        ctx.restore();</span>
+<span class="line">        </span>
+<span class="line">        // 绘制血量条</span>
+<span class="line">        if (this.health &lt; this.maxHealth) {</span>
+<span class="line">            this.drawHealthBar(ctx);</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    drawHealthBar(ctx) {</span>
+<span class="line">        const barWidth = this.width;</span>
+<span class="line">        const barHeight = 4;</span>
+<span class="line">        const barY = this.y - 8;</span>
+<span class="line">        </span>
+<span class="line">        // 背景</span>
+<span class="line">        ctx.fillStyle = &#39;#FF0000&#39;;</span>
+<span class="line">        ctx.fillRect(this.x, barY, barWidth, barHeight);</span>
+<span class="line">        </span>
+<span class="line">        // 血量</span>
+<span class="line">        ctx.fillStyle = &#39;#00FF00&#39;;</span>
+<span class="line">        const healthWidth = (this.health / this.maxHealth) * barWidth;</span>
+<span class="line">        ctx.fillRect(this.x, barY, healthWidth, barHeight);</span>
+<span class="line">    }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// 玩家坦克类</span>
+<span class="line">class PlayerTank extends Tank {</span>
+<span class="line">    constructor(x, y) {</span>
+<span class="line">        super(x, y, &#39;#00FF00&#39;);</span>
+<span class="line">        this.maxHealth = 3;</span>
+<span class="line">        this.health = this.maxHealth;</span>
+<span class="line">        this.lives = 3;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    update(deltaTime, keys) {</span>
+<span class="line">        // 处理移动输入</span>
+<span class="line">        if (keys[&#39;ArrowUp&#39;] || keys[&#39;KeyW&#39;]) {</span>
+<span class="line">            this.move(0, deltaTime, game.obstacles);</span>
+<span class="line">        }</span>
+<span class="line">        if (keys[&#39;ArrowRight&#39;] || keys[&#39;KeyD&#39;]) {</span>
+<span class="line">            this.move(1, deltaTime, game.obstacles);</span>
+<span class="line">        }</span>
+<span class="line">        if (keys[&#39;ArrowDown&#39;] || keys[&#39;KeyS&#39;]) {</span>
+<span class="line">            this.move(2, deltaTime, game.obstacles);</span>
+<span class="line">        }</span>
+<span class="line">        if (keys[&#39;ArrowLeft&#39;] || keys[&#39;KeyA&#39;]) {</span>
+<span class="line">            this.move(3, deltaTime, game.obstacles);</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 处理射击输入</span>
+<span class="line">        if (keys[&#39;Space&#39;]) {</span>
+<span class="line">            const bullet = this.fire(Date.now());</span>
+<span class="line">            if (bullet) {</span>
+<span class="line">                game.bullets.push(bullet);</span>
+<span class="line">            }</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// 敌方坦克类</span>
+<span class="line">class EnemyTank extends Tank {</span>
+<span class="line">    constructor(x, y) {</span>
+<span class="line">        super(x, y, &#39;#FF0000&#39;);</span>
+<span class="line">        this.aiState = &#39;patrol&#39;;</span>
+<span class="line">        this.targetDirection = Math.floor(Math.random() * 4);</span>
+<span class="line">        this.stateChangeTime = 0;</span>
+<span class="line">        this.moveTime = 0;</span>
+<span class="line">        this.fireInterval = 1000 + Math.random() * 2000; // 随机射击间隔</span>
+<span class="line">        this.lastAIUpdate = 0;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    update(deltaTime, player, obstacles) {</span>
+<span class="line">        const currentTime = Date.now();</span>
+<span class="line">        </span>
+<span class="line">        // AI决策更新（降低更新频率以提升性能）</span>
+<span class="line">        if (currentTime - this.lastAIUpdate &gt; 100) {</span>
+<span class="line">            this.updateAI(deltaTime, player, obstacles);</span>
+<span class="line">            this.lastAIUpdate = currentTime;</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 移动</span>
+<span class="line">        this.executeMovement(deltaTime, obstacles);</span>
+<span class="line">        </span>
+<span class="line">        // 射击</span>
+<span class="line">        this.handleFiring(currentTime, player);</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    updateAI(deltaTime, player, obstacles) {</span>
+<span class="line">        const distanceToPlayer = Math.sqrt(</span>
+<span class="line">            Math.pow(player.x - this.x, 2) + </span>
+<span class="line">            Math.pow(player.y - this.y, 2)</span>
+<span class="line">        );</span>
+<span class="line">        </span>
+<span class="line">        // 状态机</span>
+<span class="line">        switch(this.aiState) {</span>
+<span class="line">            case &#39;patrol&#39;:</span>
+<span class="line">                if (distanceToPlayer &lt; 150) {</span>
+<span class="line">                    this.aiState = &#39;attack&#39;;</span>
+<span class="line">                    this.targetDirection = this.getDirectionToPlayer(player);</span>
+<span class="line">                }</span>
+<span class="line">                break;</span>
+<span class="line">                </span>
+<span class="line">            case &#39;attack&#39;:</span>
+<span class="line">                if (distanceToPlayer &gt; 200) {</span>
+<span class="line">                    this.aiState = &#39;patrol&#39;;</span>
+<span class="line">                } else {</span>
+<span class="line">                    // 朝向玩家</span>
+<span class="line">                    this.targetDirection = this.getDirectionToPlayer(player);</span>
+<span class="line">                }</span>
+<span class="line">                break;</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 随机改变方向（巡逻状态）</span>
+<span class="line">        if (this.aiState === &#39;patrol&#39; &amp;&amp; Math.random() &lt; 0.02) {</span>
+<span class="line">            this.targetDirection = Math.floor(Math.random() * 4);</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    getDirectionToPlayer(player) {</span>
+<span class="line">        const dx = player.x - this.x;</span>
+<span class="line">        const dy = player.y - this.y;</span>
+<span class="line">        </span>
+<span class="line">        if (Math.abs(dx) &gt; Math.abs(dy)) {</span>
+<span class="line">            return dx &gt; 0 ? 1 : 3; // 右或左</span>
+<span class="line">        } else {</span>
+<span class="line">            return dy &gt; 0 ? 2 : 0; // 下或上</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    executeMovement(deltaTime, obstacles) {</span>
+<span class="line">        if (!this.move(this.targetDirection, deltaTime, obstacles)) {</span>
+<span class="line">            // 撞墙了，改变方向</span>
+<span class="line">            this.targetDirection = Math.floor(Math.random() * 4);</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    handleFiring(currentTime, player) {</span>
+<span class="line">        if (this.aiState === &#39;attack&#39; &amp;&amp; </span>
+<span class="line">            currentTime - this.lastFireTime &gt; this.fireInterval) {</span>
+<span class="line">            </span>
+<span class="line">            // 检查是否可以射击到玩家（简单的射线检测）</span>
+<span class="line">            if (this.canShootPlayer(player)) {</span>
+<span class="line">                const bullet = this.fire(currentTime);</span>
+<span class="line">                if (bullet) {</span>
+<span class="line">                    game.bullets.push(bullet);</span>
+<span class="line">                }</span>
+<span class="line">            }</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    canShootPlayer(player) {</span>
+<span class="line">        // 简化的射线检测</span>
+<span class="line">        const dx = player.x - this.x;</span>
+<span class="line">        const dy = player.y - this.y;</span>
+<span class="line">        </span>
+<span class="line">        // 检查玩家是否在射击方向上</span>
+<span class="line">        switch(this.direction) {</span>
+<span class="line">            case 0: return dy &lt; 0 &amp;&amp; Math.abs(dx) &lt; 50; // 上</span>
+<span class="line">            case 1: return dx &gt; 0 &amp;&amp; Math.abs(dy) &lt; 50; // 右</span>
+<span class="line">            case 2: return dy &gt; 0 &amp;&amp; Math.abs(dx) &lt; 50; // 下</span>
+<span class="line">            case 3: return dx &lt; 0 &amp;&amp; Math.abs(dy) &lt; 50; // 左</span>
+<span class="line">        }</span>
+<span class="line">        return false;</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h3>子弹系统</h3>
+<pre><code class="language-javascript"><span class="line">class Bullet {</span>
+<span class="line">    constructor(x, y, direction, owner) {</span>
+<span class="line">        this.x = x;</span>
+<span class="line">        this.y = y;</span>
+<span class="line">        this.width = 4;</span>
+<span class="line">        this.height = 4;</span>
+<span class="line">        this.speed = 300;</span>
+<span class="line">        this.direction = direction;</span>
+<span class="line">        this.owner = owner;</span>
+<span class="line">        this.active = true;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    update(deltaTime) {</span>
+<span class="line">        if (!this.active) return;</span>
+<span class="line">        </span>
+<span class="line">        const speed = this.speed * (deltaTime / 1000);</span>
+<span class="line">        </span>
+<span class="line">        // 根据方向移动</span>
+<span class="line">        switch(this.direction) {</span>
+<span class="line">            case 0: this.y -= speed; break; // 上</span>
+<span class="line">            case 1: this.x += speed; break; // 右</span>
+<span class="line">            case 2: this.y += speed; break; // 下</span>
+<span class="line">            case 3: this.x -= speed; break; // 左</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 边界检查</span>
+<span class="line">        if (this.x &lt; 0 || this.x &gt; 800 || this.y &lt; 0 || this.y &gt; 600) {</span>
+<span class="line">            this.active = false;</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    render(ctx) {</span>
+<span class="line">        if (!this.active) return;</span>
+<span class="line">        </span>
+<span class="line">        ctx.fillStyle = &#39;#FFFF00&#39;;</span>
+<span class="line">        ctx.fillRect(this.x - this.width/2, this.y - this.height/2, </span>
+<span class="line">                    this.width, this.height);</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    checkCollision(target) {</span>
+<span class="line">        if (!this.active || this.owner === target) return false;</span>
+<span class="line">        </span>
+<span class="line">        return this.x &lt; target.x + target.width &amp;&amp;</span>
+<span class="line">               this.x + this.width &gt; target.x &amp;&amp;</span>
+<span class="line">               this.y &lt; target.y + target.height &amp;&amp;</span>
+<span class="line">               this.y + this.height &gt; target.y;</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h2>游戏机制实现</h2>
+<h3>碰撞检测系统</h3>
+<pre><code class="language-javascript"><span class="line">class CollisionManager {</span>
+<span class="line">    static handleBulletCollisions(bullets, targets) {</span>
+<span class="line">        bullets.forEach(bullet =&gt; {</span>
+<span class="line">            if (!bullet.active) return;</span>
+<span class="line">            </span>
+<span class="line">            // 检查与障碍物的碰撞</span>
+<span class="line">            game.obstacles.forEach(obstacle =&gt; {</span>
+<span class="line">                if (bullet.checkCollision(obstacle)) {</span>
+<span class="line">                    bullet.active = false;</span>
+<span class="line">                    // 可以添加爆炸效果</span>
+<span class="line">                    this.createExplosion(bullet.x, bullet.y);</span>
+<span class="line">                }</span>
+<span class="line">            });</span>
+<span class="line">            </span>
+<span class="line">            // 检查与坦克的碰撞</span>
+<span class="line">            targets.forEach(target =&gt; {</span>
+<span class="line">                if (bullet.checkCollision(target)) {</span>
+<span class="line">                    bullet.active = false;</span>
+<span class="line">                    target.health--;</span>
+<span class="line">                    </span>
+<span class="line">                    // 创建击中效果</span>
+<span class="line">                    this.createHitEffect(target.x, target.y);</span>
+<span class="line">                    </span>
+<span class="line">                    // 检查目标是否被摧毁</span>
+<span class="line">                    if (target.health &lt;= 0) {</span>
+<span class="line">                        this.destroyTarget(target);</span>
+<span class="line">                    }</span>
+<span class="line">                }</span>
+<span class="line">            });</span>
+<span class="line">        });</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static createExplosion(x, y) {</span>
+<span class="line">        // 简单的爆炸效果</span>
+<span class="line">        const explosion = new ParticleEffect(x, y, &#39;explosion&#39;);</span>
+<span class="line">        game.effects.push(explosion);</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static createHitEffect(x, y) {</span>
+<span class="line">        // 击中效果</span>
+<span class="line">        const hitEffect = new ParticleEffect(x, y, &#39;hit&#39;);</span>
+<span class="line">        game.effects.push(hitEffect);</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static destroyTarget(target) {</span>
+<span class="line">        if (target instanceof EnemyTank) {</span>
+<span class="line">            // 敌方坦克被摧毁</span>
+<span class="line">            game.score += 100;</span>
+<span class="line">            game.enemiesRemaining--;</span>
+<span class="line">            </span>
+<span class="line">            // 从数组中移除</span>
+<span class="line">            const index = game.enemies.indexOf(target);</span>
+<span class="line">            if (index &gt; -1) {</span>
+<span class="line">                game.enemies.splice(index, 1);</span>
+<span class="line">            }</span>
+<span class="line">            </span>
+<span class="line">            // 创建爆炸效果</span>
+<span class="line">            this.createExplosion(target.x, target.y);</span>
+<span class="line">            </span>
+<span class="line">        } else if (target instanceof PlayerTank) {</span>
+<span class="line">            // 玩家坦克被摧毁</span>
+<span class="line">            target.lives--;</span>
+<span class="line">            target.health = target.maxHealth;</span>
+<span class="line">            </span>
+<span class="line">            if (target.lives &lt;= 0) {</span>
+<span class="line">                game.gameState = &#39;gameOver&#39;;</span>
+<span class="line">            } else {</span>
+<span class="line">                // 重置玩家位置</span>
+<span class="line">                target.x = 100;</span>
+<span class="line">                target.y = 500;</span>
+<span class="line">            }</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h3>关卡系统</h3>
+<pre><code class="language-javascript"><span class="line">class LevelManager {</span>
+<span class="line">    static levels = [</span>
+<span class="line">        { enemies: 5, speed: 1.0, fireRate: 1.0 },</span>
+<span class="line">        { enemies: 8, speed: 1.2, fireRate: 1.2 },</span>
+<span class="line">        { enemies: 12, speed: 1.4, fireRate: 1.4 },</span>
+<span class="line">        { enemies: 16, speed: 1.6, fireRate: 1.6 },</span>
+<span class="line">        { enemies: 20, speed: 1.8, fireRate: 1.8 }</span>
+<span class="line">    ];</span>
+<span class="line"></span>
+<span class="line">    static loadLevel(levelNumber) {</span>
+<span class="line">        const level = this.levels[levelNumber - 1] || this.levels[this.levels.length - 1];</span>
+<span class="line">        </span>
+<span class="line">        // 清除现有敌人</span>
+<span class="line">        game.enemies = [];</span>
+<span class="line">        game.bullets = [];</span>
+<span class="line">        </span>
+<span class="line">        // 设置关卡参数</span>
+<span class="line">        game.enemiesRemaining = level.enemies;</span>
+<span class="line">        game.level = levelNumber;</span>
+<span class="line">        </span>
+<span class="line">        // 生成敌人</span>
+<span class="line">        this.spawnEnemies(level);</span>
+<span class="line">        </span>
+<span class="line">        // 重置玩家</span>
+<span class="line">        game.player.x = 100;</span>
+<span class="line">        game.player.y = 500;</span>
+<span class="line">        game.player.health = game.player.maxHealth;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static spawnEnemies(levelConfig) {</span>
+<span class="line">        const spawnPositions = [</span>
+<span class="line">            { x: 50, y: 50 },</span>
+<span class="line">            { x: 400, y: 50 },</span>
+<span class="line">            { x: 750, y: 50 },</span>
+<span class="line">            { x: 750, y: 300 },</span>
+<span class="line">            { x: 400, y: 300 }</span>
+<span class="line">        ];</span>
+<span class="line">        </span>
+<span class="line">        for (let i = 0; i &lt; Math.min(5, levelConfig.enemies); i++) {</span>
+<span class="line">            const pos = spawnPositions[i];</span>
+<span class="line">            const enemy = new EnemyTank(pos.x, pos.y);</span>
+<span class="line">            </span>
+<span class="line">            // 应用关卡难度</span>
+<span class="line">            enemy.speed *= levelConfig.speed;</span>
+<span class="line">            enemy.fireInterval /= levelConfig.fireRate;</span>
+<span class="line">            </span>
+<span class="line">            game.enemies.push(enemy);</span>
+<span class="line">        }</span>
+<span class="line">        </span>
+<span class="line">        // 设置剩余敌人计数</span>
+<span class="line">        game.enemiesToSpawn = levelConfig.enemies - game.enemies.length;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static checkLevelComplete() {</span>
+<span class="line">        if (game.enemies.length === 0 &amp;&amp; game.enemiesToSpawn === 0) {</span>
+<span class="line">            // 关卡完成</span>
+<span class="line">            game.level++;</span>
+<span class="line">            setTimeout(() =&gt; {</span>
+<span class="line">                this.loadLevel(game.level);</span>
+<span class="line">            }, 2000);</span>
+<span class="line">            </span>
+<span class="line">            return true;</span>
+<span class="line">        }</span>
+<span class="line">        return false;</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h2>UI系统与游戏状态</h2>
+<h3>用户界面渲染</h3>
+<pre><code class="language-javascript"><span class="line">class UIRenderer {</span>
+<span class="line">    static render(ctx, game) {</span>
+<span class="line">        // 设置字体</span>
+<span class="line">        ctx.font = &#39;16px Arial&#39;;</span>
+<span class="line">        ctx.fillStyle = &#39;#FFFFFF&#39;;</span>
+<span class="line">        </span>
+<span class="line">        // 渲染分数</span>
+<span class="line">        ctx.fillText(`Score: ${game.score}`, 10, 25);</span>
+<span class="line">        </span>
+<span class="line">        // 渲染关卡</span>
+<span class="line">        ctx.fillText(`Level: ${game.level}`, 10, 45);</span>
+<span class="line">        </span>
+<span class="line">        // 渲染生命值</span>
+<span class="line">        ctx.fillText(`Lives: ${game.player.lives}`, 10, 65);</span>
+<span class="line">        </span>
+<span class="line">        // 渲染剩余敌人</span>
+<span class="line">        ctx.fillText(`Enemies: ${game.enemiesRemaining}`, 10, 85);</span>
+<span class="line">        </span>
+<span class="line">        // 渲染游戏状态信息</span>
+<span class="line">        if (game.gameState === &#39;paused&#39;) {</span>
+<span class="line">            this.renderPauseScreen(ctx);</span>
+<span class="line">        } else if (game.gameState === &#39;gameOver&#39;) {</span>
+<span class="line">            this.renderGameOverScreen(ctx);</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static renderPauseScreen(ctx) {</span>
+<span class="line">        // 半透明背景</span>
+<span class="line">        ctx.fillStyle = &#39;rgba(0, 0, 0, 0.7)&#39;;</span>
+<span class="line">        ctx.fillRect(0, 0, 800, 600);</span>
+<span class="line">        </span>
+<span class="line">        // 暂停文字</span>
+<span class="line">        ctx.font = &#39;48px Arial&#39;;</span>
+<span class="line">        ctx.fillStyle = &#39;#FFFFFF&#39;;</span>
+<span class="line">        ctx.textAlign = &#39;center&#39;;</span>
+<span class="line">        ctx.fillText(&#39;PAUSED&#39;, 400, 300);</span>
+<span class="line">        </span>
+<span class="line">        ctx.font = &#39;24px Arial&#39;;</span>
+<span class="line">        ctx.fillText(&#39;Press P to continue&#39;, 400, 350);</span>
+<span class="line">        ctx.textAlign = &#39;left&#39;;</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    static renderGameOverScreen(ctx) {</span>
+<span class="line">        // 半透明背景</span>
+<span class="line">        ctx.fillStyle = &#39;rgba(0, 0, 0, 0.8)&#39;;</span>
+<span class="line">        ctx.fillRect(0, 0, 800, 600);</span>
+<span class="line">        </span>
+<span class="line">        // 游戏结束文字</span>
+<span class="line">        ctx.font = &#39;48px Arial&#39;;</span>
+<span class="line">        ctx.fillStyle = &#39;#FF0000&#39;;</span>
+<span class="line">        ctx.textAlign = &#39;center&#39;;</span>
+<span class="line">        ctx.fillText(&#39;GAME OVER&#39;, 400, 250);</span>
+<span class="line">        </span>
+<span class="line">        ctx.font = &#39;24px Arial&#39;;</span>
+<span class="line">        ctx.fillStyle = &#39;#FFFFFF&#39;;</span>
+<span class="line">        ctx.fillText(`Final Score: ${game.score}`, 400, 300);</span>
+<span class="line">        ctx.fillText(&#39;Press R to restart&#39;, 400, 350);</span>
+<span class="line">        ctx.textAlign = &#39;left&#39;;</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h2>性能优化策略</h2>
+<h3>1. 对象池模式</h3>
+<pre><code class="language-javascript"><span class="line">class ObjectPool {</span>
+<span class="line">    constructor(createFn, resetFn, initialSize = 10) {</span>
+<span class="line">        this.createFn = createFn;</span>
+<span class="line">        this.resetFn = resetFn;</span>
+<span class="line">        this.pool = [];</span>
+<span class="line">        </span>
+<span class="line">        // 预创建对象</span>
+<span class="line">        for (let i = 0; i &lt; initialSize; i++) {</span>
+<span class="line">            this.pool.push(this.createFn());</span>
+<span class="line">        }</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    get() {</span>
+<span class="line">        if (this.pool.length &gt; 0) {</span>
+<span class="line">            return this.pool.pop();</span>
+<span class="line">        }</span>
+<span class="line">        return this.createFn();</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    release(obj) {</span>
+<span class="line">        this.resetFn(obj);</span>
+<span class="line">        this.pool.push(obj);</span>
+<span class="line">    }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">// 使用示例</span>
+<span class="line">const bulletPool = new ObjectPool(</span>
+<span class="line">    () =&gt; new Bullet(0, 0, 0, null),</span>
+<span class="line">    (bullet) =&gt; { bullet.active = false; },</span>
+<span class="line">    20</span>
+<span class="line">);</span></code></pre>
+<h3>2. 渲染优化</h3>
+<pre><code class="language-javascript"><span class="line">class RenderOptimizer {</span>
+<span class="line">    static dirtyRectangles = [];</span>
+<span class="line">    </span>
+<span class="line">    static addDirtyRect(x, y, width, height) {</span>
+<span class="line">        this.dirtyRectangles.push({ x, y, width, height });</span>
+<span class="line">    }</span>
+<span class="line">    </span>
+<span class="line">    static clearDirtyRects(ctx) {</span>
+<span class="line">        this.dirtyRectangles.forEach(rect =&gt; {</span>
+<span class="line">            ctx.clearRect(rect.x, rect.y, rect.width, rect.height);</span>
+<span class="line">        });</span>
+<span class="line">        this.dirtyRectangles = [];</span>
+<span class="line">    }</span>
+<span class="line">    </span>
+<span class="line">    static isInViewport(obj, viewX, viewY, viewWidth, viewHeight) {</span>
+<span class="line">        return obj.x + obj.width &gt;= viewX &amp;&amp;</span>
+<span class="line">               obj.x &lt;= viewX + viewWidth &amp;&amp;</span>
+<span class="line">               obj.y + obj.height &gt;= viewY &amp;&amp;</span>
+<span class="line">               obj.y &lt;= viewY + viewHeight;</span>
+<span class="line">    }</span>
+<span class="line">}</span></code></pre>
+<h2>项目特色</h2>
+<h3>1. 单文件架构优势</h3>
+<ul>
+<li><strong>简单部署</strong>: 只需一个HTML文件即可运行</li>
+<li><strong>零依赖</strong>: 无需任何外部库或框架</li>
+<li><strong>易于分享</strong>: 方便代码阅读和学习</li>
+<li><strong>快速加载</strong>: 减少HTTP请求</li>
+</ul>
+<h3>2. 经典游戏机制</h3>
+<ul>
+<li><strong>即时响应</strong>: 流畅的实时控制体验</li>
+<li><strong>智能AI</strong>: 敌方坦克具备基本战术AI</li>
+<li><strong>渐进难度</strong>: 多关卡难度递增设计</li>
+<li><strong>视觉反馈</strong>: 丰富的击中和爆炸效果</li>
+</ul>
+<h3>3. 可扩展设计</h3>
+<ul>
+<li><strong>模块化代码</strong>: 清晰的类结构便于扩展</li>
+<li><strong>事件系统</strong>: 支持自定义游戏事件</li>
+<li><strong>配置驱动</strong>: 关卡数据与逻辑分离</li>
+</ul>
+<h2>技术收获</h2>
+<h3>Canvas 2D编程</h3>
+<ul>
+<li>掌握了Canvas绘图API的高级用法</li>
+<li>理解了游戏渲染循环的优化策略</li>
+<li>学会了图形变换和动画实现</li>
+</ul>
+<h3>游戏开发基础</h3>
+<ul>
+<li>实现了完整的游戏循环架构</li>
+<li>设计了高效的碰撞检测系统</li>
+<li>构建了状态管理和AI决策系统</li>
+</ul>
+<h3>性能优化实践</h3>
+<ul>
+<li>应用了对象池等内存管理技术</li>
+<li>实施了脏矩形等渲染优化策略</li>
+<li>平衡了功能复杂度与运行效率</li>
+</ul>
+<h2>未来扩展方向</h2>
+<ol>
+<li><strong>多人模式</strong>: 本地双人对战</li>
+<li><strong>关卡编辑器</strong>: 自定义地图功能</li>
+<li><strong>道具系统</strong>: 武器升级和特殊道具</li>
+<li><strong>存档功能</strong>: LocalStorage保存游戏进度</li>
+<li><strong>移动适配</strong>: 触屏控制和响应式设计</li>
+</ol>
+<h2>总结</h2>
+<p>这个HTML5 Canvas坦克大战项目成功展示了使用原生Web技术开发完整游戏的可行性。通过精心设计的架构和高效的实现策略，在保持代码简洁的同时实现了丰富的游戏功能。</p>
+<p>项目不仅是对经典游戏的致敬，更是现代Web游戏开发技术的实践应用，为轻量级游戏开发提供了完整的解决方案参考。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

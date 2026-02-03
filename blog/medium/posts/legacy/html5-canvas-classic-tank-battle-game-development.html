@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Canvas Classic Tank Battle Game Development: Single-File Game Architecture Practice</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2025-07-20
+tags: [frontend]
+legacy: true</h2>
+<h1>HTML5 Canvas Classic Tank Battle Game Development: Single-File Game Architecture Practice</h1>
+<h3>Architecture Characteristics</h3>
+<ul>
+<li><strong>Single-file Design</strong>: All code centralized in one HTML file</li>
+<li><strong>Object-oriented</strong>: Using ES6 class syntax for code structure organization</li>
+<li><strong>Modular Thinking</strong>: Clear functional separation and responsibility division</li>
+<li><strong>Zero Dependencies</strong>: No external libraries or frameworks required</li>
+</ul>
+<h2>Game System Design</h2>
+<h3>Core Class Structure</h3>
+<blockquote><code>// Main game class</code><br>
+<code>class TankWarGame {</code><br>
+<code>    constructor() {</code><br>
+<code>        this.canvas = document.getElementById(&#039;gameCanvas&#039;);</code><br>
+<code>        this.ctx = this.canvas.getContext(&#039;2d&#039;);</code><br>
+<code>        this.width = 800;</code><br>
+<code>        this.height = 600;</code><br>
+<code>        </code><br>
+<code># ... (97 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/7abce6704f419596dc8f7a056776457f">GitHub Gist</a></em></p><h3>Tank Class Implementation</h3>
+<blockquote><code>class Tank {</code><br>
+<code>    constructor(x, y, color = &#039;#00FF00&#039;) {</code><br>
+<code>        this.x = x;</code><br>
+<code>        this.y = y;</code><br>
+<code>        this.width = 32;</code><br>
+<code>        this.height = 32;</code><br>
+<code>        this.speed = 100; // pixels per second</code><br>
+<code>        this.direction = 0; // 0:up, 1:right, 2:down, 3:left</code><br>
+<code># ... (257 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/193d3ade127a15eb6f425da4479857a6">GitHub Gist</a></em></p><h3>Bullet System</h3>
+<blockquote><code>class Bullet {</code><br>
+<code>    constructor(x, y, direction, owner) {</code><br>
+<code>        this.x = x;</code><br>
+<code>        this.y = y;</code><br>
+<code>        this.width = 4;</code><br>
+<code>        this.height = 4;</code><br>
+<code>        this.speed = 300;</code><br>
+<code>        this.direction = direction;</code><br>
+<code># ... (40 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/c3f6eccc39cee25d8a86c3ddd285f7b3">GitHub Gist</a></em></p><h2>Game Mechanics Implementation</h2>
+<h3>Collision Detection System</h3>
+<blockquote><code>class CollisionManager {</code><br>
+<code>    static handleBulletCollisions(bullets, targets) {</code><br>
+<code>        bullets.forEach(bullet =&gt; {</code><br>
+<code>            if (!bullet.active) return;</code><br>
+<code>            </code><br>
+<code>            // Check collision with obstacles</code><br>
+<code>            game.obstacles.forEach(obstacle =&gt; {</code><br>
+<code>                if (bullet.checkCollision(obstacle)) {</code><br>
+<code># ... (66 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/0caf17052eeeef0c362843ce5e8c3d15">GitHub Gist</a></em></p><h3>Level System</h3>
+<blockquote><code>class LevelManager {</code><br>
+<code>    static levels = [</code><br>
+<code>        { enemies: 5, speed: 1.0, fireRate: 1.0 },</code><br>
+<code>        { enemies: 8, speed: 1.2, fireRate: 1.2 },</code><br>
+<code>        { enemies: 12, speed: 1.4, fireRate: 1.4 },</code><br>
+<code>        { enemies: 16, speed: 1.6, fireRate: 1.6 },</code><br>
+<code>        { enemies: 20, speed: 1.8, fireRate: 1.8 }</code><br>
+<code>    ];</code><br>
+<code># ... (58 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/cfc574b4d2512cf51422e363715f8460">GitHub Gist</a></em></p><h2>UI System and Game State</h2>
+<h3>User Interface Rendering</h3>
+<blockquote><code>class UIRenderer {</code><br>
+<code>    static render(ctx, game) {</code><br>
+<code>        // Set font</code><br>
+<code>        ctx.font = &#039;16px Arial&#039;;</code><br>
+<code>        ctx.fillStyle = &#039;#FFFFFF&#039;;</code><br>
+<code>        </code><br>
+<code>        // Render score</code><br>
+<code>        ctx.fillText(`Score: ${game.score}`, 10, 25);</code><br>
+<code># ... (52 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/2bea79ec7336398ba875695639a8c002">GitHub Gist</a></em></p><h2>Performance Optimization Strategies</h2>
+<h3>1. Object Pool Pattern</h3>
+<blockquote><code>class ObjectPool {</code><br>
+<code>    constructor(createFn, resetFn, initialSize = 10) {</code><br>
+<code>        this.createFn = createFn;</code><br>
+<code>        this.resetFn = resetFn;</code><br>
+<code>        this.pool = [];</code><br>
+<code>        </code><br>
+<code>        // Pre-create objects</code><br>
+<code>        for (let i = 0; i &lt; initialSize; i++) {</code><br>
+<code># ... (23 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/fdba21422661b858b3cd5c1a4bb218de">GitHub Gist</a></em></p><h3>2. Rendering Optimization</h3>
+<blockquote><code>class RenderOptimizer {</code><br>
+<code>    static dirtyRectangles = [];</code><br>
+<code>    </code><br>
+<code>    static addDirtyRect(x, y, width, height) {</code><br>
+<code>        this.dirtyRectangles.push({ x, y, width, height });</code><br>
+<code>    }</code><br>
+<code>    </code><br>
+<code>    static clearDirtyRects(ctx) {</code><br>
+<code># ... (13 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/229e76ffbf2df514877f057284e0448c">GitHub Gist</a></em></p><h2>Project Features</h2>
+<h3>1. Single-file Architecture Advantages</h3>
+<ul>
+<li><strong>Simple Deployment</strong>: Only one HTML file needed to run</li>
+<li><strong>Zero Dependencies</strong>: No external libraries or frameworks required</li>
+<li><strong>Easy Sharing</strong>: Convenient for code reading and learning</li>
+<li><strong>Fast Loading</strong>: Reduced HTTP requests</li>
+</ul>
+<h3>2. Classic Game Mechanics</h3>
+<ul>
+<li><strong>Instant Response</strong>: Smooth real-time control experience</li>
+<li><strong>Intelligent AI</strong>: Enemy tanks with basic tactical AI</li>
+<li><strong>Progressive Difficulty</strong>: Multi-level difficulty escalation design</li>
+<li><strong>Visual Feedback</strong>: Rich hit and explosion effects</li>
+</ul>
+<h3>3. Extensible Design</h3>
+<ul>
+<li><strong>Modular Code</strong>: Clear class structure for easy extension</li>
+<li><strong>Event System</strong>: Support for custom game events</li>
+<li><strong>Configuration-driven</strong>: Level data separated from logic</li>
+</ul>
+<h2>Technical Insights</h2>
+<h3>Canvas 2D Programming</h3>
+<ul>
+<li>Mastered advanced usage of Canvas drawing API</li>
+<li>Understood optimization strategies for game rendering loops</li>
+<li>Learned graphic transformation and animation implementation</li>
+</ul>
+<h3>Game Development Fundamentals</h3>
+<ul>
+<li>Implemented complete game loop architecture</li>
+<li>Designed efficient collision detection system</li>
+<li>Built state management and AI decision system</li>
+</ul>
+<h3>Performance Optimization Practice</h3>
+<ul>
+<li>Applied memory management techniques like object pools</li>
+<li>Implemented rendering optimizations like dirty rectangles</li>
+<li>Balanced functional complexity with runtime efficiency</li>
+</ul>
+<h2>Future Extension Directions</h2>
+<ol>
+<li><strong>Multiplayer Mode</strong>: Local two-player battles</li>
+<li><strong>Level Editor</strong>: Custom map functionality</li>
+<li><strong>Power-up System</strong>: Weapon upgrades and special items</li>
+<li><strong>Save Function</strong>: LocalStorage for game progress</li>
+<li><strong>Mobile Adaptation</strong>: Touch controls and responsive design</li>
+</ol>
+<h2>Summary</h2>
+<p>This HTML5 Canvas tank battle project successfully demonstrates the feasibility of developing complete games using native Web technologies. Through carefully designed architecture and efficient implementation strategies, it achieves rich game functionality while maintaining code simplicity.</p>
+<p>The project is not only a tribute to classic games but also a practical application of modern Web game development technologies, providing a complete solution reference for lightweight game development.</p>
+
+</body>
+</html>

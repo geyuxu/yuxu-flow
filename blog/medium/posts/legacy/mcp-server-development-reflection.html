@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>从混乱到清晰：一次MCP服务器开发的反思与总结</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [devops, mcp, python, fastmcp, 自动化, 博客]
+legacy: true</h2>
+<h1>从混乱到清晰：一次MCP服务器开发的反思与总结</h1>
+<p>选择了Python和FastMCP框架来实现MCP服务器。FastMCP的优势在于：</p>
+<ul>
+<li>极简的API设计</li>
+<li>通过装饰器即可将普通函数转换为MCP工具</li>
+<li>内置的stdio通信支持</li>
+</ul>
+<h3>2. 核心功能实现</h3>
+<p>最终实现了一个整合的<code>publish_blog_post</code>工具，它包含了完整的发布流程：</p>
+<blockquote><code>@app.tool()</code><br>
+<code>async def publish_blog_post(</code><br>
+<code>    directory: str, </code><br>
+<code>    content: str, </code><br>
+<code>    filename: str,</code><br>
+<code>    commit_message: str = None,</code><br>
+<code>    deploy: bool = True</code><br>
+<code>) -&gt; str:</code><br>
+<code>    &quot;&quot;&quot;Save article, commit changes, and optionally deploy - all in one command.&quot;&quot;&quot;</code><br>
+<code>    </code><br>
+<code>    # 1. 保存文章（自动添加frontmatter）</code><br>
+<code>    # 2. Git提交</code><br>
+<code>    # 3. 可选的部署</code></blockquote><p>关键特性：</p>
+<ul>
+<li><strong>智能frontmatter生成</strong>：自动为Markdown文件添加必要的元数据</li>
+<li><strong>一站式操作</strong>：整合了文件保存、Git操作和部署</li>
+<li><strong>错误处理</strong>：优雅处理&quot;nothing to commit&quot;等情况</li>
+</ul>
+<h2>三、遇到的问题与解决</h2>
+<h3>问题1：初稿&quot;乱写一通&quot;</h3>
+<p>第一次写的博客文章被指出&quot;乱写一通&quot;，原因是我把FastMCP描述得过于复杂，实际上它就是一个简单的Python脚本。</p>
+<p><strong>反思</strong>：技术写作要准确、简洁，不要为了显得高深而把简单的事情复杂化。</p>
+<p><strong>解决</strong>：重新理解项目本质，强调Python脚本的简洁性，用不到100行代码就实现了完整功能。</p>
+<h3>问题2：测试的困境</h3>
+<p>尝试测试MCP工具时遇到了FastMCP装饰器导致的调用问题：</p>
+<p><code>TypeError: &#039;FunctionTool&#039; object is not callable</code></p><p><strong>原因</strong>：<code>@app.tool()</code>装饰器将函数包装成了<code>FunctionTool</code>对象，不能直接调用。</p>
+<p><strong>解决</strong>：在MCP服务器中添加了测试模式：</p>
+<blockquote><code>if __name__ == &quot;__main__&quot;:</code><br>
+<code>    if len(sys.argv) &gt; 1 and sys.argv[1] == &quot;--test&quot;:</code><br>
+<code>        asyncio.run(test_mode())</code><br>
+<code>    else:</code><br>
+<code>        app.run()</code></blockquote><h3>问题3：测试原则的违背</h3>
+<p>最初的测试直接操作文件系统，而不是通过MCP服务器，完全违背了测试原则。</p>
+<p><strong>解决</strong>：修改MCP服务器程序，添加内置的测试功能，确保测试通过服务器的工具函数进行。</p>
+<h2>四、项目成果</h2>
+<ol>
+<li><p><strong>成功发布的博客文章</strong>：</p>
+<ul>
+<li>《用Python脚本快速实现MCP服务器》（中英文版本）</li>
+<li>准确描述了FastMCP的使用方法</li>
+</ul>
+</li>
+<li><p><strong>功能完整的MCP服务器</strong>：</p>
+<ul>
+<li>代码已推送到 <a href="https://github.com/geyuxu/astro-mcp-publisher">GitHub</a></li>
+<li>实现了发布、搜索、删除功能（后两者已注释，保持简洁）</li>
+</ul>
+</li>
+<li><p><strong>简化的工作流程</strong>：</p>
+<ul>
+<li>从4步手动操作简化为1个函数调用</li>
+<li>实现了真正的&quot;一键发布&quot;</li>
+</ul>
+</li>
+</ol>
+<h2>五、技术细节与最佳实践</h2>
+<h3>1. 环境配置的灵活性</h3>
+<p><code>ASTRO_DIR = pathlib.Path(os.getenv(&quot;ASTRO_DIR&quot;, &quot;./astro&quot;)).expanduser().resolve()</code></p><h3>2. 命令执行的封装</h3>
+<blockquote><code>def _run(cmd: List[str]) -&gt; str:</code><br>
+<code>    proc = subprocess.run(cmd, cwd=ASTRO_DIR, capture_output=True, text=True)</code><br>
+<code>    banner = f&quot;$ {&#039; &#039;.join(cmd)}\n&quot;</code><br>
+<code>    return banner + proc.stdout + proc.stderr</code></blockquote><h3>3. 时间格式的规范化</h3>
+<p>从简单的日期格式演进到包含时分秒：</p>
+<p><code>pubDate: {datetime.datetime.now().strftime(&#039;%Y-%m-%d %H:%M:%S&#039;)}</code></p><h2>六、经验教训</h2>
+<ol>
+<li><p><strong>清晰沟通的重要性</strong>：技术实现再好，如果不能清晰地传达价值，就是失败的。</p>
+</li>
+<li><p><strong>简洁即是美</strong>：不到100行Python代码就能实现强大的功能，这本身就是FastMCP的魅力。</p>
+</li>
+<li><p><strong>测试的正确方式</strong>：测试应该通过被测试的系统进行，而不是绕过它。</p>
+</li>
+<li><p><strong>迭代改进</strong>：从初始版本到最终版本，经历了多次重构和简化，每次都让代码更清晰。</p>
+</li>
+</ol>
+<h2>七、未来展望</h2>
+<p>虽然当前版本已经满足了核心需求，但仍有改进空间：</p>
+<ul>
+<li>恢复搜索和删除功能</li>
+<li>添加更多的错误处理</li>
+<li>支持批量操作</li>
+<li>集成更多的博客平台</li>
+</ul>
+<h2>总结</h2>
+<p>这次开发经历虽然只有一天，但收获颇丰。从被批评&quot;乱写一通&quot;到最终实现清晰、实用的MCP服务器，这个过程本身就是一次宝贵的学习经历。它提醒我们：好的技术方案不仅要功能强大，更要简洁明了、易于理解和使用。</p>
+<p>正如这个项目的标题所示，从混乱到清晰，不仅是代码的演进，更是认知的提升。</p>
+
+</body>
+</html>

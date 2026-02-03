@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuxu Ge | Senior Architect & AI Researcher</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #2980b9;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --light-text: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header / Hero Section */
+        header {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            color: var(--text-color);
+        }
+
+        /* Social Links */
+        .social-links {
+            margin-bottom: 40px;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.8rem;
+            height: 1.8rem;
+            margin: 0 10px;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+
+        .social-links a svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            vertical-align: middle;
+        }
+
+        .social-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            margin-left: 10px;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Sections */
+        section {
+            padding: 60px 0;
+            border-top: 1px solid #eee;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        /* About Section */
+        .about-text {
+            font-size: 1.1rem;
+            color: #444;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+        }
+
+        /* Projects Grid */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .project-card {
+            background: var(--bg-color);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #e1e4e8;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .project-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            background: #e1e4e8;
+            color: #555;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .project-desc {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .project-link {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .project-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            background: var(--bg-color);
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .subtitle { font-size: 1rem; }
+            .btn { display: block; width: 100%; margin: 10px 0; text-align: center; }
+            .btn-outline { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1>Yuxu Ge</h1>
+            <div class="subtitle">Senior Software Architect (12 Yrs Exp) | MSc AI Candidate @ York</div>
+            
+            <p class="tagline">
+                Bridging the gap between <strong>Enterprise Engineering</strong> and <strong>Generative AI</strong>.<br>
+                Specializing in Distributed Systems, RAG, and Safe AI.
+            </p>
+
+            <div class="social-links">
+                <a href="https://github.com/geyuxu" target="_blank" title="GitHub" aria-label="GitHub">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                </a>
+                <a href="https://x.com/YuxuGe_AI" target="_blank" title="X (Twitter)" aria-label="X (Twitter)">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle;">
+                        <path d="M18.244 1.727h3.58l-7.81 8.926 9.185 12.345h-7.173l-5.61-7.337-6.414 7.337H.381l8.342-9.546L0 1.727h7.3l5.077 6.752z"/>
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/comm/mynetwork/discovery-see-all?usecase=PEOPLE_FOLLOWS&followMember=geyuxu" target="_blank" title="LinkedIn" aria-label="LinkedIn">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.447 20.452H17.2v-5.569c0-1.328-.025-3.039-1.852-3.039-1.853 0-2.136 1.447-2.136 2.942v5.666h-3.248V9h3.122v1.561h.045c.435-.823 1.498-1.688 3.083-1.688 3.295 0 3.903 2.17 3.903 4.989v6.59zM5.337 7.433a1.882 1.882 0 110-3.764 1.882 1.882 0 010 3.764zm1.626 13.019H3.708V9h3.255v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.226.792 24 1.771 24h20.451C23.2 24 24 23.226 24 22.271V1.729C24 .774 23.2 0 22.222 0z"/>
+                    </svg>
+                </a>
+                <!-- <a href="/cdn-cgi/l/email-protection#552c202d207b3230153a2021393a3a3e7b363a38" title="Email" aria-label="Email">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.25 5.25h19.5A1.25 1.25 0 0 1 23 6.5v11a1.25 1.25 0 0 1-1.25 1.25H2.25A1.25 1.25 0 0 1 1 17.5v-11A1.25 1.25 0 0 1 2.25 5.25zm9.57 6.63 8.43-5.43H3.75l8.07 5.43a.75.75 0 0 0 .98 0zM3.5 17h17V8.66l-7.27 4.91a2.25 2.25 0 0 1-2.46 0L3.5 8.66V17z"/>
+                    </svg>
+                </a> -->
+                <a href="mailto:me@yuxu.ge" title="Email" aria-label="Email">
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.25 5.25h19.5A1.25 1.25 0 0 1 23 6.5v11a1.25 1.25 0 0 1-1.25 1.25H2.25A1.25 1.25 0 0 1 1 17.5v-11A1.25 1.25 0 0 1 2.25 5.25zm9.57 6.63 8.43-5.43H3.75l8.07 5.43a.75.75 0 0 0 .98 0zM3.5 17h17V8.66l-7.27 4.91a2.25 2.25 0 0 1-2.46 0L3.5 8.66V17z"/>
+                    </svg>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <section id="about">
+        <div class="container">
+            <h2>About Me</h2>
+            <div class="about-text">
+                <p>
+                    I am a veteran software engineer with over a decade of experience architecting high-concurrency systems for <strong>30 million users</strong> (ex-Bailian Omnichannel). My expertise lies in the Java ecosystem, Cloud Architecture (AWS), and optimizing large-scale Search Middleware.
+                </p>
+                <p>
+                    Currently, I am pivoting to academic research at the <strong>University of York</strong>. I am focused on solving the "Last Mile" problems of AI deployment: specifically <strong>Hallucination in RAG pipelines</strong> and <strong>Narrative Consistency in AI Agents</strong>.
+                </p>
+                <p>
+                    My goal is to design AI frameworks that are not just theoretically sound, but engineeringly robust and scalable.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <div class="container">
+            <h2>Featured Work</h2>
+            <div class="project-grid">
+                
+                <div class="project-card">
+                    <span class="project-tag">Engineering & AI</span>
+                    <h3 class="project-title">Spring-AI-RAG-System</h3>
+                    <p class="project-desc">
+                        An explainable Retrieval-Augmented Generation (RAG) pipeline designed for enterprise knowledge bases. Implements a <strong>Hybrid Search</strong> strategy (Elasticsearch + PgVector) to solve context window limits and hallucinations.
+                    </p>
+                    <a href="https://github.com/geyuxu/Spring-AI-RAG-System" target="_blank" class="project-link">View Architecture <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="project-card">
+                    <span class="project-tag">Research</span>
+                    <h3 class="project-title">Adaptive-NPC-Survey</h3>
+                    <p class="project-desc">
+                        A systematic critical review of Adaptive AI behaviors in gaming. Investigates the trade-off between Deep RL agent performance and player immersion using the <strong>SPIDER framework</strong>.
+                    </p>
+                    <a href="https://github.com/geyuxu/Adaptive-NPC-Survey" target="_blank" class="project-link">Read Summary <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Yuxu Ge. All rights reserved.</p>
+        </div>
+    </footer>
+
+<!-- <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body> -->
+</html>

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年主流大模型厂商大模型一览 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2025-04-22
+tags: [ai]
+legacy: true</h2>
+<h1>2025年主流大模型厂商大模型一览</h1>
+<ul>
+<li>GPT-3：发布于2020年，拥有约1750亿参数，是首个让业界震撼的大模型。它能写文章、写代码、翻译对话，展现了惊人的语言生成能力。当时你让它续写一句话，它往往能给出几段通顺的文本，这在之前是难以想象的。</li>
+<li>GPT-3.5：这是GPT-3的改进版，出现于2022年左右。我们熟知的ChatGPT最初用的模型其实就是GPT-3.5。相比GPT-3，它经过对话优化，响应更贴近人类对话风格，错漏更少。可以把GPT-3.5看作“GPT-3的加强版”，就像手机的“S”升级款——功能更完善但架构不变。</li>
+<li>GPT-4：发布于2023年，是OpenAI真正的下一代旗舰模型。参数具体数量没有公开，但业界猜测可能高达数万亿级别，远超GPT-3。GPT-4的一大突破是多模态能力：不仅能读写文本，还能“看图说话”。举个例子，你可以给GPT-4上传一张图片，让它生成描述或回答关于图中内容的问题。这相当于赋予模型“视力”，让它从只能看文字升级为同时处理图像和文字，多模态就好比一个人不仅会读书，还能看懂照片。GPT-4上线后表现出更强的推理和理解能力，在不少专业考试和任务上都优于以往模型。</li>
+<li>GPT-4.5：作为GPT-4之后的中间升级版，GPT-4.5于2025年初推出  。可以把它理解为GPT-4的“加强Pro版”。据OpenAI CEO山姆·阿尔特曼介绍，GPT-4.5是一个“巨大且昂贵的模型” 。相较GPT-4，4.5在各种任务上的表现进一步提升，尤其是在非英语语言和创意性任务上更胜一筹。据报道，GPT-4.5在15种语言的基准测试中全面超越了原始GPT-4 。当然，能力提升也意味着计算开销大增——使用GPT-4.5的API费用是GPT-4的数倍 。因此GPT-4.5主要面向高端付费用户和企业客户，而GPT-4由于成本较低，仍在许多日常应用中广泛使用。</li>
+</ul>
+<p>OpenAI的模型命名比较直接：数字越大代表越新的代数。整数版本（如4）通常是架构飞跃，点版本（如4.5）是迭代改进版。适用场景上，GPT-3.5擅长日常对话、撰写一般性内容，速度快；GPT-4适合复杂任务、需要严格准确性的场合；GPT-4.5则进一步用于高要求的专业应用，比如需要更高创意和多语言能力的内容创作等。作为行业标杆，OpenAI的GPT系列在通用智能对话、编程辅助、内容生成等方面表现领先，不过它是封闭商用模式，模型细节不公开。</p>
+<h2>Anthropic 的 Claude：安全至上的后起之秀</h2>
+<p>Anthropic是由OpenAI前几位研究员创立的AI公司，也加入了大模型竞赛。他们的模型系列叫做Claude（克劳德），这个名字不像GPT那样带数字，反而像人名，体现了一种定位：做“AI助手”，希望模型像一个善解人意的伙伴。Anthropic非常强调AI的安全性和可靠性，提出了“AI宪法”等理念，旨在让模型对人类有益且不作恶。</p>
+<p>Claude 1大约在2023年3月推出，起初只提供给小范围用户测试。Claude 2在2023年7月正式公开发布，面向所有用户开放使用 。Claude 2相比前代有两大明显提升：一是上下文长度大幅增加，二是支持文件附件输入。所谓上下文长度，可以理解为模型“一次能记住多少内容”。Claude 2把这个“记忆力”从约9000字扩展到了100000字那么长 ！这意味着你可以丢给它一本小说，它都能一并读懂再回答问题。而OpenAI的GPT-4标准版上下文是8000字，扩展版也32k左右，相比之下Claude可以记忆和分析的内容要多得多。更长的上下文非常适合需要长文档分析的场景，比如让AI阅读法律合同、技术文档然后总结。第二个提升是Claude 2支持直接上传PDF等文件 ，模型可以读取文件内容进行摘要或问答，就好比一个AI秘书能帮你读报告再做笔记。</p>
+<p>Claude系列的命名不像GPT有明确数字，但内部有版本区分。Claude 2发布后，Anthropic又在不断改进，例如Claude 2.1（2023年11月）将上下文进一步翻倍到20万字 。2024年Anthropic还推出了新一代的Claude 3系列，继续提高模型智能水平。据报道，Claude 3在推理、代码、跨任务能力上建立了新的标杆，并提供了如“长思维链”和工具使用等新特性，使AI能够进行更复杂的认知重构（比如多步推理和自主执行操作）  。不过这些更高级的版本主要在专业领域测试，普通用户接触较多的还是Claude 2系列。</p>
+<p>总体来说，Anthropic的Claude在对话安全性和长文本处理上独具特色。Claude往往语气温和、有礼貌，严格遵守安全原则（有时甚至因为过于谨慎被批评过“过度防范”）。在性能上，Claude 2已能与GPT-4相抗衡于某些任务，并且在长文理解方面更有优势。对于需要处理海量文字或者希望AI回答更可靠不过界的用户，Claude是一个重要选择。</p>
+<h2>Google DeepMind 的 Gemini</h2>
+<p>作为AI领域的老牌巨头，谷歌（Google）在大模型方面同样投入巨大。2023年谷歌将旗下的Brain团队和DeepMind公司合并，成立Google DeepMind，集中火力研发下一代基础模型。他们的代表作是代号Gemini（双子座）的模型家族。谷歌喜欢用代号而非简单的数字命名，Gemini寓意集合多种能力于一身，就像双子星座那样拥有“双胞胎”特质。</p>
+<p>Gemini 1.0在2023年底公布，包括了三个等级的模型：【Gemini Ultra】（超高性能级），【Gemini Pro】（通用性能级），以及【Gemini Nano】（移动设备级） 。Ultra面向最复杂的任务，Pro用于大部分日常应用，Nano则可以嵌入手机等设备。刚推出时，Gemini Pro就集成进了谷歌的Bard聊天机器人，Nano则应用在Pixel手机中 。可以说，谷歌的策略是多线部署：不同规模的模型针对不同场景，从云端服务到终端设备都覆盖。</p>
+<p>Gemini的一大卖点是原生的多模态能力。据谷歌介绍，Gemini在训练时不仅看文本，还学习了图像、音频、视频、代码等多种数据 。这意味着Gemini生成文本的同时，天生就具备理解图像、处理声音甚至编写代码的潜力。例如，DeepMind的CEO Demis Hassabis曾表示希望Gemini结合他们过去AlphaGo的策略推理能力与大模型的语言能力，未来能在综合智能上超越OpenAI的ChatGPT 。为此谷歌还召回了创始人谢尔盖·布林助阵研发Gemini，并用包括YouTube视频转录在内的海量数据来训练它 。</p>
+<p>2024年，Google DeepMind持续快速迭代了Gemini模型。据报道，Gemini 1.5版本在2024年中期面向开发者测试，Gemini 2.0于2024年12月正式发布 。Gemini 2.0进一步增强了实时多模态处理能力，可以进行实时音频、视频交互（例如在语音助手中更聪明地响应） 。同时，谷歌在Gemini中引入了“Agentic AI”的概念，探索让模型驱动软件代理去帮用户完成任务。Gemini 2.0发布时，谷歌将其称为“面向自主智能体时代的新模型” 。简单理解，Agentic AI就是让AI像“特工”一样自主行动，比如读取邮件、日程安排甚至上网搜集信息，然后帮你完成复杂任务。Gemini的架构为了支持这点，也集成了工具使用能力，可以调用外部应用和API（类似于让AI学会使用浏览器、计算器等工具）。</p>
+<p>在命名上，谷歌采用类似软件版本的方式（1.0、2.0、2.5等），并辅以子型号名称（如Pro、Flash等）。这可能让普通人有点眼花缭乱，但本质上Gemini每次大版本升级都是能力飞跃，比如从1.0到2.0在多模态实时性上进步显著 。谷歌也倾向于把模型直接融入自家产品，而不是单独开放API收费。因此很多人可能直接在Google的搜索、翻译、助手等产品中受益于Gemini模型，却未必察觉背后是哪一版。总体来看，Google DeepMind凭借雄厚的研究实力和数据资源，Gemini系列模型在多模态融合和工具使用方面走在前沿，是OpenAI的有力竞争者之一。</p>
+<h2>DeepSeek：横空出世的搅局者</h2>
+<p>2024年底一家公司横空出世，崛起的“DeepSeek”就是一匹黑马。DeepSeek不是传统意义的大厂，而更像是开源AI社区和创业公司的结合体：它推出的大模型采取开源+低价策略，在行业内掀起了不小的风浪 。可以说，DeepSeek扮演了鲶鱼的角色，给原本由巨头主导的格局带来冲击。</p>
+<p>DeepSeek的模型命名体系有点不一样。他们主要有两条产品线：一是基础通用模型系列，以“V”加数字标识版本（如V1、V2、V3）；二是强化推理能力的模型系列，以“R”标识（如R1）。其中DeepSeek-V3是截至2025年最新一代通用大语言模型，而DeepSeek-R1则是首个“深度思考”模型，专注于复杂推理和工具调用能力。简单打个比方，V系列相当于性能不断升级的发动机，而R系列是在发动机基础上加装了导航系统和工具箱，让AI不仅会思考还能主动查资料、用工具解决问题。</p>
+<p>DeepSeek的出现令同行感受到巨大压力。据媒体报道，DeepSeek-R1以颠覆性的姿态杀入市场，它开源+低价的模式引发了“鲇鱼效应”，迫使全球大模型厂商重新调整竞争策略 。因为DeepSeek将自己的模型代码和参数权重开放出来，开发者和企业可以免费使用和本地部署，这大大降低了门槛。同时，DeepSeek也提供云API服务，其定价远低于OpenAI等的收费标准。高性能又平价的选择一出现，很多客户开始尝试DeepSeek的方案。一时间，闭源的大模型厂商不得不响应：例如OpenAI加快了GPT-4.5的推出步伐，Google也更快地将Gemini开放给所有用户 ，而在中国，百度火速宣布将文心大模型全面免费并计划开源下一代模型。</p>
+<p>DeepSeek模型在能力上已经相当强大。DeepSeek-V3的通用自然语言表现被认为接近GPT-4.5水平，甚至在某些基准上持平或超越。DeepSeek-R1则率先引入了深度思考和自主行动能力，支持联网搜索、插件工具使用等。R1目前在多模态方面稍显不足，比如只能处理文本附件，对图像的识别还有限 。</p>
+<p>总的来说，DeepSeek代表了开源大模型的崛起。这股力量源于Meta等公司开放模型（例如LLaMA系列）的带动，也受益于全球开源开发者的协作。对于注重数据隐私、希望定制专有模型的企业，以及资金不足的中小创新者，开源的大模型提供了一个价格友好、可控可拓展的替代方案。DeepSeek正是抓住了这一需求，用开源社区的方式打造高质量模型，成为大模型版图中不可忽视的新势力。</p>
+<h2>百度文心大模型</h2>
+<p>在中国本土，大模型研发同样如火如荼，其中以百度最具代表性。百度很早就布局了预训练模型技术，推出了“文心”系列模型（英文名ERNIE）。2023年，当OpenAI的ChatGPT引发国内关注时，百度迅速推出了对标的对话产品文心一言，背后的底层模型就是文心大模型系列。经过两年的迭代，百度的文心模型实现了飞速升级，从3.0演进到4.0、4.5，并新增了特殊版本X1，逐渐形成自己的命名和版本体系。</p>
+<ul>
+<li>文心大模型3.0：这是早期版本，参数量级已达到百亿级别。百度研究院曾发布论文指出，文心3.0的“Titan”版本规模高达2600亿参数，是当时世界上最大的中文预训练模型之一。这一版本奠定了文心系列的基础。</li>
+<li>文心大模型4.0：在2023年下半年推出。4.0在模型架构和训练数据上全面升级，性能有质的飞跃。据报道，百度在一些中文语言理解测试上声称文心4.0已可比肩GPT-4的水准 。文心一言的APP也在4.0版时改名为“文小言”，强化其产品定位。</li>
+<li>文心大模型4.5：最新发布于2025年3月。4.5号称是百度首个原生多模态大模型 。也就是说，4.5从训练阶段便融合了图像、语音、文本等多种模态数据，能够优于以往版本地理解和生成不同类型的信息。百度官方表示，文心4.5在多模态能力上已超过OpenAI的GPT-4（原始版） 。例如，你可以给文心4.5上传一张图片或一段音频，它可以分析其中内容并与文本结合回答问题。这让文心从纯文字聊天升级为一个“视听全才”的AI助手。此外，文心4.5在中文语言生成上也强化很多，官方宣称文本创作能力优于DeepSeek-V3和GPT-4.5等最新国外模型 。</li>
+<li>文心大模型X1：和4.5一同发布的还有一个特别型号X1。X1被称为“深度思考模型”，关注的是AI的推理、工具使用和自主进化能力 。它运用了诸如递进式强化学习、思维链+行动链训练、多元统一奖励机制等前沿技术，让模型学会“反思”和“规划”。换句话说，X1不仅能对话，还能根据需要调用外部工具（比如上网搜索资料、执行代码绘图等）来完成更复杂的任务 。这类似于DeepSeek-R1和Claude 3中探索的方向，让AI从被动回答升级为主动求解问题的智能体。X1的推出表明百度也在追赶全球AI“认知重构”的新趋势，即让AI具备更接近人类思维链条的能力。</li>
+</ul>
+<p>百度在模型命名上采用数字+增补字母的规则：数字表示基础版本进化，字母如“X”表示特殊能力分支。“文心4.5”属于基础通用模型，第4代的中期升级版；“文心X1”则是跨代的全新线路（X可能取义于eXpert或思考（X思））。这种命名方式直观地告诉用户模型侧重点的不同。对于应用场景，基础版（如4.0、4.5）适合对话问答、内容创作等常规需求，而X1这种深度思考版更适合复杂推理、多工具协同的场景，比如专业问答、复杂决策支持等。</p>
+<p>作为中国的AI巨头，百度也在积极推动文心模型的开源和产业落地。2024年底百度宣布文心一言对公众全面免费，2025年计划开源新一代文心模型 。这显示出百度应对竞争的策略转变：通过开放来聚拢开发者生态，用低成本降低企业采用门槛。当前，文心大模型已通过百度智能云的“千帆大模型平台”服务各行各业，提供包括金融、医疗、教育等领域的定制解决方案。在中文领域和本土场景下，百度文心系列无疑是领头羊。</p>
+<h2>其他玩家：Meta与国内新秀们</h2>
+<p>除了上述公司，Meta和国内其他科技公司也在大模型领域占有一席之地。Meta在2023年开放发布了LLaMA系列大模型（如LLaMA 1、LLaMA 2），虽然这些模型没有直接提供公众聊天服务，但因为开源开放，被学术和开发者社区广泛下载使用。尤其是LLaMA 2（最大规模70亿和700亿参数两个版本）作为开源大模型的代表，为后来DeepSeek等的崛起打下了基础。可以认为，Meta通过开放其模型，间接催生了许多衍生应用和改进版本。2024年据传Meta也在研发更大规模的模型（有可能是LLaMA 3），继续走开源路线，让开源社区拥有与商业巨头抗衡的“武器”。</p>
+<p>在国内，除了百度之外，阿里巴巴、腾讯、科大讯飞、华为、字节跳动等公司都推出了自家的大模型：</p>
+<ul>
+<li>阿里巴巴的通义千问（简称Qwen）系列，是阿里云开发的大模型。阿里在2023年开源了Qwen-7B、Qwen-14B和Qwen-70B等模型 。2024年阿里还发布了一个名为“新夸克”的AI对话应用，整合了深度思考、深度搜索等功能 。据报道，阿里最新开源的推理模型QwQ-32B性能已可比肩DeepSeek-R1 。阿里的模型在中英双语和多模态上都有布局，并计划将其广泛应用到电商、办公等产品中。</li>
+<li>腾讯推出了“混元”大模型。2023年腾讯云发布了混元大模型，用于金融、政务等B端业务。据消息2025年腾讯又发布了新一代的“混元Turbo S”模型，号称具备快速深度思考能力 。腾讯还将大模型融合到自家的微信、QQ等生态中，例如提供智能客服、内容创作助手等功能。</li>
+<li>科大讯飞发布了“星火认知大模型”。讯飞的优势在语音和中文领域，星火模型在2023年的多次评测中表现突出，特别是在中文问答和教育场景有深耕。讯飞强调让大模型赋能教育、办公软件，如实现AI实时翻译、作文批改等。</li>
+<li>华为则侧重于基础研究和行业模型。华为云推出了“盘古”系列大模型，包括盘古NLP、CV（计算机视觉）等模型，用于产业AI。2024年华为还组建团队推动医疗大模型在临床上的应用 ，利用AI帮助医生进行诊断和研发行医药。</li>
+<li>其他新锐如百川智能（发布了Baichuan大模型）、智谱AI（推出了GLM通用语言模型）、MiniMax、清华大学等也在纷纷加入开源大模型行列。比如百川智能的13B/53B参数模型在中文基准上表现不俗，被视为国产开源的生力军 。</li>
+</ul>
+<p>可以看到，大模型领域如今呈现百花齐放的局面。国外有OpenAI、Anthropic、Google、Meta四大派系龙头；国内有以百度为首，阿里、腾讯、讯飞等紧随其后的格局；开源社区力量亦不可忽视。从性能上讲，顶尖闭源模型（如GPT-4.5、Gemini等）在综合能力上仍稍占优势，而开源和国产模型正快速追赶，在本地化应用和定制方面有独特优势。</p>
+<h2>群雄逐鹿下的AI未来</h2>
+<p>2025年的大模型江湖，既有巨头之间的巅峰对决，也有开源新秀的搅局参与。对普通人来说，关注这些大模型厂商及其代表作，并不需要钻研技术细节——正如上文所示，我们可以用生活化的比喻去理解它们的特点。多模态就是让AI像人一样“视听兼备”，而参数规模则是AI“大脑”容量的直观体现。</p>
+<p>性能对比方面，目前尚没有任何一款模型能够在所有领域一骑绝尘。OpenAI的GPT-4系列在通用对话和创意生成上表现卓越；Anthropic的Claude在长文本处理和安全性上独具一格；Google的Gemini在多模态交互和工具使用上后来居上；DeepSeek代表的开源模型在灵活性和成本上优势明显；百度文心为首的中文模型在本地语言和行业知识上更贴近国内用户需求。可以预见，未来一段时间这些模型将互相竞赛、彼此促进行业进步 。</p>
+<p>盛宴才刚刚开始，我时常回想2018年-19年看的一本书《奇点临近》，恍惚已如隔世。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

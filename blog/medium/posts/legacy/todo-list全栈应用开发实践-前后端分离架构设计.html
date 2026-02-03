@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List全栈应用开发实践：前后端分离架构设计</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2025-07-21
+tags: [backend]
+legacy: true</h2>
+<h1>Todo List全栈应用开发实践：前后端分离架构设计</h1>
+<h3>后端技术栈</h3>
+<ul>
+<li><strong>Python Flask</strong>: 轻量级Web框架</li>
+<li><strong>SQLite</strong>: 嵌入式数据库</li>
+<li><strong>RESTful API</strong>: 标准化接口设计</li>
+<li><strong>JSON</strong>: 数据交换格式</li>
+</ul>
+<h2>功能设计</h2>
+<h3>核心功能</h3>
+<ol>
+<li><strong>任务创建</strong>: 添加新的待办事项</li>
+<li><strong>任务查看</strong>: 显示所有任务列表</li>
+<li><strong>任务编辑</strong>: 修改任务内容和状态</li>
+<li><strong>任务删除</strong>: 移除已完成或不需要的任务</li>
+<li><strong>状态切换</strong>: 标记任务完成/未完成</li>
+<li><strong>数据持久化</strong>: 任务信息保存到数据库</li>
+</ol>
+<h3>界面特性</h3>
+<ul>
+<li><strong>简洁设计</strong>: 清晰的任务展示界面</li>
+<li><strong>实时更新</strong>: 操作后立即反映到界面</li>
+<li><strong>响应式布局</strong>: 适配不同屏幕尺寸</li>
+<li><strong>友好交互</strong>: 直观的用户操作体验</li>
+</ul>
+<h2>前端实现</h2>
+<h3>JavaScript 核心逻辑</h3>
+<blockquote><code>// 任务管理类</code><br>
+<code>class TodoManager {</code><br>
+<code>    constructor() {</code><br>
+<code>        this.tasks = [];</code><br>
+<code>        this.init();</code><br>
+<code>    }</code><br>
+<code></code><br>
+<code>    // 初始化应用</code><br>
+<code># ... (89 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/fe3385837e35cde4561f3d249a4d26f7">GitHub Gist</a></em></p><h3>CSS 样式设计</h3>
+<blockquote><code>/* 主容器样式 */</code><br>
+<code>.todo-container {</code><br>
+<code>    max-width: 600px;</code><br>
+<code>    margin: 50px auto;</code><br>
+<code>    padding: 20px;</code><br>
+<code>    background: #fff;</code><br>
+<code>    border-radius: 8px;</code><br>
+<code>    box-shadow: 0 2px 10px rgba(0,0,0,0.1);</code><br>
+<code># ... (73 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/d0a8ba3f4d7410750c286b5dadf87707">GitHub Gist</a></em></p><h2>后端实现</h2>
+<h3>Flask API 服务</h3>
+<blockquote><code>from flask import Flask, request, jsonify, render_template</code><br>
+<code>import sqlite3</code><br>
+<code>import json</code><br>
+<code>from datetime import datetime</code><br>
+<code></code><br>
+<code>app = Flask(__name__)</code><br>
+<code></code><br>
+<code># 数据库初始化</code><br>
+<code># ... (115 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/dc035b7d507b4d0938362df39e3a68b2">GitHub Gist</a></em></p><h2>项目特色</h2>
+<h3>1. 前后端分离</h3>
+<ul>
+<li>清晰的职责划分</li>
+<li>RESTful API 设计</li>
+<li>前端专注用户交互，后端专注数据处理</li>
+</ul>
+<h3>2. 技术选型合理</h3>
+<ul>
+<li>原生 JavaScript 保证性能</li>
+<li>jQuery 简化 DOM 操作</li>
+<li>Flask 轻量级易于开发</li>
+<li>SQLite 零配置数据库</li>
+</ul>
+<h3>3. 代码组织良好</h3>
+<ul>
+<li>模块化的 JavaScript 类设计</li>
+<li>清晰的 CSS 样式结构  </li>
+<li>标准的 Flask 路由组织</li>
+</ul>
+<h3>4. 用户体验优秀</h3>
+<ul>
+<li>实时响应用户操作</li>
+<li>直观的视觉反馈</li>
+<li>简洁美观的界面设计</li>
+</ul>
+<h2>部署与运行</h2>
+<h3>本地开发环境</h3>
+<blockquote><code># 后端启动</code><br>
+<code>pip install flask</code><br>
+<code>python app.py</code><br>
+<code></code><br>
+<code># 前端访问</code><br>
+<code>http://localhost:5000</code></blockquote><h3>目录结构</h3>
+<blockquote><code>todo-app/</code><br>
+<code>├── app.py                 # Flask后端服务</code><br>
+<code>├── todo.db               # SQLite数据库</code><br>
+<code>├── templates/</code><br>
+<code>│   └── index.html        # 主页模板</code><br>
+<code>├── static/</code><br>
+<code>│   ├── js/</code><br>
+<code>│   │   └── app.js        # 前端JavaScript</code><br>
+<code>│   └── css/</code><br>
+<code>│       └── style.css     # 样式文件</code><br>
+<code>└── requirements.txt      # Python依赖</code></blockquote><h2>技术收获与思考</h2>
+<h3>架构设计</h3>
+<ul>
+<li><strong>前后端分离</strong>提升了开发效率和可维护性</li>
+<li><strong>RESTful API</strong>设计确保了接口的标准化</li>
+<li><strong>轻量级技术栈</strong>降低了项目复杂度</li>
+</ul>
+<h3>开发体验</h3>
+<ul>
+<li><strong>原生JavaScript</strong>提供了更好的性能控制</li>
+<li><strong>jQuery</strong>大幅简化了DOM操作和AJAX请求</li>
+<li><strong>Flask</strong>的简洁性加快了开发进度</li>
+</ul>
+<h3>代码质量</h3>
+<ul>
+<li><strong>模块化设计</strong>提高了代码复用性</li>
+<li><strong>异常处理</strong>保证了应用的稳定性</li>
+<li><strong>数据验证</strong>确保了数据的完整性</li>
+</ul>
+<h2>未来优化方向</h2>
+<ol>
+<li><strong>功能扩展</strong>: 任务分类、优先级、截止日期</li>
+<li><strong>性能优化</strong>: 分页加载、缓存机制</li>
+<li><strong>用户系统</strong>: 登录注册、多用户支持</li>
+<li><strong>界面增强</strong>: 拖拽排序、批量操作</li>
+<li><strong>移动适配</strong>: PWA支持、离线功能</li>
+</ol>
+<h2>总结</h2>
+<p>这个 Todo List 全栈应用成功实现了前后端分离的架构设计，通过合理的技术选型和清晰的代码组织，构建了一个功能完整、用户体验良好的任务管理应用。</p>
+<p>项目展示了如何使用经典的Web技术栈构建现代化的应用，为进一步的功能扩展和技术升级奠定了坚实的基础。</p>
+
+</body>
+</html>

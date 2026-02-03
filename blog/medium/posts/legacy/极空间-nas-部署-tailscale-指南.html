@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极空间 NAS 部署 Tailscale 指南</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [快速笔记]
+legacy: true</h2>
+<h1>极空间 NAS 部署 Tailscale 指南</h1>
+<h2>1. 准备工作</h2>
+<ul>
+<li>登录 <a href="https://login.tailscale.com/admin/settings/keys">Tailscale 网页控制台</a>。</li>
+<li>生成 <strong>Auth Key</strong>：<ul>
+<li>勾选 <strong>Reusable</strong> (可复用)</li>
+<li>勾选 <strong>Ephemeral</strong> (非临时/长期有效)</li>
+<li>勾选 <strong>Pre-approved</strong></li>
+</ul>
+</li>
+<li>复制以 <code>tskey-auth-</code> 开头的密钥备用。</li>
+</ul>
+<h2>2. 极空间 Docker 部署 (图形界面法)</h2>
+<p><strong>步骤一：下载镜像</strong></p>
+<ul>
+<li>极空间 Docker -&gt; 镜像 -&gt; 仓库 -&gt; 搜索 <code>tailscale</code> -&gt; 下载 <code>tailscale/tailscale</code>。</li>
+</ul>
+<p><strong>步骤二：创建并配置容器 (关键)</strong>
+选中镜像点击“添加容器”，修改以下 4 项：</p>
+<ol>
+<li><strong>文件夹路径</strong> (解决 invalid volume path 报错)：<ul>
+<li>本地路径：手动新建或选择一个文件夹 (如 <code>/Docker/tailscale</code>)</li>
+<li>装载路径：手动填写 <code>/var/lib/tailscale</code></li>
+</ul>
+</li>
+<li><strong>网络</strong>：<ul>
+<li>修改为 <strong>Host</strong> 模式 (必须，否则无法做网关)。</li>
+</ul>
+</li>
+<li><strong>环境</strong>：<ul>
+<li>添加变量名：<code>TS_AUTHKEY</code></li>
+<li>添加变量值：粘贴你复制的 Key。</li>
+</ul>
+</li>
+<li><strong>能力/权限</strong>：<ul>
+<li><strong>必须勾选</strong> “以特权模式运行” (或“高权限”)，否则无法启动。</li>
+</ul>
+</li>
+</ol>
+<h2>3. 验证与进阶</h2>
+<ul>
+<li><strong>启动容器</strong>：查看状态是否为“运行中”。</li>
+<li><strong>验证</strong>：手机/电脑打开 Tailscale，查看是否有新设备 (如 <code>zspace-nas</code>) 上线。</li>
+<li><strong>进阶 (可选)</strong>：<ul>
+<li><strong>子网路由 (访问内网其他设备)</strong>：在“环境”中添加 <code>TS_ROUTES=192.168.x.0/24</code> (替换为你路由器的网段)。</li>
+<li><strong>密钥不过期</strong>：在 Tailscale 网页控制台 -&gt; Machines -&gt; 点击设备右侧三个点 -&gt; Disable Key Expiry。</li>
+</ul>
+</li>
+</ul>
+
+</body>
+</html>

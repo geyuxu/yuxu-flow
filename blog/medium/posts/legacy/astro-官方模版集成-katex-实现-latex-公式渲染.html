@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro 官方模版集成 KaTeX 实现 LaTeX 公式渲染</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2025-04-24
+tags: [frontend]
+legacy: true</h2>
+<h1>Astro 官方模版集成 KaTeX 实现 LaTeX 公式渲染</h1>
+<h3>1.	安装必要依赖：</h3>
+<p>首先，需要安装支持 Markdown 数学公式的 remark 和 rehype 插件，以及 KaTeX 本身。这两个插件分别是 remark-math（解析 Markdown 中的数学公式语法）和 rehype-katex（在构建时将公式渲染为 KaTeX 输出）。在项目根目录运行以下命令安装依赖：</p>
+<blockquote><code># 使用 npm 或 pnpm 安装所需的插件和 KaTeX 库</code><br>
+<code>pnpm add remark-math rehype-katex katex</code><br>
+<code># 如果使用 npm:</code><br>
+<code># npm install remark-math rehype-katex katex</code></blockquote><p>安装完成后，项目中将多出 remark-math、rehype-katex 和 katex 三个依赖包。</p>
+<h3>2.	修改 Astro 配置：</h3>
+<p>接下来，需要让 Astro 的 Markdown 渲染管道使用我们刚安装的插件。在项目的配置文件（通常是 astro.config.mjs 或 astro.config.ts）中添加 remark 和 rehype 插件配置。打开 astro.config.mjs 并进行如下修改：</p>
+<blockquote><code>import { defineConfig } from &#039;astro/config&#039;;</code><br>
+<code>import remarkMath from &#039;remark-math&#039;;</code><br>
+<code>import rehypeKatex from &#039;rehype-katex&#039;;</code><br>
+<code></code><br>
+<code>export default defineConfig({</code><br>
+<code>  // ... 其他 Astro 配置 ...</code><br>
+<code>  markdown: {</code><br>
+<code>    // 添加 remark 和 rehype 插件以支持数学公式</code><br>
+<code>    remarkPlugins: [remarkMath],</code><br>
+<code>    rehypePlugins: [rehypeKatex],</code><br>
+<code>  },</code><br>
+<code>  // ... 其他 Astro 配置 ...</code><br>
+<code>});</code></blockquote><p>上述配置确保 Astro 在处理 Markdown 时，会先通过 remark-math 解析 $...$ 和 $$...$$ 之间的内容为数学公式节点，然后通过 rehype-katex 将这些节点渲染为对应的 HTML 和 MathML。这一步是公式渲染的核心。如果项目中已有其他 remarkPlugins 或 rehypePlugins，确保将新的插件添加进去即可。</p>
+<h3>3.	引入 KaTeX 样式：</h3>
+<p>仅仅配置插件还不够，我们还需要引入 KaTeX 的 CSS 样式文件，否则公式的渲染可能会缺少适当的排版和字体。KaTeX 官方提供现成的 CSS，可以通过 CDN 引入或本地导入。这里选择使用 CDN 引入。在 Astro 主布局文件（例如 src/layouts/Layout.astro 或项目中的公共布局组件）中加入 KaTeX 的样式链接。在 HTML 的 <head> 部分添加：</p>
+<blockquote><code>---</code><br>
+<code>import { Astro } from &#039;astro&#039;;</code><br>
+<code>---</code><br>
+<code>&lt;html&gt;</code><br>
+<code>  &lt;head&gt;</code><br>
+<code>    &lt;!-- 其他元数据和样式 --&gt;</code><br>
+<code>    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css&quot; /&gt;</code><br>
+<code>  &lt;/head&gt;</code><br>
+<code>  &lt;body&gt;</code><br>
+<code>    &lt;slot /&gt;  &lt;!-- 页面主要内容 --&gt;</code><br>
+<code>  &lt;/body&gt;</code><br>
+<code>&lt;/html&gt;</code></blockquote><p><strong>注意：</strong> 如果不方便使用 CDN，你也可以安装 katex 包后，通过在布局组件的 frontmatter 中直接引入 import &#39;katex/dist/katex.min.css&#39;; 来加载本地的 KaTeX CSS。无论采用哪种方式，确保构建后页面的 <head> 确实加载了 katex.min.css。</p>
+<h3>4.	（可选）调整暗色模式样式：</h3>
+<p>如果你的博客支持深色模式或使用了诸如 Tailwind CSS 的排版插件，你可能需要针对 KaTeX 渲染的公式调整颜色样式。例如，在使用 Tailwind CSS 的站点中，KaTeX 渲染的块级公式元素默认为 .katex-display 类。如果不手动设置颜色，在暗色模式下公式可能仍是黑色文字，从而与深色背景冲突。为了解决这个问题，可以在全局样式文件（例如 src/styles/typography.css 或 Tailwind 全局样式）中添加一条规则：</p>
+<blockquote><code>.prose .katex-display {</code><br>
+<code>  color: inherit;  /* 继承父元素的文本颜色 */</code><br>
+<code>}</code></blockquote><p>上述样式将确保 KaTeX 公式的文字颜色跟随页面文本颜色，从而在暗色背景下可见（例如继承 .prose 容器的前景色）。请根据你站点的 CSS 架构调整相应的选择器和属性。如果没有使用暗色模式或 Tailwind 的排版插件，此步骤可忽略。</p>
+<p>完成以上步骤后，我们已经把所需的插件和样式集成进 Astro 项目。现在可以编写含有 LaTeX 公式的 Markdown 内容并验证效果。</p>
+<h2>在 Markdown 中书写 LaTeX 公式</h2>
+<p>配置完成后，在 Markdown 博文中插入数学公式将变得非常简单。行内公式 使用单个美元符号 $...$ 包裹，例如在文章中写下 <code>$E = mc^2$</code>（不含外层引号）将呈现为 $E = mc^2$。块级公式（单独成行居中的公式）则使用一对美元符号 $$...$$ 单独占行来包裹。示例：</p>
+<blockquote><code>在质能方程中，质量和能量的关系可以表示为：</code><br>
+<code>$$</code><br>
+<code>E = mc^2</code><br>
+<code>$$</code><br>
+<code></code><br>
+<code>另一个示例是二次方程的求根公式：</code><br>
+<code>$$</code><br>
+<code>x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}</code><br>
+<code>$$</code></blockquote><p>在实际文章中，上述 Markdown 代码将渲染出独立居中的公式。通过这样的语法，我们可以在博客文章中轻松展示复杂的数学推导过程。例如，使用双美元符可以展示多行对齐的公式组，使用 \sum、\int 等命令可以插入求和、积分符号等。在支持 KaTeX 后，几乎所有常见的 LaTeX 数学符号和环境都可以直接在 Astro Markdown 中使用。</p>
+<h2>踩坑记录与经验总结</h2>
+<p>在集成 KaTeX 支持的过程中，我也遇到了一些小问题和注意点：</p>
+<p>•	公式不渲染或原样显示：初次尝试时，我发现页面中的 $E = mc^2$ 仍然以文本形式显示，没有变成美观的公式。这通常是因为 remark-math 插件未生效或书写语法有误。请确认已在 astro.config.mjs 中正确添加 remarkPlugins: [remarkMath]，并确保公式语法正确（行内公式不要有换行，块级公式的起止 $$ 各自独占一行）。
+•	公式渲染样式异常：若公式渲染出来但样式不对，比如字体、对齐或颜色异常，大概率是 KaTeX CSS 没有加载。我一开始忘记引入 CSS，结果公式内容只是简单的数学文本且没有正确的排版格式。解决办法是确保在布局文件的 <head> 中引入了 katex.min.css，可以打开浏览器开发者工具检查网络面板或元素面板，确认 CSS 文件成功加载、生效。
+•	深色模式下公式不可见：正如前文提到的，如果启用了深色模式，务必调整 KaTeX 公式的文字颜色以适配深色背景。我当时在暗色模式下发现公式“消失”了，实际上是颜色与背景融为一体。通过在 CSS 中设置 .katex-display { color: inherit; }，问题迎刃而解。
+•	构建时报错：在编写复杂公式时，若不小心拼写错误或遗漏符号，Astro 构建阶段可能会抛出错误（因为 remark-math 在解析无效的 LaTeX 时会出错）。遇到这种情况，检查 Markdown 文件中的公式语法是否正确（括号是否闭合，命令拼写是否准确）。修正公式语法错误即可解决构建失败的问题。</p>
+<p>经过以上配置和调整，我顺利地在 Astro 博客中集成了 KaTeX，并成功渲染出所需的数学公式。在实际写作时，感觉就像在 LaTeX 文档中编写数学公式一样自然流畅。总结一下，Astro 本身作为静态站点生成器，并未开箱即用地支持 LaTeX 渲染，但通过 remark/rehype 插件与 KaTeX，我们可以较为轻松地扩展 Astro 的 Markdown 功能。希望这篇开发日志式的记录能为你提供参考，让你的 Astro 博客也能优雅地呈现数学之美。祝各位在技术创作中畅通无阻！</p>
+
+</body>
+</html>

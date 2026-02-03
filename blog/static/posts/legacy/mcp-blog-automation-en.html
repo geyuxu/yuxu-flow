@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP-Blog: One-Command Astro Blog Deployment to GitHub Pages | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [devops, mcp, astro, automation, github pages, devops]
+legacy: true</h2>
+<h1>MCP-Blog: One-Command Astro Blog Deployment to GitHub Pages</h1>
+<ol>
+<li>After writing a new post in my blog project <code>geyuxu.com</code></li>
+<li>Run <code>git add .</code>, <code>git commit -m &quot;...&quot;</code>, and <code>git push</code> to push the source code to the main branch</li>
+<li>Execute <code>npm run build</code> to generate static files in the <code>dist</code> directory</li>
+<li>Push the contents of the <code>dist</code> directory to the <code>gh-pages</code> branch for deployment</li>
+</ol>
+<p>This process not only involves multiple commands but is also prone to issues, especially if the <code>dist</code> directory isn&#39;t managed correctly by Git. More importantly, I wanted a central &quot;management hub&quot; to handle tasks like this, rather than cluttering my project directories with various scripts.</p>
+<p>This led me to create the <strong>MCP-Blog</strong> project. Its core goal is to: <strong>Automate the entire commit-and-deploy workflow for one project directory from a completely separate, dedicated management directory, using a single command.</strong></p>
+<p>This approach solves two major pain points:</p>
+<ol>
+<li><strong>Operational Isolation</strong>: Separates management scripts from blog content, keeping the blog repository clean and focused</li>
+<li><strong>Process Automation</strong>: Simplifies a multi-step process into a single action, reducing human error and increasing efficiency</li>
+</ol>
+<h2>2. Technical Architecture: The MCP Design Philosophy</h2>
+<h3>What is MCP (Model Context Protocol)?</h3>
+<p>The &quot;Model-Context Protocol&quot; (MCP) is not a public network protocol, but rather a <strong>command-line interaction specification</strong> I designed for this project. Its core philosophy is:</p>
+<blockquote>
+<p>Enable an independent execution script (Model) to understand and operate on a target project within a specific context (Context).</p>
+</blockquote>
+<p>In this project:</p>
+<ul>
+<li><strong>Model</strong>: Our <code>mcp-blog</code> project, which acts as the active executor</li>
+<li><strong>Context</strong>: Our <code>geyuxu.com</code> blog project, which is the target being operated on</li>
+<li><strong>Protocol</strong>: The command-line interface and script execution logic we define. For example, <code>./mcp.sh &quot;commit message&quot;</code> is an implementation of this protocol</li>
+</ul>
+<h3>Architecture Diagram</h3>
+<p>The workflow is straightforward:</p>
+<pre><code><span class="line">+-----------+       +-------------------------+       +---------------------+       +----------------+</span>
+<span class="line">|           |       |                         |       |                     |       |                |</span>
+<span class="line">|   User    |------&gt;|  MCP Script (mcp.sh)    |------&gt;|  Astro Blog Project |------&gt;|  GitHub Repo   |</span>
+<span class="line">|           |       |                         |       | (geyuxu.com)        |       | (main/gh-pages)|</span>
+<span class="line">+-----------+       +-------------------------+       +---------------------+       +----------------+</span>
+<span class="line">      |                        |                                |                           |</span>
+<span class="line">      | 1. Provide commit msg  | 2. cd to blog directory       | 3. Git ops &amp; build       | 4. Deploy to Pages</span>
+<span class="line">      |                        | 4. Execute deploy commands     |                           |</span></code></pre>
+<p>The key is how the <strong>MCP script</strong> effectively &quot;traverses&quot; into the <strong>Astro blog project</strong> directory to execute operations.</p>
+<h2>3. Implementation Details: Building the Automation Tool</h2>
+<p>Let&#39;s examine the core implementation. The entire project is driven by a single Shell script.</p>
+<p><strong>Project Structure:</strong></p>
+<pre><code><span class="line">/Users/geyuxu/repo/blog/</span>
+<span class="line">├── mcp-blog/         # MCP project</span>
+<span class="line">│   └── mcp.sh</span>
+<span class="line">└── geyuxu.com/       # Astro blog project</span>
+<span class="line">    ├── src/</span>
+<span class="line">    ├── public/</span>
+<span class="line">    ├── package.json</span>
+<span class="line">    └── ...</span></code></pre>
+<h3>1. Core Script <code>mcp.sh</code></h3>
+<p>This is the heart of our automation. It handles parameter reception, directory switching, command execution, and error handling.</p>
+<pre><code class="language-bash"><span class="line">#!/bin/bash</span>
+<span class="line"></span>
+<span class="line"># Exit immediately on error</span>
+<span class="line">set -e</span>
+<span class="line"></span>
+<span class="line"># --- Configuration ---</span>
+<span class="line"># Define MCP project path (where the script resides)</span>
+<span class="line">MCP_PROJECT_PATH=&quot;/Users/geyuxu/repo/blog/mcp-blog&quot;</span>
+<span class="line"># Define blog repository path (target to operate on)</span>
+<span class="line">BLOG_REPO_PATH=&quot;/Users/geyuxu/repo/blog/geyuxu.com&quot;</span>
+<span class="line"># --- End Configuration ---</span>
+<span class="line"></span>
+<span class="line"># 1. Check input parameters: commit message is required</span>
+<span class="line">if [ -z &quot;$1&quot; ]; then</span>
+<span class="line">  echo &quot;❌ Error: Please provide a commit message.&quot;</span>
+<span class="line">  echo &quot;Usage: ./mcp.sh \&quot;your commit message\&quot;&quot;</span>
+<span class="line">  exit 1</span>
+<span class="line">fi</span>
+<span class="line"></span>
+<span class="line">COMMIT_MESSAGE=$1</span>
+<span class="line"></span>
+<span class="line">echo &quot;🚀 MCP-Blog task starting...&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line"></span>
+<span class="line"># 2. Cross-directory permission management core</span>
+<span class="line">echo &quot;📂 Entering blog repository: $BLOG_REPO_PATH&quot;</span>
+<span class="line">cd &quot;$BLOG_REPO_PATH&quot;</span>
+<span class="line"></span>
+<span class="line"># 3. Git automation: commit source code</span>
+<span class="line">echo &quot;🔄 Syncing source code to main branch...&quot;</span>
+<span class="line">git add .</span>
+<span class="line">git commit -m &quot;$COMMIT_MESSAGE&quot;</span>
+<span class="line">git push origin main</span>
+<span class="line"></span>
+<span class="line">echo &quot;✅ Source sync complete.&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line"></span>
+<span class="line"># 4. Astro blog system integration: build project</span>
+<span class="line">echo &quot;🛠️  Building Astro project...&quot;</span>
+<span class="line">npm run build</span>
+<span class="line"></span>
+<span class="line">echo &quot;✅ Build complete.&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line"></span>
+<span class="line"># 5. GitHub Pages deployment</span>
+<span class="line">echo &quot;🚀 Deploying to GitHub Pages...&quot;</span>
+<span class="line"># We use the gh-pages package to simplify deployment</span>
+<span class="line"># It automatically pushes dist directory contents to gh-pages branch</span>
+<span class="line">npm run deploy</span>
+<span class="line"></span>
+<span class="line">echo &quot;✅ Deployment successful!&quot;</span>
+<span class="line">echo &quot;=================================&quot;</span>
+<span class="line">echo &quot;🎉 All tasks completed, blog updated!&quot;</span>
+<span class="line"></span>
+<span class="line"># Return to original directory (optional, good practice)</span>
+<span class="line">cd &quot;$MCP_PROJECT_PATH&quot;</span></code></pre>
+<h3>2. Key Technical Points</h3>
+<ul>
+<li><p><strong>Cross-directory Permission Management (<code>cd &quot;$BLOG_REPO_PATH&quot;</code>)</strong>:
+This seemingly simple <code>cd</code> command is key to cross-directory operations. After the script starts, it first switches the current working directory to the blog project. This way, all subsequent <code>git</code> and <code>npm</code> commands execute as if they were run directly in the <code>geyuxu.com</code> directory, naturally gaining the &quot;context permissions&quot; to operate on that directory&#39;s files.</p>
+</li>
+<li><p><strong>Git Automation (<code>git add/commit/push</code>)</strong>:
+The script handles source code commits using standard Git commands. Passing the commit message as the script&#39;s first parameter (<code>$1</code>) adds flexibility.</p>
+</li>
+<li><p><strong>Astro Integration (<code>npm run build</code>)</strong>:
+Every Astro project has a <code>build</code> script defined in <code>package.json</code>. Our automation script calls it directly without concerning itself with the complex internal build process, achieving perfect decoupling.</p>
+</li>
+<li><p><strong>GitHub Pages Deployment (<code>npm run deploy</code>)</strong>:
+To simplify deployment, I highly recommend using the <code>gh-pages</code> npm package.</p>
+<p>First, install it in your <strong>Astro project (<code>geyuxu.com</code>)</strong>:</p>
+<pre><code class="language-bash"><span class="line">npm install gh-pages --save-dev</span></code></pre>
+<p>Then, add a <code>deploy</code> command to your <code>geyuxu.com/package.json</code> scripts:</p>
+<pre><code class="language-json"><span class="line">{</span>
+<span class="line">  &quot;scripts&quot;: {</span>
+<span class="line">    &quot;dev&quot;: &quot;astro dev&quot;,</span>
+<span class="line">    &quot;start&quot;: &quot;astro dev&quot;,</span>
+<span class="line">    &quot;build&quot;: &quot;astro build&quot;,</span>
+<span class="line">    &quot;preview&quot;: &quot;astro preview&quot;,</span>
+<span class="line">    &quot;astro&quot;: &quot;astro&quot;,</span>
+<span class="line">    &quot;deploy&quot;: &quot;gh-pages -d dist&quot; </span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+<p>The <code>gh-pages -d dist</code> command automatically pushes the <code>dist</code> directory contents to the <code>gh-pages</code> branch.</p>
+</li>
+</ul>
+<h2>4. Usage Example: Running MCP-Blog</h2>
+<p>Assuming you&#39;ve completed the above configuration, publishing a new blog post is now as simple as breathing.</p>
+<ol>
+<li><p><strong>Grant execution permissions to the script</strong> (only needed once):</p>
+<pre><code class="language-bash"><span class="line">cd /Users/geyuxu/repo/blog/mcp-blog</span>
+<span class="line">chmod +x mcp.sh</span></code></pre>
+</li>
+<li><p><strong>One-command publishing</strong>:
+After finishing your writing in <code>geyuxu.com</code>, open the terminal and run:</p>
+<pre><code class="language-bash"><span class="line">./mcp.sh &quot;feat: add new article about MCP-Blog&quot;</span></code></pre>
+</li>
+</ol>
+<p>Then, grab a coffee and watch the terminal automate everything:</p>
+<pre><code><span class="line">🚀 MCP-Blog task starting...</span>
+<span class="line">=================================</span>
+<span class="line">📂 Entering blog repository: /Users/geyuxu/repo/blog/geyuxu.com</span>
+<span class="line">🔄 Syncing source code to main branch...</span>
+<span class="line">[main 1234567] feat: add new article about MCP-Blog</span>
+<span class="line"> 1 file changed, 1 insertion(+)</span>
+<span class="line"> ...</span>
+<span class="line">✅ Source sync complete.</span>
+<span class="line">=================================</span>
+<span class="line">🛠️  Building Astro project...</span>
+<span class="line">&gt; geyuxu.com@0.0.1 build</span>
+<span class="line">&gt; astro build</span>
+<span class="line">...</span>
+<span class="line">✅ Build complete.</span>
+<span class="line">=================================</span>
+<span class="line">🚀 Deploying to GitHub Pages...</span>
+<span class="line">&gt; geyuxu.com@0.0.1 deploy</span>
+<span class="line">&gt; gh-pages -d dist</span>
+<span class="line">Published</span>
+<span class="line">✅ Deployment successful!</span>
+<span class="line">=================================</span>
+<span class="line">🎉 All tasks completed, blog updated!</span></code></pre>
+<p>A few minutes later, your new article will be live online.</p>
+<h2>5. Summary and Future Directions</h2>
+<p>The <strong>MCP-Blog</strong> project successfully automates the complex blog publishing workflow through a simple Shell script, achieving:</p>
+<ul>
+<li><strong>Efficiency Boost</strong>: Reduces 5-6 steps to a single command</li>
+<li><strong>Error Reduction</strong>: Automated operations prevent manual omissions or mistakes</li>
+<li><strong>Clean Code</strong>: Separates management logic from business logic (blog content)</li>
+</ul>
+<p><strong>Future exploration directions:</strong></p>
+<ol>
+<li><strong>Feature Enhancement</strong>: Add a command to create new articles, e.g., <code>./mcp.sh new &quot;Article Title&quot;</code>, which automatically generates a Markdown template with frontmatter</li>
+<li><strong>Platform Upgrade</strong>: Upgrade from Shell script to a more robust Node.js or Python CLI tool with richer interaction and error handling</li>
+<li><strong>CI/CD Integration</strong>: While local scripts are convenient, the ultimate automation solution is migrating to GitHub Actions. When the <code>main</code> branch receives new pushes, it automatically triggers the build and deployment workflow</li>
+</ol>
+<p>I hope this small project inspires you. Automation is second nature to us engineers—by delegating repetitive work to machines, we can focus on creating more valuable content.</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+% Sample LaTeX Document
+% Demonstrates LaTeX syntax highlighting
+
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[colorlinks=true]{hyperref}
+
+\title{Introduction to LaTeX}
+\author{Blog System Demo}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This is a sample LaTeX document demonstrating various features
+including mathematical equations, formatting, and document structure.
+\end{abstract}
+
+\section{Introduction}
+
+LaTeX is a typesetting system widely used for scientific and technical documents.
+It excels at rendering mathematical notation.
+
+\section{Mathematics}
+
+\subsection{Inline Math}
+
+Einstein's famous equation $E = mc^2$ shows mass-energy equivalence.
+The quadratic formula is $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$.
+
+\subsection{Display Math}
+
+The Gaussian integral:
+\begin{equation}
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+\end{equation}
+
+Maxwell's equations in differential form:
+\begin{align}
+\nabla \cdot \mathbf{E} &= \frac{\rho}{\epsilon_0} \\
+\nabla \cdot \mathbf{B} &= 0 \\
+\nabla \times \mathbf{E} &= -\frac{\partial \mathbf{B}}{\partial t} \\
+\nabla \times \mathbf{B} &= \mu_0 \mathbf{J} + \mu_0 \epsilon_0 \frac{\partial \mathbf{E}}{\partial t}
+\end{align}
+
+\section{Lists and Formatting}
+
+\begin{itemize}
+    \item First item with \textbf{bold text}
+    \item Second item with \textit{italic text}
+    \item Third item with \texttt{monospace text}
+\end{itemize}
+
+\begin{enumerate}
+    \item Numbered item one
+    \item Numbered item two
+    \item Numbered item three
+\end{enumerate}
+
+\section{Conclusion}
+
+LaTeX provides excellent control over document formatting and is
+particularly powerful for technical and scientific writing.
+
+\end{document}

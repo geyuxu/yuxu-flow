@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervised vs. Unsupervised Learning: Concepts, Algorithms, and Practice</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai, machine learning, supervised learning, unsupervised learning, ai]
+legacy: true</h2>
+<h1>Supervised vs. Unsupervised Learning: Concepts, Algorithms, and Practice</h1>
+<hr>
+<h2>2. Core Concepts and Differences</h2>
+<h3>2.1 Supervised Learning</h3>
+<p>The core idea of supervised learning is to <strong>learn from &quot;labeled&quot; data</strong>. The &quot;label&quot; here is the correct answer we want the model to predict.</p>
+<ul>
+<li><strong>Definition</strong>: Given a set of input data <code>X</code> and its corresponding output labels <code>y</code>, the goal of the algorithm is to learn a mapping function <code>f</code> such that <code>f(x) ≈ y</code>.</li>
+<li><strong>Objective</strong>: To minimize a <strong>measurable error</strong> between the model&#39;s predictions and the true labels, such as Mean Squared Error (MSE) for regression or Cross-Entropy for classification.</li>
+<li><strong>Typical Tasks</strong>:<ul>
+<li><strong>Classification</strong>: Predicting a discrete class label. For example, determining if an email is spam or not (binary classification), or identifying an animal in a picture as a cat, dog, or bird (multi-class classification).</li>
+<li><strong>Regression</strong>: Predicting a continuous numerical value. For example, predicting the price of a house based on its features, or forecasting the temperature for the next day based on historical data.</li>
+</ul>
+</li>
+</ul>
+<h3>2.2 Unsupervised Learning</h3>
+<p>In contrast to supervised learning, unsupervised learning deals with <strong>&quot;unlabeled&quot; data</strong>. It does not require manually annotated answers; instead, it strives to discover the inherent structure and patterns within the data itself.</p>
+<ul>
+<li><strong>Definition</strong>: Given only input data <code>X</code>, the algorithm&#39;s goal is to uncover hidden structures in the data.</li>
+<li><strong>Objective</strong>: To explore the intrinsic patterns of the data, such as <strong>similarity, density, or latent factors</strong>.</li>
+<li><strong>Typical Tasks</strong>:<ul>
+<li><strong>Clustering</strong>: Grouping similar data points into the same cluster. For example, segmenting customers into different groups (high-value, potential, etc.) based on their purchasing behavior.</li>
+<li><strong>Dimensionality Reduction/Visualization</strong>: Reducing the number of features in the data while preserving its core information. For example, compressing high-dimensional user profiles into a 2D plane for visualization.</li>
+<li><strong>Density Estimation/Generative Modeling</strong>: Learning the distribution of the data to generate new, similar samples. For example, creating realistic human face images.</li>
+</ul>
+</li>
+</ul>
+<h3>2.3 At-a-Glance Comparison</h3>
+<p><img src="__TABLE_-2d1b6bf__" alt="Table"></p><hr>
+<h2>3. Workflow Comparison</h2>
+<h3>3.1 Supervised Learning Pipeline</h3>
+<p>A typical supervised learning project follows a relatively standardized process:</p>
+<ol>
+<li><strong>Data Annotation and Splitting</strong>: Obtain or annotate high-quality labeled data and split it into training, validation, and test sets.</li>
+<li><strong>Feature Engineering and Model Selection</strong>: Extract effective features based on business understanding and choose a suitable model (e.g., linear model, tree-based model, or neural network).</li>
+<li><strong>Training and Tuning</strong>: Train the model on the training set and tune hyperparameters (e.g., learning rate, tree depth) on the validation set.</li>
+<li><strong>Evaluation and Deployment</strong>: Evaluate the final model&#39;s performance on the test set and deploy it to production if it meets the criteria.</li>
+<li><strong>Monitoring and Iteration</strong>: Continuously monitor the model&#39;s online performance, watch for &quot;concept drift&quot; (changes in data distribution), and periodically retrain it with new data.</li>
+</ol>
+<h3>3.2 Unsupervised Learning Pipeline</h3>
+<p>The unsupervised learning process is more exploratory:</p>
+<ol>
+<li><strong>Data Preprocessing</strong>: Data standardization or normalization is crucial, as many algorithms (like K-means, PCA) are sensitive to scale. An appropriate distance metric (e.g., Euclidean distance, cosine similarity) must also be chosen.</li>
+<li><strong>Algorithm and Hyperparameter Exploration</strong>: Select a suitable algorithm (e.g., K-means, DBSCAN) and explore its key hyperparameters (e.g., number of clusters <code>k</code>, neighborhood radius <code>ε</code>).</li>
+<li><strong>Result Visualization and Business Validation</strong>: Since there is no &quot;correct answer,&quot; results (like clusters or dimensionality reduction plots) often need to be visualized and validated with business knowledge for effectiveness and interpretability.</li>
+<li><strong>Downstream Applications</strong>: The results of unsupervised learning often serve as input for downstream tasks. For example, using cluster assignments as user tags or using reduced-dimension features for a subsequent supervised learning model.</li>
+</ol>
+<hr>
+<h2>4. A Quick Look at Typical Algorithms</h2>
+<h3>4.1 Supervised Learning Algorithms</h3>
+<p><img src="__TABLE_7000b145__" alt="Table"></p><h3>4.2 Unsupervised Learning Algorithms</h3>
+<p><img src="__TABLE_-c44948a__" alt="Table"></p><hr>
+<h2>5. Scenarios and Case Studies</h2>
+<p><img src="__TABLE_3b319bc4__" alt="Table"></p><hr>
+<h2>6. Extended Paradigms</h2>
+<p>The line between supervised and unsupervised learning is not always sharp. In practice, many powerful hybrid paradigms have emerged:</p>
+<ul>
+<li><strong>Semi-supervised Learning</strong>: When you have a small amount of labeled data and a large amount of unlabeled data, techniques like Pseudo-Labeling and Consistency Regularization can leverage the unlabeled data to improve model performance.</li>
+<li><strong>Weakly Supervised Learning</strong>: The labels are not entirely accurate or complete (e.g., you know an image contains a cat, but not its exact location).</li>
+<li><strong>Self-supervised Learning</strong>: Creates &quot;pseudo-tasks&quot; from the data itself to generate labels. For example, randomly masking a word in a text (Masked Language Model) and training the model to predict it, which is the core idea behind pre-trained language models like BERT.</li>
+<li><strong>Reinforcement Learning (RL)</strong>: An agent learns the optimal policy by interacting with an environment and receiving rewards or penalties. It is often combined with supervised learning, as in AlphaGo.</li>
+</ul>
+<hr>
+<h2>7. Selection Guide &amp; Practical Tips</h2>
+<ol>
+<li><p><strong>Start with Your Data and Labels</strong>:</p>
+<ul>
+<li><strong>Have high-quality labels?</strong> Go with supervised learning.</li>
+<li><strong>Labeling is expensive?</strong> Prioritize unsupervised learning for data exploration (clustering, visualization) or use self-supervised/semi-supervised methods to reduce label dependency.</li>
+</ul>
+</li>
+<li><p><strong>Consider Model Scale and Data Complexity</strong>:</p>
+<ul>
+<li><strong>Large-scale perceptual tasks (images, speech, text)?</strong> Deep learning networks are the best choice.</li>
+<li><strong>Small, high-dimensional datasets?</strong> SVMs or tree-based models (like Random Forest) might perform better.</li>
+<li><strong>Structured/tabular data?</strong> XGBoost/LightGBM are often the performance kings.</li>
+</ul>
+</li>
+<li><p><strong>Balance Interpretability and Accuracy</strong>:</p>
+<ul>
+<li><strong>High-stakes or regulated scenarios (finance, healthcare)?</strong> Linear models, logistic regression, or decision trees are favored for their interpretability.</li>
+<li><strong>Scenarios where performance is paramount (online ads, recommendations)?</strong> More accurate, complex models (like deep networks) are preferred.</li>
+</ul>
+</li>
+<li><p><strong>Combine Offline Exploration with Online Application</strong>:</p>
+<ul>
+<li>A common pattern is to first use <strong>unsupervised learning</strong> for exploratory analysis on offline data to discover potential user segments or data patterns. Then, use these findings as features or targets to build a <strong>supervised learning</strong> model for real-time prediction online.</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>8. Conclusion</h2>
+<p>Supervised and unsupervised learning are two powerful tools for solving different kinds of problems, with the core distinction being their reliance on &quot;ground truth&quot; answers.</p>
+<ul>
+<li><strong>Supervised learning excels at &quot;answering known questions.&quot;</strong> Driven by clear goals and high-quality labels, it can make accurate predictions.</li>
+<li><strong>Unsupervised learning excels at &quot;discovering unknown questions.&quot;</strong> Without prior knowledge, it can reveal hidden structures, patterns, and insights in the data.</li>
+</ul>
+<p>In real-world machine learning projects, the two are often not isolated. The most powerful solutions frequently combine them: <strong>first exploring the possibilities in the data with unsupervised learning, then building a precise model for a specific goal with supervised learning, creating a complete cycle from data insight to value creation.</strong></p>
+<hr>
+<h2>9. Code Examples</h2>
+<h3>9.1 Environment Setup</h3>
+<p><code>pip install scikit-learn matplotlib torch torchvision</code></p><h3>9.2 Supervised Learning Examples</h3>
+<h4>Linear Regression (California Housing)</h4>
+<blockquote><code>from sklearn.datasets import fetch_california_housing</code><br>
+<code>from sklearn.model_selection import train_test_split</code><br>
+<code>from sklearn.linear_model import LinearRegression</code><br>
+<code>from sklearn.metrics import mean_squared_error</code><br>
+<code></code><br>
+<code># California Housing dataset</code><br>
+<code>X, y = fetch_california_housing(return_X_y=True)</code><br>
+<code>X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)</code><br>
+<code></code><br>
+<code>model = LinearRegression().fit(X_train, y_train)</code><br>
+<code>pred = model.predict(X_test)</code><br>
+<code>print(f&quot;RMSE on California Housing: {mean_squared_error(y_test, pred, squared=False):.2f}&quot;)</code></blockquote><h4>Logistic Regression (Breast Cancer Binary Classification)</h4>
+<blockquote><code>from sklearn.datasets import load_breast_cancer</code><br>
+<code>from sklearn.linear_model import LogisticRegression</code><br>
+<code>from sklearn.preprocessing import StandardScaler</code><br>
+<code></code><br>
+<code>X, y = load_breast_cancer(return_X_y=True)</code><br>
+<code># Scaling improves performance</code><br>
+<code>scaler = StandardScaler()</code><br>
+<code>X_scaled = scaler.fit_transform(X)</code><br>
+<code></code><br>
+<code>clf = LogisticRegression(max_iter=1000).fit(X_scaled, y)</code><br>
+<code>print(f&quot;Accuracy on Breast Cancer: {clf.score(X_scaled, y):.3f}&quot;)</code></blockquote><h3>9.3 Unsupervised Learning Examples</h3>
+<h4>K-means Clustering + Visualization</h4>
+<blockquote><code>from sklearn.datasets import load_iris</code><br>
+<code>from sklearn.cluster import KMeans</code><br>
+<code>import matplotlib.pyplot as plt</code><br>
+<code></code><br>
+<code>X, y = load_iris(return_X_y=True) # y is used here only for comparison; K-means itself doesn&#039;t use it</code><br>
+<code>kmeans = KMeans(n_clusters=3, random_state=42, n_init=10).fit(X) # n_init=&#039;auto&#039; in future</code><br>
+<code></code><br>
+<code># Visualize the first two features</code><br>
+<code>plt.scatter(X[:, 0], X[:, 1], c=kmeans.labels_, cmap=&#039;viridis&#039;)</code><br>
+<code>plt.title(&#039;K-means Clustering on Iris Dataset&#039;)</code><br>
+<code>plt.xlabel(&#039;Sepal Length&#039;)</code><br>
+<code>plt.ylabel(&#039;Sepal Width&#039;)</code><br>
+<code>plt.show()</code></blockquote><h4>PCA + t-SNE Visualization</h4>
+<blockquote><code>from sklearn.decomposition import PCA</code><br>
+<code>from sklearn.manifold import TSNE</code><br>
+<code>import matplotlib.pyplot as plt</code><br>
+<code>from sklearn.datasets import load_iris</code><br>
+<code></code><br>
+<code>X, y = load_iris(return_X_y=True)</code><br>
+<code></code><br>
+<code># First, reduce dimensions with PCA to a reasonable intermediate number</code><br>
+<code># ... (10 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/e34aec8decb174dcc67963b1fd7ad677">GitHub Gist</a></em></p><h3>9.4 Simple GAN Skeleton (PyTorch)</h3>
+<p>This is a minimal GAN structure to demonstrate its core components, not a complete training script.</p>
+<blockquote><code>import torch</code><br>
+<code>from torch import nn</code><br>
+<code></code><br>
+<code># Define the Generator</code><br>
+<code>class Generator(nn.Module):</code><br>
+<code>    def __init__(self, z_dim=100, img_dim=784):</code><br>
+<code>        super().__init__()</code><br>
+<code>        self.net = nn.Sequential(</code><br>
+<code># ... (33 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/5095f68122900d4c3a19408e05cd7228">GitHub Gist</a></em></p><hr>
+<h2>10. References</h2>
+<ul>
+<li><em>Pattern Recognition and Machine Learning</em> — Christopher M. Bishop</li>
+<li><em>Deep Learning</em> — Ian Goodfellow, Yoshua Bengio, and Aaron Courville</li>
+<li><a href="https://scikit-learn.org/stable/documentation.html">Scikit-learn Official Documentation</a></li>
+<li><a href="https://pytorch.org/docs/stable/index.html">PyTorch Official Documentation</a></li>
+</ul>
+
+</body>
+</html>

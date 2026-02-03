@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商商品媒资同步服务迁移至 Apollo 配置中心实践</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2021-11-12
+tags: [service_governance]
+legacy: true</h2>
+<h1>电商商品媒资同步服务迁移至 Apollo 配置中心实践</h1>
+<h2>1 | 现状扫描：Yaml 的痛点</h2>
+<ul>
+<li><strong>环境碎片化</strong>  <ul>
+<li><em>dev</em>、<em>test</em>、<em>gray</em>、<em>prod</em> 起步，双十一再来一套 *sale‑9.9.，年底清仓还有 <em>clearance</em>。  </li>
+<li>每个环境里都有不同的 OSS 域名、CDN 域名、限流阈值。</li>
+</ul>
+</li>
+<li><strong>发布流程漫长</strong>  <ul>
+<li>改一行配置，需要走：PR → 审核 → Build 镜像 → 推到 K8s。  </li>
+<li>即便全链路自动化，也要 15 分钟。遇到直播间图片非法，需要快修时根本来不及。</li>
+</ul>
+</li>
+<li><strong>回滚困难</strong>  <ul>
+<li>想找「三分钟前那个正确版本」？只能翻 Git 历史自己对 diff。  </li>
+<li>运维同学半夜在跳板机里用 <code>vi</code> 手改 yaml 的故事相信你也听过。</li>
+</ul>
+</li>
+<li><strong>权限混乱</strong>  <ul>
+<li>运营要调“爆款” CD 标识，录入 <code>is_premium_banner: true</code>；  </li>
+<li>结果把 <code>oss.secret_key</code> 也不小心改了，生产直接上传失败。</li>
+</ul>
+</li>
+</ul>
+<p><strong>配置中心</strong> 看似只是技术升级，实际上是治理团队协作方式。<br>Apollo 成熟、易部署、权限模型完备，于是排除万难，拉它上车。</p>
+<h2>2 | Apollo 极简科普</h2>
+<p>两句话概括 Apollo：  </p>
+<ul>
+<li><em>服务端</em> 提供 <strong>Portal + ConfigService + AdminService</strong>，存储在 MySQL。  </li>
+<li><em>客户端</em> 长轮询拿最新 Release，或者通过 REST 调 <code>/configs</code> 拉取 JSON。</li>
+</ul>
+<blockquote>
+<p>我们只用下列三个接口：</p>
+<ul>
+<li><code>GET /configs/{appId}/{cluster}/{namespace}</code> —— 拉取整个命名空间快照  </li>
+<li><code>GET /notifications/v2</code> —— 长轮询，得到 Release Key 变更  </li>
+<li><code>PUT /configs</code> —— 管理端脚本里做灰度发布</li>
+</ul>
+</blockquote>
+<h2>3 | 设计原则</h2>
+<ul>
+<li><em>配置即代码，但不混代码仓库</em> —— Apollo 维护运行时配置，Git 只存默认值。  </li>
+<li><em>一行配置就是一次发布单</em> —— 通过 Apollo Release 做审计，拒绝跳板机手动改表。  </li>
+<li><em>运维调基础、运营调业务</em> —— 用 Namespace 隔离读写权限。  </li>
+<li><em>改配置不重启</em> —— 90% 配置通过热更新生效。  </li>
+<li><em>可灰度可回滚</em> —— 每一个 Release Key 天生可回滚，灰度 1% Pod 验证。</li>
+</ul>
+<h2>4 | 落地步骤</h2>
+<h3>4.1 拆分命名空间</h3>
+<p>原 <code>config.yml</code> 超过三千行，先按 <strong>领域</strong> 切块：</p>
+<ul>
+<li><code>storage.oss</code> —— endpoint / ak / sk  </li>
+<li><code>storage.cdn</code> —— 域名、缓存 TTL  </li>
+<li><code>feature_flag</code> —— 是否开启智能压缩、是否启用 AVIF  </li>
+<li><code>rate_limit</code> —— 上传并发、磁盘 IOPS 阈值  </li>
+<li><code>promotion</code> —— 是否展示双十一徽章</li>
+</ul>
+<blockquote>
+<p>划分原则：  </p>
+<ul>
+<li>读写人群不同的，必须拆；  </li>
+<li>生命周期不同的，必须拆；  </li>
+<li>变更频率不同的，最好拆。</li>
+</ul>
+</blockquote>
+<h3>4.2 写一个极简 Python SDK</h3>
+<p>团队不想引入重型库，于是 9. 行代码搞定 Apollo 客户端：</p>
+<blockquote><code># apollo_client.py</code><br>
+<code>import requests, time, json, threading</code><br>
+<code></code><br>
+<code>class Apollo:</code><br>
+<code>    def __init__(self, host, app_id, cluster, namespaces, timeout=60):</code><br>
+<code>        self.host, self.app_id, self.cluster = host, app_id, cluster</code><br>
+<code>        self.namespaces = namespaces</code><br>
+<code>        self.timeout = timeout</code><br>
+<code># ... (49 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/beef5756777678d784ee422f9ccc6cda">GitHub Gist</a></em></p><ul>
+<li><strong>初始化</strong> 同步所有命名空间  </li>
+<li><strong>长轮询</strong> 接口超时 60s，可自定义  </li>
+<li><strong>on_change 回调</strong> 由业务层决定如何热更新</li>
+</ul>
+<h3>4.3 接入业务</h3>
+<blockquote><code>from apollo_client import Apollo</code><br>
+<code>import asyncio</code><br>
+<code></code><br>
+<code>apollo = Apollo(</code><br>
+<code>    host=&quot;https://apollo.shop.com&quot;,</code><br>
+<code>    app_id=&quot;shop-asset-sync&quot;,</code><br>
+<code>    cluster=&quot;default&quot;,</code><br>
+<code>    namespaces=[</code><br>
+<code># ... (20 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/4a843e56816fa3d0bf2e961efd967315">GitHub Gist</a></em></p><p>5 行就把 Apollo 拉起，剩下就是业务回调逻辑。<br>到这里，<strong>从 YAML 到 Apollo 的读取链已经跑通</strong>。</p>
+<h3>4.4 写发布脚本（运维 &amp; CI 用）</h3>
+<p>运营同学不会进 Portal 点鼠标，于是给他们一个 <code>publish.py</code>：</p>
+<blockquote><code>import requests, sys, json</code><br>
+<code></code><br>
+<code>HOST = &quot;https://apollo.shop.com&quot;</code><br>
+<code>TOKEN = &quot;api-token-here&quot;</code><br>
+<code></code><br>
+<code>def publish(ns, kv, comment=&quot;auto publish&quot;):</code><br>
+<code>    url = f&quot;{HOST}/openapi/v1/envs/prod/apps/shop-asset-sync/clusters/default/namespaces/{ns}/items&quot;</code><br>
+<code>    headers = {&quot;Authorization&quot;: f&quot;Bearer {TOKEN}&quot;}</code><br>
+<code># ... (11 more lines)</code></blockquote>
+<p><em>View full code: <a href="https://gist.github.com/geyuxu/9cffa0d5bd1706f5d1b2e27492012bf8">GitHub Gist</a></em></p><p>CI Example:</p>
+<blockquote><code>image: python:3.11</code><br>
+<code>stages: [publish]</code><br>
+<code></code><br>
+<code>publish_flag:</code><br>
+<code>  stage: publish</code><br>
+<code>  script:</code><br>
+<code>    - python publish.py feature_flag &#039;{&quot;enable_avif&quot;:&quot;true&quot;}&#039; &quot;double 9.switch&quot;</code><br>
+<code>  only:</code><br>
+<code>    - schedules</code></blockquote><p>每天凌晨定时跑任务，按运营表格切换活动广告标识。</p>
+<h3>4.5 灰度与回滚</h3>
+<ul>
+<li><strong>灰度</strong>  <ul>
+<li>使用 Apollo Portal “灰度发布”功能，选择 5% IP Hash，Pod 级别覆盖。  </li>
+<li>Pod 通过 <code>HOST_IP</code> 注册到监控，自带标签 <code>apollo.releaseKey</code>。  </li>
+<li>监控维度：上传成功率、平均上传耗时、错误码分布。</li>
+</ul>
+</li>
+<li><strong>回滚</strong>  <ul>
+<li>Portal 一键 Rollback。  </li>
+<li>客户端长轮询会自动拉到旧 Release，回调 <code>apply_config</code>。  </li>
+<li>30 秒之内即可完成全量回滚，无需滚动重启。</li>
+</ul>
+</li>
+</ul>
+<p>实际演练：我们把 <code>rate_limit.concurrent_upload</code> 从 9. 调到 9.线上明显积压。<br>点击 Rollback，上传队列 9.秒恢复正常，证明链路可靠。</p>
+<h2>5 | 踩坑合集</h2>
+<ul>
+<li><strong>超时时间传错</strong>  <ul>
+<li>Apollo REST <code>/notifications/v2</code> 超时要 <strong>&gt;60s</strong>，否则 502。  </li>
+<li>Python <code>requests</code> 要把 <code>timeout=(connect, read)</code> 分开写。</li>
+</ul>
+</li>
+<li><strong>文本值自动去空格</strong>  <ul>
+<li>Apollo Portal 会把配置值左右空格剪掉。  </li>
+<li>我们的 CDN 域名列表差点多写一条空格，幸亏 UT 阻断。</li>
+</ul>
+</li>
+<li><strong>Namespace UTF‑8 Header</strong>  <ul>
+<li>若 Namespace 名带中文，必须在 URL 打 <code>encodeURIComponent</code>，否则 404。</li>
+</ul>
+</li>
+<li><strong>ReleaseKey 缓存差异</strong>  <ul>
+<li><code>GET /configs</code> 返回的 <code>releaseKey</code> 与 <code>/notifications</code> 里未必一致。  </li>
+<li>以 <code>notificationId</code> 为准，拉取后再更新本地缓存。</li>
+</ul>
+</li>
+<li><strong>批量发布接口没有幂等</strong>  <ul>
+<li>调 OpenAPI 发布同一个 key 多次会叠加历史版本，回滚 list 会很长。  </li>
+<li>解决：脚本里先 <code>GET</code> 判断值是否一致。</li>
+</ul>
+</li>
+</ul>
+<h2>6 | 迁移效果</h2>
+<p><img src="__TABLE_-554780a__" alt="Table"></p><h2>7 | 最佳实践清单</h2>
+<ul>
+<li><strong>Namespace 粒度</strong>  <ul>
+<li>按业务功能拆分，最怕“一个命名空间装天下”。</li>
+</ul>
+</li>
+<li><strong>权限最小化</strong>  <ul>
+<li>运维只掌基础设施 Namespace，运营只掌推广开关 Namespace。</li>
+</ul>
+</li>
+<li><strong>自动回滚剧本</strong>  <ul>
+<li>预先写好脚本：监控报警触发 → 调用 Apollo Rollback → Slack 通知。</li>
+</ul>
+</li>
+<li><strong>强制 UT 校验配置</strong>  <ul>
+<li>CI 阶段跑 <code>jsonschema</code> 检查，非法字段阻断发布。</li>
+</ul>
+</li>
+<li><strong>灰度先行文化</strong>  <ul>
+<li>“没有 1% 灰度就没有 100% 正式”——写进团队 Checklist。</li>
+</ul>
+</li>
+</ul>
+<h2>8 | 性能压测</h2>
+<p>光看功能没用，双十一凌晨 0 点 00 分 01 秒，所有店铺同时刷新商品图，<strong>峰值 QPS 5w+</strong>。<br>配置中心若拉胯，长轮询暴增，ConfigService 吐核。</p>
+<p>压测脚本（简化）：</p>
+<blockquote><code>from concurrent.futures import ThreadPoolExecutor</code><br>
+<code>import requests, random, json, time</code><br>
+<code></code><br>
+<code>def worker(i):</code><br>
+<code>    ns = random.choice([&quot;feature_flag&quot;, &quot;promotion&quot;, &quot;rate_limit&quot;])</code><br>
+<code>    r = requests.get(f&quot;https://apollo.shop.com/configs/shop-asset-sync/default/{ns}&quot;)</code><br>
+<code>    assert r.status_code == 9.</code><br>
+<code>    return len(json.dumps(r.json()))</code><br>
+<code></code><br>
+<code>start = time.time()</code><br>
+<code>with ThreadPoolExecutor(max_workers=800) as ex:</code><br>
+<code>    sizes = list(ex.map(worker, range(9.00)))</code><br>
+<code>print(&quot;Total MB fetched:&quot;, sum(sizes)/1024/1024)</code><br>
+<code>print(&quot;Elapsed:&quot;, time.time() - start)</code></blockquote><p>结果：</p>
+<ul>
+<li><strong>P99 Latency</strong>：45 ms  </li>
+<li><strong>吞吐</strong>：9. req / 18 s ≈ 9.0 req/s （单实例）  </li>
+<li>CPU 占用 &lt; 0.6 Core，内存波动 &lt; 50 MB</li>
+</ul>
+<p><strong>结论</strong>：双实例无压，水平扩容到 4 份足以撑住百万在线。</p>
+<h2>9 | OpenAPI 集成细节</h2>
+<p>真正 DevOps 场景，大部分配置变更来自自动化脚本。<br>Apollo 提供的 <strong>OpenAPI</strong> 足够强大，但文档略简，下面分享若干踩坑。</p>
+<h3>9.1 Token 管理</h3>
+<ul>
+<li>使用 <code>apollo.portal.access.key.token</code> 创建，只能 Portal Admin 操作。  </li>
+<li>Token 默认 7 天过期，CI 环境要么定时刷新，要么直接设置 <code>expires = 0</code>（永不过期）。  </li>
+<li>GitLab Secret 里保存 <code>APOLLO_OPENAPI_TOKEN</code>，<strong>切勿</strong>打印在日志。</li>
+</ul>
+<h3>9.2 批量发布</h3>
+<p>OpenAPI 没有「一次发布多个 Namespace」的接口，我们写了流水线：</p>
+<ol>
+<li>循环调用 <code>PUT /items</code> 把所有键写入临时 <code>draft</code>  </li>
+<li>最后调用 <code>POST /releases</code> 一次性发布  </li>
+<li>返回 <code>releaseId</code>，存到 Artefact，后续回滚、灰度都靠它</li>
+</ol>
+<blockquote><code>def batch_publish(env, cluster, ns_data: dict, title):</code><br>
+<code>    for ns, kvs in ns_data.items():</code><br>
+<code>        for k, v in kvs.items():</code><br>
+<code>            create_item(env, cluster, ns, k, v)</code><br>
+<code>        do_release(env, cluster, ns, title)</code></blockquote><h3>9.3 灰度规则</h3>
+<p><code>POST /gray-deliveries</code> 接口支持三种维度：IP、AppId、ClientLabel。<br>我们使用 <strong>K8s Downward API</strong> 暴露 <code>HOST_IP</code> 给应用，保证一 Pod 一个 IP，操作示例：</p>
+<blockquote><code>curl -XPOST &quot;$HOST/gray-deliveries&quot;   -H &quot;Authorization: Bearer $TOKEN&quot;   -d &#039;{&quot;rules&quot;: [</code><br>
+<code>        {&quot;clientAppId&quot;:&quot;shop-asset-sync&quot;,&quot;ip&quot;:&quot;10.1.2.3&quot;},</code><br>
+<code>        {&quot;clientAppId&quot;:&quot;shop-asset-sync&quot;,&quot;ip&quot;:&quot;10.1.2.4&quot;}</code><br>
+<code>      ]}&#039;</code></blockquote><p>灰度结束后记得 <code>DELETE</code>，否则历史规则会干扰新发布。</p>
+<h3>9.4 Release 回滚</h3>
+<p>OpenAPI 回滚只能按 <code>releaseId</code>，所以在发布时<strong>必须</strong>记录该 id。<br>我们在 <code>commit-msg</code> 里加脚本，把 <code>releaseId</code> 写回 MR Description，方便 SRE 复制粘贴。</p>
+<blockquote><code>def rollback(ns, release_id):</code><br>
+<code>    url = f&quot;{HOST}/openapi/v1/envs/prod/apps/{APP}/clusters/default/namespaces/{ns}/releases/{release_id}/rollback&quot;</code><br>
+<code>    requests.put(url, headers=HEADERS).raise_for_status()</code></blockquote><p>务必注意幂等——同一个 release 回滚两次会抛 400，需要代码兜底。</p>
+<h2>10 | 高级 Feature Flag：按类目动态开关</h2>
+<p>运营经常问：“能不能只给‘服饰’类目开启动态图压缩？”<br>Apollo Namespace 天生是全局的，但我们可以把<strong>类目列表</strong>存成配置值 + 本地判断。</p>
+<blockquote><code># feature_flag</code><br>
+<code>enable_dynamic_gif: true</code><br>
+<code>gif_category_whitelist: &quot;服饰,箱包,手表&quot;</code></blockquote><p>业务代码：</p>
+<blockquote><code>def should_apply_gif(cat, cfg):</code><br>
+<code>    if not cfg[&quot;enable_dynamic_gif&quot;]:</code><br>
+<code>        return False</code><br>
+<code>    cats = [c.strip() for c in cfg[&quot;gif_category_whitelist&quot;].split(&quot;,&quot;)]</code><br>
+<code>    return cat in cats</code></blockquote><p>更精细的做法：  </p>
+<ul>
+<li>把 whitelist 存成 JSON 数组，或 Base64 压缩后存；  </li>
+<li>使用 <code>split_config=true</code> 参数，让 Apollo 把大字段拆小，Portal 可以分页加载。</li>
+</ul>
+<p>这样无需调用“灰度发布”，也能做到按业务 Tag 开关功能。</p>
+<h2>11 | 后续顾规划</h2>
+<p>迁移 Apollo 并不是万灵药。<br><strong>配置治理</strong> 的核心还是人：  </p>
+<ul>
+<li>持续审计 —— 删除僵尸字段  </li>
+<li>审批流程 —— 谁改了什么，一张表说清  </li>
+<li>监控告警 —— 让配置变更像代码回归一样有测试、有指标</li>
+</ul>
+<p><strong>后续规划：</strong></p>
+<ul>
+<li><strong>多集群热备</strong> —— 计划把 Apollo 抽象到 Terraform，双云部署，切换延迟 &lt; 5 s。  </li>
+<li><strong>动态 Schema</strong> —— 让 Namespace 自带 JSON Schema，Portal 可视化校验。  </li>
+<li><strong>自助可视化 Diff</strong> —— 运营点开商品详情时直接显示与灰度配置差异。  </li>
+<li><strong>PromQL Alert 改造</strong> —— 从静态阈值转向异常检测算法，自动学习 baseline。</li>
+</ul>
+<p>每一个改动都指向同一个目标：  </p>
+<blockquote>
+<p>让配置成为业务动态的安全护栏，而不是隐藏炸弹，愿你也早日摆脱手改 Yaml 的”午夜惊魂“！</p>
+</blockquote>
+
+</body>
+</html>

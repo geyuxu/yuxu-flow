@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Static Blog Converter Development Practice and Technical Summary | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2025-07-22
+tags: [backend]
+legacy: true</h2>
+<h1>Java Static Blog Converter Development Practice and Technical Summary</h1>
+<ul>
+<li><strong>Language</strong>: Java 8</li>
+<li><strong>Build Tool</strong>: Maven 3.x</li>
+<li><strong>Core Libraries</strong>: FlexMark-Java (Markdown processing), Jackson (JSON/YAML processing)</li>
+<li><strong>Testing Framework</strong>: JUnit Jupiter</li>
+<li><strong>Encoding</strong>: UTF-8 for multi-language content support</li>
+</ul>
+<h3>Project Structure</h3>
+<pre><code><span class="line">src/</span>
+<span class="line">├── main/java/com/example/blog/</span>
+<span class="line">│   ├── BlogConverter.java          # Main entry class, CLI interface</span>
+<span class="line">│   ├── StaticSiteGenerator.java    # Core generator</span>
+<span class="line">│   ├── TemplateEngine.java         # Template engine</span>
+<span class="line">│   ├── MarkdownConverter.java      # Markdown converter  </span>
+<span class="line">│   ├── FrontmatterParser.java      # YAML frontmatter parser</span>
+<span class="line">│   ├── AssetProcessor.java         # Asset processor</span>
+<span class="line">│   └── BlogGenerationException.java # Exception handling</span>
+<span class="line">└── test/                           # Complete test suite</span></code></pre>
+<h2>Core Feature Implementation</h2>
+<h3>1. Multi-format Document Support</h3>
+<p>The system supports processing various document formats:</p>
+<ul>
+<li><strong>Markdown</strong>: Primary content format</li>
+<li><strong>Office Documents</strong>: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX</li>
+<li><strong>Plain Text</strong>: TXT, MD</li>
+</ul>
+<p>Each file generates a unique UUID identifier during processing to ensure filename uniqueness.</p>
+<h3>2. YAML Frontmatter Parsing</h3>
+<pre><code class="language-java"><span class="line">// FrontmatterParser supports standard YAML frontmatter</span>
+<span class="line">---</span>
+<span class="line">title: &quot;Article Title&quot;</span>
+<span class="line">date: 2025-07-22</span>
+<span class="line">tags: [&quot;Java&quot;, &quot;Maven&quot;, &quot;Static Site&quot;]</span>
+<span class="line">---</span>
+<span class="line"></span>
+<span class="line"># Article Content</span></code></pre>
+<h3>3. Template Engine System</h3>
+<ul>
+<li>Support for custom HTML templates</li>
+<li>Conditional processing and nested conditional blocks</li>
+<li>Variable replacement and content injection</li>
+<li>Responsive layout support</li>
+</ul>
+<h3>4. Security Design</h3>
+<ul>
+<li><strong>XSS Protection</strong>: Input content filtering and escaping</li>
+<li><strong>Input Validation</strong>: Strict file path and content validation  </li>
+<li><strong>Exception Handling</strong>: Complete exception handling mechanism</li>
+<li><strong>Path Security</strong>: Prevention of directory traversal attacks</li>
+</ul>
+<h2>Maven Build Configuration</h2>
+<h3>Dependency Management</h3>
+<pre><code class="language-xml"><span class="line">&lt;dependencies&gt;</span>
+<span class="line">    &lt;!-- Markdown Processing --&gt;</span>
+<span class="line">    &lt;dependency&gt;</span>
+<span class="line">        &lt;groupId&gt;com.vladsch.flexmark&lt;/groupId&gt;</span>
+<span class="line">        &lt;artifactId&gt;flexmark-all&lt;/artifactId&gt;</span>
+<span class="line">        &lt;version&gt;0.64.8&lt;/version&gt;</span>
+<span class="line">    &lt;/dependency&gt;</span>
+<span class="line">    </span>
+<span class="line">    &lt;!-- JSON/YAML Processing --&gt;</span>
+<span class="line">    &lt;dependency&gt;</span>
+<span class="line">        &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;</span>
+<span class="line">        &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;</span>
+<span class="line">        &lt;version&gt;2.15.2&lt;/version&gt;</span>
+<span class="line">    &lt;/dependency&gt;</span>
+<span class="line">    </span>
+<span class="line">    &lt;!-- Testing Framework --&gt;</span>
+<span class="line">    &lt;dependency&gt;</span>
+<span class="line">        &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;</span>
+<span class="line">        &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;</span>
+<span class="line">        &lt;version&gt;5.10.0&lt;/version&gt;</span>
+<span class="line">        &lt;scope&gt;test&lt;/scope&gt;</span>
+<span class="line">    &lt;/dependency&gt;</span>
+<span class="line">&lt;/dependencies&gt;</span></code></pre>
+<h3>Shade Plugin Configuration</h3>
+<p>Using Maven Shade plugin to generate executable Fat JAR:</p>
+<pre><code class="language-xml"><span class="line">&lt;plugin&gt;</span>
+<span class="line">    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;</span>
+<span class="line">    &lt;artifactId&gt;maven-shade-plugin&lt;/artifactId&gt;</span>
+<span class="line">    &lt;version&gt;3.4.1&lt;/version&gt;</span>
+<span class="line">    &lt;executions&gt;</span>
+<span class="line">        &lt;execution&gt;</span>
+<span class="line">            &lt;goals&gt;</span>
+<span class="line">                &lt;goal&gt;shade&lt;/goal&gt;</span>
+<span class="line">            &lt;/goals&gt;</span>
+<span class="line">            &lt;configuration&gt;</span>
+<span class="line">                &lt;transformers&gt;</span>
+<span class="line">                    &lt;transformer implementation=&quot;org.apache.maven.plugins.shade.resource.ManifestResourceTransformer&quot;&gt;</span>
+<span class="line">                        &lt;mainClass&gt;com.example.blog.BlogConverter&lt;/mainClass&gt;</span>
+<span class="line">                    &lt;/transformer&gt;</span>
+<span class="line">                &lt;/transformers&gt;</span>
+<span class="line">            &lt;/configuration&gt;</span>
+<span class="line">        &lt;/execution&gt;</span>
+<span class="line">    &lt;/executions&gt;</span>
+<span class="line">&lt;/plugin&gt;</span></code></pre>
+<h2>Usage</h2>
+<h3>Command Line Interface</h3>
+<pre><code class="language-bash"><span class="line"># Compile and package</span>
+<span class="line">mvn clean package</span>
+<span class="line"></span>
+<span class="line"># Run converter</span>
+<span class="line">java -jar target/java-static-blog-converter-1.0.0-SNAPSHOT.jar</span>
+<span class="line"></span>
+<span class="line"># Specify source and output directories</span>
+<span class="line">java -jar target/java-static-blog-converter-1.0.0-SNAPSHOT.jar build &lt;src&gt; -o &lt;dist&gt;</span></code></pre>
+<h3>Output Structure</h3>
+<p>The generated static website includes:</p>
+<ul>
+<li>HTML page files</li>
+<li>CSS style files  </li>
+<li>JavaScript scripts</li>
+<li>Static assets (images, fonts, etc.)</li>
+<li>Complete directory structure</li>
+</ul>
+<h2>Key Technical Points in Development</h2>
+<h3>1. Modular Design</h3>
+<p>Applied single responsibility principle, each class focuses on specific functionality:</p>
+<ul>
+<li><code>BlogConverter</code>: CLI interface and argument parsing</li>
+<li><code>StaticSiteGenerator</code>: Core business logic</li>
+<li><code>MarkdownConverter</code>: Dedicated Markdown conversion</li>
+<li><code>TemplateEngine</code>: Template processing and rendering</li>
+</ul>
+<h3>2. Exception Handling Strategy</h3>
+<pre><code class="language-java"><span class="line">public class BlogGenerationException extends Exception {</span>
+<span class="line">    // Custom exception handling with detailed error information</span>
+<span class="line">    // Support for exception chaining and error categorization</span>
+<span class="line">}</span></code></pre>
+<h3>3. Environment Configuration Support</h3>
+<ul>
+<li>Environment variable configuration support</li>
+<li>Multi-environment deployment support</li>
+<li>DeepSeek API Key integration</li>
+<li>Flexible configuration file management</li>
+</ul>
+<h3>4. Test Coverage</h3>
+<ul>
+<li>Complete unit testing</li>
+<li>Integration testing</li>
+<li>Multi-scenario test cases</li>
+<li>Automated testing workflow</li>
+</ul>
+<h2>Version Iteration and Optimization</h2>
+<p>The project has gone through multiple version iterations:</p>
+<ol>
+<li><strong>Initial Version</strong>: Basic Markdown to HTML functionality</li>
+<li><strong>Feature Enhancement</strong>: Added template engine and multi-format support</li>
+<li><strong>Security Hardening</strong>: Implemented XSS protection and input validation</li>
+<li><strong>Performance Optimization</strong>: Improved processing speed and memory usage</li>
+<li><strong>Test Enhancement</strong>: Increased test coverage and exception handling</li>
+</ol>
+<h2>Technical Insights and Reflections</h2>
+<h3>Architecture Design</h3>
+<ul>
+<li><strong>Modularity</strong>: Clear separation of responsibilities improved code maintainability</li>
+<li><strong>Extensibility</strong>: Plugin-based architecture supports feature extensions</li>
+<li><strong>Security</strong>: Comprehensive security design prevents various attacks</li>
+</ul>
+<h3>Maven Best Practices</h3>
+<ul>
+<li><strong>Dependency Management</strong>: Reasonable dependency version control</li>
+<li><strong>Build Optimization</strong>: Efficient compilation and packaging workflow</li>
+<li><strong>Plugin Usage</strong>: Shade plugin for single JAR deployment</li>
+</ul>
+<h3>Java 8 Feature Application</h3>
+<ul>
+<li><strong>Stream API</strong>: Improved collection processing efficiency</li>
+<li><strong>Lambda Expressions</strong>: Simplified code logic</li>
+<li><strong>Optional Class</strong>: Elegant null value handling</li>
+</ul>
+<h2>Use Cases</h2>
+<p>This static blog converter is suitable for:</p>
+<ol>
+<li><strong>Personal Blogs</strong>: Quickly set up personal tech blogs</li>
+<li><strong>Documentation Sites</strong>: Convert Markdown documents to websites</li>
+<li><strong>Content Management</strong>: Batch content processing and publishing</li>
+<li><strong>CI/CD Integration</strong>: Automated content publishing workflow</li>
+</ol>
+<h2>Future Optimization Directions</h2>
+<ol>
+<li><strong>Performance Enhancement</strong>: Parallel processing and caching mechanisms</li>
+<li><strong>Feature Expansion</strong>: Support for more document formats</li>
+<li><strong>UI Interface</strong>: Develop web management interface</li>
+<li><strong>Plugin System</strong>: Support for third-party plugin extensions</li>
+<li><strong>Cloud Deployment</strong>: Support for containerized deployment</li>
+</ol>
+<h2>Summary</h2>
+<p>This Java static blog converter project demonstrates how to build a feature-complete, secure, and reliable content processing tool using modern Java technology stack. Through reasonable architectural design, comprehensive test coverage, and continuous version iteration, the project has achieved production-ready quality standards.</p>
+<p>The project not only achieved expected technical goals but also accumulated valuable engineering practice experience during development, providing important references for subsequent project development.</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1636 @@
+[
+  {
+    "slug": "posts/2026/HELLO2",
+    "title": "HELLO2",
+    "date": "2026-02-02",
+    "type": "opendocument-text",
+    "ext": "odt",
+    "pdfPreview": true
+  },
+  {
+    "slug": "posts/2026/HELLO",
+    "title": "HELLO",
+    "date": "2026-02-02",
+    "type": "opendocument-text",
+    "ext": "odt",
+    "pdfPreview": true
+  },
+  {
+    "slug": "posts/2026/ai-assistant-rag",
+    "title": "Building a RAG-Powered AI Assistant for My Personal Website",
+    "date": "2026-01-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "rag",
+      "cloudflare-workers",
+      "javascript",
+      "llm"
+    ],
+    "description": "Building a RAG-powered AI assistant for my personal website using hybrid search, Cloudflare Workers, and OpenAI API."
+  },
+  {
+    "slug": "posts/2026/multi-language-translation-zh",
+    "title": "为博客添加多语言 AI 翻译功能",
+    "date": "2026-01-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "translation",
+      "cloudflare-workers",
+      "javascript",
+      "llm"
+    ],
+    "description": "使用 GPT-4o-mini 和 Cloudflare Workers 为静态博客添加实时 AI 翻译功能，支持 10 种语言，采用双层缓存策略。"
+  },
+  {
+    "slug": "posts/2026/ai-assistant-rag-zh",
+    "title": "为个人网站构建 RAG 驱动的 AI 助手",
+    "date": "2026-01-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "rag",
+      "cloudflare-workers",
+      "javascript",
+      "llm"
+    ],
+    "description": "使用混合搜索、Cloudflare Workers 和 OpenAI API 为个人网站构建 RAG 驱动的 AI 助手。"
+  },
+  {
+    "slug": "posts/2026/neuroevo-life",
+    "title": "From Conway's Game of Life to Digital Darwinism: Building a GPU-Accelerated Neuroevolutionary Ecosystem",
+    "date": "2026-01-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "evolutionary-computation",
+      "pytorch",
+      "artificial-life",
+      "gpu"
+    ],
+    "description": "Taking Conway's Game of Life to a new dimension: building a GPU-accelerated neuroevolutionary ecosystem with PyTorch to observe Darwinian competition among digital life forms."
+  },
+  {
+    "slug": "posts/2026/neuroevo-life-zh",
+    "title": "从康威生命游戏到数字达尔文主义：构建 GPU 加速的神经演化生态系统",
+    "date": "2026-01-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "evolutionary-computation",
+      "pytorch",
+      "artificial-life",
+      "gpu"
+    ],
+    "description": "将康威生命游戏推向新维度：构建基于 PyTorch 的 GPU 加速神经演化生态系统，观察数字生命的达尔文式竞争。"
+  },
+  {
+    "slug": "posts/2026/multi-language-translation",
+    "title": "Adding Multi-Language AI Translation to My Blog",
+    "date": "2026-01-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "translation",
+      "cloudflare-workers",
+      "javascript",
+      "llm"
+    ],
+    "description": "Adding real-time AI translation to a static blog with GPT-4o-mini and Cloudflare Workers, supporting 10 languages with dual-layer caching."
+  },
+  {
+    "slug": "posts/2026/geocoding-client",
+    "title": "Building a Production-Ready Geocoding Client: Coordinate Hacks, Connection Pools, and Rate Limiting",
+    "date": "2026-01-26",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "python",
+      "backend",
+      "geospatial"
+    ],
+    "description": "A deep dive into coordinate transformation (WGS84/GCJ02), connection pooling, rate limiting with token bucket, and retry strategies for geocoding APIs."
+  },
+  {
+    "slug": "posts/2026/hybrid-search-static-blog-zh",
+    "title": "静态博客的混合搜索方案：BM25 + 向量检索 + Cloudflare Workers",
+    "date": "2026-01-26",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "rag",
+      "search",
+      "cloudflare",
+      "javascript"
+    ],
+    "description": "为静态博客构建生产级混合搜索 - 结合 BM25 关键词搜索与 OpenAI 向量搜索，无需后端服务器。"
+  },
+  {
+    "slug": "posts/2026/hybrid-search-static-blog",
+    "title": "Building Hybrid Search for Static Blogs: BM25 + Vector Search with Cloudflare Workers",
+    "date": "2026-01-26",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "rag",
+      "search",
+      "cloudflare",
+      "javascript"
+    ],
+    "description": "Building a production-ready hybrid search for static blogs - combining BM25 keyword search with OpenAI embeddings, all without a backend server."
+  },
+  {
+    "slug": "posts/notebooks/R_010_numpy_basics",
+    "title": "NumPy Basics (Reproducible)",
+    "date": "2025-11-30",
+    "type": "notebook",
+    "ext": "ipynb"
+  },
+  {
+    "slug": "posts/notebooks/R_001_sanity_check",
+    "title": "Environment Sanity Check",
+    "date": "2025-11-30",
+    "type": "notebook",
+    "ext": "ipynb",
+    "description": "Environment Sanity Check"
+  },
+  {
+    "slug": "posts/notebooks/R_002_minimal_retrieval",
+    "title": "Minimal Retrieval (TF-IDF)",
+    "date": "2025-11-30",
+    "type": "notebook",
+    "ext": "ipynb",
+    "description": "Minimal Retrieval (TF-IDF)"
+  },
+  {
+    "slug": "posts/notebooks/R_020_pandas_basics",
+    "title": "Pandas Basics: Core Objects & Common Operations",
+    "date": "2025-11-30",
+    "type": "notebook",
+    "ext": "ipynb"
+  },
+  {
+    "slug": "posts/legacy/ai-assisted-development-lessons-learned-zh",
+    "title": "我的AI编程伙伴差点让项目翻车：一个惨痛的教训",
+    "date": "2025-07-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "软件开发",
+      "架构设计",
+      "最佳实践",
+      "asyncio",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/ai-assisted-development-lessons-learned",
+    "title": "My AI Coding Partner Almost Drove My Project Off a Cliff: A Cautionary Tale",
+    "date": "2025-07-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "software development",
+      "architecture",
+      "best practices",
+      "asyncio",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/python-mcp-server-astro-automation-zh",
+    "title": "用Python脚本快速实现MCP服务器：Astro博客自动化实践",
+    "date": "2025-07-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops",
+      "mcp",
+      "python",
+      "astro",
+      "自动化",
+      "fastmcp"
+    ]
+  },
+  {
+    "slug": "posts/legacy/python-mcp-server-astro-automation-en",
+    "title": "Automating an Astro Blog with a Python MCP Server: A Hands-On Guide",
+    "date": "2025-07-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops",
+      "mcp",
+      "python",
+      "astro",
+      "automation",
+      "fastmcp"
+    ]
+  },
+  {
+    "slug": "posts/legacy/echodraft-project-plan-the-intelligent-content-ref",
+    "title": "EchoDraft Project Plan: The Intelligent Content Refiner for Audio and Video",
+    "date": "2025-07-25",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/autogen-multi-agent-system-practice-reflection-fro",
+    "title": "AutoGen Multi-Agent System Practice Reflection From Heavy-Weight Contextual Programming to Lightweight AI Assistant",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/claude-code-pricing-comparison-en",
+    "title": "Claude Code Pricing Analysis: Subscription vs API - How to Choose?",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "claude",
+      "ai",
+      "pricing models",
+      "technology selection",
+      "cost analysis"
+    ]
+  },
+  {
+    "slug": "posts/legacy/chatgpt-claude-code-混合开发工作流-一种兼顾规划-敏捷与质量的ai编程新范式",
+    "title": "ChatGPT + Claude Code 混合开发工作流：一种兼顾规划、敏捷与质量的AI编程新范式",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/a-project-management-paradigm-revolution-progressi",
+    "title": "A Project Management Paradigm Revolution Progressive Development and User-Participatory AI Project Implementation Strategy",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/york-university-aew-svtc-policy-guide",
+    "title": "解构约克大学双轨制：学术参与与签证合规深度指南",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/york-university-aew-svtc-policy-guide-en",
+    "title": "Deconstructing the University of York's Dual-Track System: An In-depth Guide to Academic Engagement and Visa Compliance",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/项目管理的范式革命-渐进式开发与用户参与的ai项目实施策略",
+    "title": "项目管理的范式革命：渐进式开发与用户参与的AI项目实施策略",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/autogen多智能体实践反思-从-上下文编程-的重装上阵到轻量级ai助手的回归",
+    "title": "AutoGen多智能体实践反思：从\"上下文编程\"的重装上阵到轻量级AI助手的回归",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/claude-code-pricing-comparison",
+    "title": "Claude Code付费模式深度解析：订阅制 vs API 如何选择？",
+    "date": "2025-07-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "claude",
+      "ai",
+      "付费模式",
+      "技术选型",
+      "成本分析"
+    ]
+  },
+  {
+    "slug": "posts/legacy/结合-claude-code-graphiti-和-neo4j-构建-agent-长记忆系统",
+    "title": "结合 Claude Code、Graphiti 和 Neo4j 构建 Agent 长记忆系统",
+    "date": "2025-07-23",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/building-agent-long-term-memory-system-with-claude",
+    "title": "Building Agent Long-term Memory System with Claude Code, Graphiti, and Neo4j",
+    "date": "2025-07-23",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/studentcrud-swift-swiftui-macos-student-management",
+    "title": "StudentCRUD：基于Swift和SwiftUI的macOS学生管理系统开发实践",
+    "date": "2025-07-23",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/java静态博客转换器开发实践与技术总结",
+    "title": "Java静态博客转换器开发实践与技术总结",
+    "date": "2025-07-22",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/java-static-blog-converter-development-practice-an",
+    "title": "Java Static Blog Converter Development Practice and Technical Summary",
+    "date": "2025-07-22",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/todo-list全栈应用开发实践-前后端分离架构设计",
+    "title": "Todo List全栈应用开发实践：前后端分离架构设计",
+    "date": "2025-07-21",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/webgl-3d坦克大战游戏开发实践-现代webgl技术应用",
+    "title": "WebGL 3D坦克大战游戏开发实践：现代WebGL技术应用",
+    "date": "2025-07-21",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/full-stack-todo-list-application-development-pract",
+    "title": "Full-Stack Todo List Application Development Practice: Front-End and Back-End Separation Architecture",
+    "date": "2025-07-21",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/webgl-3d-tank-battle-game-development-practice-mod",
+    "title": "WebGL 3D Tank Battle Game Development Practice: Modern WebGL Technology Application",
+    "date": "2025-07-21",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/html5-canvas-classic-tank-battle-game-development",
+    "title": "HTML5 Canvas Classic Tank Battle Game Development: Single-File Game Architecture Practice",
+    "date": "2025-07-20",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/html5-canvas经典坦克大战游戏开发-单文件游戏架构实践",
+    "title": "HTML5 Canvas经典坦克大战游戏开发：单文件游戏架构实践",
+    "date": "2025-07-20",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/项目管理基础知识学习笔记l5",
+    "title": "项目管理基础知识（第五课）学习笔记：如何制定和管理项目进度",
+    "date": "2025-06-13",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/项目管理基础知识学习笔记l4",
+    "title": "项目管理基础知识学习笔记L4",
+    "date": "2025-06-12",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/项目管理基础知识学习笔记l3",
+    "title": "项目管理基础知识学习笔记L3",
+    "date": "2025-06-11",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/项目管理基础知识学习笔记l2",
+    "title": "项目管理基础知识学习笔记L2",
+    "date": "2025-06-10",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/项目管理基础知识学习笔记l1",
+    "title": "项目管理基础知识学习笔记L1",
+    "date": "2025-06-09",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/02-cuda-开发必备的-cc-语法",
+    "title": "CUDA 开发必备的 C/C++ 语法",
+    "date": "2025-05-08",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/01-扬帆起航-深度学习工程师的cuda远征",
+    "title": "扬帆起航：深度学习工程师的cuda远征",
+    "date": "2025-05-07",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/00-windows-11-下两种-cuda-开发环境配置-wsl-本地工具链",
+    "title": "Windows 11 下两种 CUDA 开发环境配置（wsl & 本地工具链）",
+    "date": "2025-05-06",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/2-java-rag-开发环境准备",
+    "title": "Java RAG 开发环境准备",
+    "date": "2025-04-30",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/1-使用-spring-ai-构建-rag-搜索服务设计",
+    "title": "使用 Spring AI 构建 RAG 搜索服务设计",
+    "date": "2025-04-29",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/多线程锁实现-原理剖析与工程实践指南",
+    "title": "多线程锁实现：原理剖析与工程实践指南",
+    "date": "2025-04-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/openai-o3-与-o4-mini-模型详解",
+    "title": "OpenAI O3 与 O4-mini 模型详解",
+    "date": "2025-04-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/astro-官方模版集成-katex-实现-latex-公式渲染",
+    "title": "Astro 官方模版集成 KaTeX 实现 LaTeX 公式渲染",
+    "date": "2025-04-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/神经网络与深度学习入门书籍整理",
+    "title": "神经网络与深度学习入门书籍整理",
+    "date": "2025-04-22",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/2025年主流大模型厂商及其代表模型一览",
+    "title": "2025年主流大模型厂商大模型一览",
+    "date": "2025-04-22",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/openai-deepseek模型横向对比",
+    "title": "OpenAI、Deepseek模型横向对比",
+    "date": "2025-04-21",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/使用paddlepaddle2复现deeplabv3-1",
+    "title": "使用 PaddlePaddle 2.x 复现 DeepLabV3+（1）：从构建到训练",
+    "date": "2025-04-03",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/使用-astro-构建并部署个人博客到-github-pages-全流程指南",
+    "title": "使用 Astro 构建并部署个人博客到 GitHub Pages全流程指南",
+    "date": "2025-04-02",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/从传统图像处理到深度学习车牌识别系统演进实践",
+    "title": "从传统图像处理到深度学习：车牌识别系统演进实践",
+    "date": "2025-04-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/图像增强在ocr中的实战作用",
+    "title": "图像增强在 OCR 中的实战作用",
+    "date": "2025-04-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/理解和使用字符实体-从基础到实践",
+    "title": "理解和使用字符实体：从基础到实践",
+    "date": "2025-03-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "frontend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/结合rpg-maker与openai-api-打造创意十足的动态角色扮演游戏",
+    "title": "结合RPG Maker与OpenAI API，打造创意十足的动态角色扮演游戏",
+    "date": "2025-02-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/statistics-foundations-zh",
+    "title": "统计推断基础：从数据到决策",
+    "date": "2025-01-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/claude-automation-platform-en",
+    "title": "Technical Research on Using Claude for Automated Updates to Notion, Obsidian, and Heptabase",
+    "date": "2025-01-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/claude-automation-platform-zh",
+    "title": "使用 Claude 自动更新知识管理平台的技术方案调研",
+    "date": "2025-01-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/probability-deep-dive-en",
+    "title": "A Deeper Dive into Probability: From Convergence to Core Concepts",
+    "date": "2025-01-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/probability-deep-dive-zh",
+    "title": "深入探索概率论：从收敛性到核心概念",
+    "date": "2025-01-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/rag-系统中的敏感词防护策略-从前置检测到即时拦截的全链路实践",
+    "title": "RAG 系统中的敏感词防护策略：从前置检测到即时拦截的全链路实践",
+    "date": "2024-10-19",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/微调-用领域数据提升大模型任务表现",
+    "title": "微调：用领域数据提升大模型任务表现",
+    "date": "2024-10-14",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/多语言智能客服术语翻译解决方案",
+    "title": "多语言智能客服术语翻译解决方案",
+    "date": "2024-10-11",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/一次微调训练失败案例解析-从-qwen2-5-的损失曲线看问题与优化",
+    "title": "一次微调训练失败案例解析：从 Qwen2.5 的损失曲线看问题与优化",
+    "date": "2024-10-09",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/大语言模型是如何-思考-的-从分词到推理的全过程揭秘",
+    "title": "大语言模型是如何“思考”的：从分词到推理的全过程揭秘",
+    "date": "2024-10-07",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/复杂结构文档解析-keynote-转换与自定义-reader-双路径实践",
+    "title": "复杂结构文档解析：Keynote 转换与自定义 Reader 双路径实践",
+    "date": "2024-10-06",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/法律咨询场景中的大模型微调前评估",
+    "title": "法律咨询场景中的大模型微调前评估",
+    "date": "2024-10-05",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/构建多智能体营销系统-从角色划分到调度协同的实践",
+    "title": "构建多智能体营销系统：从角色划分到调度协同的实践",
+    "date": "2024-10-03",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/防范-ai-幻觉-在医疗-法律与教育场景中的应用安全实践",
+    "title": "防范 AI 幻觉：在医疗、法律与教育场景中的应用安全实践",
+    "date": "2024-10-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/使用r-tree实现2d点去重与可视化优化",
+    "title": "使用R-Tree实现2D点去重与可视化优化",
+    "date": "2024-09-30",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/构建闭环智能会议助手-从语音转写到语音摘要播报的技术实践",
+    "title": "构建闭环智能会议助手：从语音转写到语音摘要播报的技术实践",
+    "date": "2024-07-21",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/python高德定位实践-逆地理编码与顺地理编码详解",
+    "title": "Python高德定位实践：逆地理编码与顺地理编码详解",
+    "date": "2024-06-23",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/结合原理与实践-全面解析elasticsearch中常见版本冲突问题及工程化解决方案",
+    "title": "结合原理与实践，全面解析Elasticsearch中常见版本冲突问题及工程化解决方案",
+    "date": "2024-05-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/打造具备行动力的智能客服-用-agent-让大模型接入真实系统",
+    "title": "打造具备行动力的智能客服：用 Agent 让大模型接入真实系统",
+    "date": "2024-03-11",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/01-numpy-basics",
+    "title": "NumPy 基础与实战入门",
+    "date": "2024-01-30",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "numpy",
+      "python",
+      "data"
+    ]
+  },
+  {
+    "slug": "posts/legacy/hyperparameter-tuning-guide-en",
+    "title": "A Comprehensive Guide to Hyperparameter Tuning in Machine Learning: From Theory to Practice",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "hyperparameter tuning",
+      "python",
+      "pytorch",
+      "optuna",
+      "scikit-learn"
+    ]
+  },
+  {
+    "slug": "posts/legacy/todo-list-multi-user-application-development-pract",
+    "title": "Todo List Multi-User Application Development Practice: Complete Upgrade from Single-User to Cross-Platform Architecture",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/mcp-blog-automation",
+    "title": "MCP-Blog：一键搞定 Astro 博客发布，告别繁琐流程",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops",
+      "mcp",
+      "astro",
+      "自动化",
+      "github pages",
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/chatgpt-claude-code-hybrid-development-workflow-a",
+    "title": "ChatGPT + Claude Code Hybrid Development Workflow: A New AI Programming Paradigm Balancing Planning, Agility, and Quality",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "manage"
+    ]
+  },
+  {
+    "slug": "posts/legacy/claude-max-vs-chatgpt-pro-2025-the-ultimate-showdo",
+    "title": "2025 Claude Max / Opus 4 vs. ChatGPT Plus / o-Series: The Ultimate Comparison Guide",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/nighthawks-v2-graphiti-digital-immortality-en",
+    "title": "Beyond Death: How Nighthawks v2.0 Achieves Digital Life Immortality Through Knowledge Graphs",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "knowledge graph",
+      "graphiti",
+      "digital life",
+      "system architecture",
+      "mcp",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/echodraft项目计划-音视频内容智能提炼利器",
+    "title": "EchoDraft项目计划：音视频内容智能提炼利器",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/data-augmentation-underfitting-overfitting-en",
+    "title": "Image Classification: Data Scarcity, Augmentation, and Underfitting/Overfitting",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "image classification",
+      "data augmentation",
+      "overfitting",
+      "underfitting",
+      "pytorch"
+    ]
+  },
+  {
+    "slug": "posts/legacy/supervised-vs-unsupervised-learning-zh",
+    "title": "监督学习 vs 非监督学习：概念、算法与实践",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "机器学习",
+      "监督学习",
+      "非监督学习",
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/connect-claude-code-to-notion-mcp-with-a-single-command",
+    "title": "Connect Claude Code to Notion MCP with a Single Command",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "claude",
+      "notion",
+      "api",
+      "automation",
+      "cli",
+      "mcp"
+    ]
+  },
+  {
+    "slug": "posts/legacy/classification-evaluation-metrics-deep-dive-en",
+    "title": "The Ultimate Guide to Classification Model Evaluation Metrics",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "classification",
+      "metrics",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/todo-list多用户应用开发实践-从单用户到跨平台架构的完整升级之路",
+    "title": "Todo List多用户应用开发实践：从单用户到跨平台架构的完整升级之路",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/使用一条命令把claude-code接入notion-mcp",
+    "title": "使用一条命令把 Claude Code 接入 Notion MCP",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "claude",
+      "notion",
+      "api",
+      "automation",
+      "cli",
+      "mcp"
+    ]
+  },
+  {
+    "slug": "posts/legacy/hyperparameter-tuning-guide-zh",
+    "title": "机器学习超参数调优：从理论到实践的全面指南",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "hyperparameter tuning",
+      "python",
+      "pytorch",
+      "optuna",
+      "scikit-learn"
+    ]
+  },
+  {
+    "slug": "posts/legacy/astro-news-bot-technical-practice",
+    "title": "Astro-News-Bot: Building an AI-Driven Automated News Aggregation and Publishing System",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/building-intelligent-content-management-pipeline-f",
+    "title": "Building an Intelligent Content Management Pipeline from Obsidian to Notion: A Three-Layer Architecture for Knowledge Automation",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/构建obsidian到notion的智能内容管理流水线",
+    "title": "构建Obsidian到Notion的智能内容管理流水线：三层架构实现知识自动化处理",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/从404到200记一次astrogithubpages样式丢失问题的深度排查",
+    "title": "从 404 到 200：记一次 Astro + GitHub Pages 样式丢失问题的深度排查",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/from-404-to-200-deep-dive-into-solving-missing-css",
+    "title": "From 404 to 200: A Deep Dive into Solving Missing CSS on Astro with GitHub Pages",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/极空间-nas-部署-tailscale-指南",
+    "title": "极空间 NAS 部署 Tailscale 指南",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "快速笔记"
+    ]
+  },
+  {
+    "slug": "posts/legacy/regression-evaluation-metrics-deep-dive-en",
+    "title": "A Deep Dive into Regression Evaluation Metrics: From MAE to R², Choosing the Right Tool for the Job",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "data science",
+      "regression",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/classification-evaluation-metrics-deep-dive",
+    "title": "分类模型评估指标权威指南：从混淆矩阵到AUC与F1分数",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "classification",
+      "metrics",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/rokid-vs-itourtranslator-simultaneous-interpretation-test",
+    "title": "AI同传眼镜 vs. 专业翻译App：真实场景下的效果对决",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "simultaneous interpretation",
+      "translation",
+      "rokid",
+      "itourtranslator",
+      "ar"
+    ]
+  },
+  {
+    "slug": "posts/legacy/full-time-student-efficient-learning-guide",
+    "title": "通过AI助手、笔记工具与番茄工作法进行高效学习",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/ab-testing-guide-for-machine-learning-en",
+    "title": "The Ultimate Guide to A/B Testing: From Statistical Principles to ML Applications",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "a/b testing",
+      "machine learning",
+      "statistics",
+      "data science"
+    ]
+  },
+  {
+    "slug": "posts/legacy/supervised-vs-unsupervised-learning-en",
+    "title": "Supervised vs. Unsupervised Learning: Concepts, Algorithms, and Practice",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "supervised learning",
+      "unsupervised learning",
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/feature-normalization-deep-dive",
+    "title": "特征归一化完整指南：从概念到代码的全面解析",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "data science",
+      "python",
+      "scikit-learn",
+      "feature engineering"
+    ]
+  },
+  {
+    "slug": "posts/legacy/mcp-blog-automation-en",
+    "title": "MCP-Blog: One-Command Astro Blog Deployment to GitHub Pages",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops",
+      "mcp",
+      "astro",
+      "automation",
+      "github pages",
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/data-augmentation-underfitting-overfitting-zh",
+    "title": "图像分类：数据稀缺、样本增强与欠拟合/过拟合",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "图像分类",
+      "数据增强",
+      "过拟合",
+      "欠拟合",
+      "pytorch"
+    ]
+  },
+  {
+    "slug": "posts/legacy/ab-testing-guide-for-machine-learning",
+    "title": "A/B测试核心指南：从统计原理到机器学习应用",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "a/b testing",
+      "machine learning",
+      "statistics",
+      "data science"
+    ]
+  },
+  {
+    "slug": "posts/legacy/project-nighthawks-ai-powered-task-scheduler-en",
+    "title": "Unveiling Project Nighthawks: Building the Next-Generation AI-Powered Task Scheduler",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "python",
+      "fastapi",
+      "system design",
+      "devops",
+      "openai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/astro-news-bot-技术实践",
+    "title": "Astro-News-Bot：构建 AI 驱动的自动化新闻聚合与发布系统",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/mcp-server-development-reflection",
+    "title": "从混乱到清晰：一次MCP服务器开发的反思与总结",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops",
+      "mcp",
+      "python",
+      "fastmcp",
+      "自动化",
+      "博客"
+    ]
+  },
+  {
+    "slug": "posts/legacy/project-nighthawk-vision-and-architecture-zh",
+    "title": "Nighthawk项目完整解析：一个自我进化Agent OS的宏大愿景与技术核心",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "agent os",
+      "nighthawk",
+      "技术方案",
+      "自我完善",
+      "架构",
+      "知识图谱"
+    ]
+  },
+  {
+    "slug": "posts/legacy/nighthawks-v2-graphiti-digital-immortality",
+    "title": "超越死亡的AI：Nighthawks v2.0如何用知识图谱实现数字生命的永恒传承",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "knowledge graph",
+      "graphiti",
+      "digital life",
+      "system architecture",
+      "mcp",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/project-nighthawks-ai-powered-task-scheduler",
+    "title": "Nighthawks项目揭秘：构建下一代AI智能任务调度系统",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "python",
+      "fastapi",
+      "system design",
+      "devops",
+      "openai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/regression-evaluation-metrics-deep-dive",
+    "title": "回归模型评估指标深度解析：从MAE到R²，选对指标才能优化模型",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "machine learning",
+      "data science",
+      "regression",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/project-nighthawk-vision-and-architecture",
+    "title": "Project Nighthawk Complete Guide: A Self-Evolving Agent OS's Grand Vision and Technical Core",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai",
+      "ai",
+      "agent os",
+      "nighthawk",
+      "technical deep dive",
+      "self-improvement",
+      "architecture",
+      "knowledge graph"
+    ]
+  },
+  {
+    "slug": "posts/legacy/gemini-cli-graphiti-mcp-integration",
+    "title": "Gemini CLI 对接 Graphiti MCP：实战指南",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/01-matplotlib-basics",
+    "title": "matplotlib学习笔记",
+    "date": "2024-01-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "matplotlib"
+    ]
+  },
+  {
+    "slug": "posts/legacy/腾讯-高德和百度地图坐标系转换详解与工程实践",
+    "title": "腾讯、高德和百度地图坐标系转换详解与工程实践",
+    "date": "2023-04-28",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "backend"
+    ]
+  },
+  {
+    "slug": "posts/legacy/01-数据预处理",
+    "title": "机器学习中的数据预处理",
+    "date": "2023-04-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "ai"
+    ]
+  },
+  {
+    "slug": "posts/legacy/01-pandas-basics",
+    "title": "Pandas Basics: Core Objects & Common Operations",
+    "date": "2023-04-23",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "pandas",
+      "data-analysis",
+      "python"
+    ]
+  },
+  {
+    "slug": "posts/legacy/一次状态同步缺陷引发的技术反思",
+    "title": "一次状态同步缺陷引发的技术反思",
+    "date": "2022-04-25",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/电商搜索店铺评分加权实践",
+    "title": "电商搜索店铺评分加权实践",
+    "date": "2022-04-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/cassandra索引重建实践",
+    "title": "Cassandra 索引重建实践",
+    "date": "2022-04-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/python应用日志采集到elk排查实录",
+    "title": "Python应用日志采集到ELK排查实录",
+    "date": "2022-03-25",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/sql视图优化api查询性能实战",
+    "title": "SQL视图优化API查询性能实战",
+    "date": "2022-03-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/应用服务接口性能优化实践",
+    "title": "应用服务接口性能优化实践",
+    "date": "2022-03-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "service_governance"
+    ]
+  },
+  {
+    "slug": "posts/legacy/从离线部署到k8s流水线发布-一线工程师的实战总结",
+    "title": "从离线部署到K8s流水线发布：一线工程师的实战总结",
+    "date": "2022-03-10",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/cassandra-数据清理实战",
+    "title": "Cassandra 数据清理实战",
+    "date": "2022-02-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/基于-cassandra-solrcloud-zookeeper-kafka-和-python-微服",
+    "title": "基于 Cassandra、SolrCloud、Zookeeper、Kafka 和 Python 微服务的搜索系统搭建实践",
+    "date": "2022-02-14",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/面向内容检索平台的预发布环境搭建",
+    "title": "面向内容检索平台的预发布环境搭建",
+    "date": "2022-02-14",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/基于摘要认证的第三方接口调用方案",
+    "title": "基于摘要认证的第三方接口调用方案",
+    "date": "2022-01-05",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "service_governance"
+    ]
+  },
+  {
+    "slug": "posts/legacy/积分商城用户数据加密改造实战笔记",
+    "title": "积分商城用户数据加密改造实战技术博客",
+    "date": "2021-11-19",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "service_governance"
+    ]
+  },
+  {
+    "slug": "posts/legacy/电商商品媒资同步服务迁移至-apollo-配置中心实践",
+    "title": "电商商品媒资同步服务迁移至 Apollo 配置中心实践",
+    "date": "2021-11-12",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "service_governance"
+    ]
+  },
+  {
+    "slug": "posts/legacy/批量行政区代码更新脚本实战笔记",
+    "title": "批量行政区代码更新脚本实战笔记",
+    "date": "2021-10-12",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  },
+  {
+    "slug": "posts/legacy/批量处理证照图片的实战笔记-加水印-上传与批量sql生成",
+    "title": "批量处理证照图片的实战笔记：加水印、上传与批量SQL生成",
+    "date": "2021-01-25",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "devops"
+    ]
+  },
+  {
+    "slug": "posts/legacy/基于地理保护区与多因子排序的系统设计实践",
+    "title": "基于地理保护区与多因子排序的系统设计实践",
+    "date": "2020-11-27",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/01-行列式和七个性质",
+    "title": "线性代数学习笔记1：行列式和七个性质",
+    "date": "2020-10-01",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "math"
+    ]
+  },
+  {
+    "slug": "posts/legacy/内容检索平台的-solr-监控实践与可观测性优化",
+    "title": "内容检索平台的 Solr 监控实践与可观测性优化",
+    "date": "2019-10-24",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "search"
+    ]
+  },
+  {
+    "slug": "posts/legacy/深入理解git子模块更新失败问题与java环境排查实践",
+    "title": "深入理解Git子模块更新失败问题与Java环境排查实践",
+    "date": "2019-03-05",
+    "type": "markdown",
+    "ext": "md",
+    "tags": [
+      "general_notes"
+    ]
+  }
+]

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini CLI 对接 Graphiti MCP：实战指南</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; line-height: 1.7; color: #333; }
+        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.4rem; margin-top: 2rem; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        code { font-family: Menlo, Monaco, monospace; font-size: 0.9em; }
+        p code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        img { max-width: 100%; }
+        blockquote { border-left: 3px solid #ddd; margin-left: 0; padding-left: 1rem; color: #666; }
+        ul { padding-left: 1.5rem; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+        a { color: #1a8917; }
+    </style>
+</head>
+<body>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai]
+legacy: true</h2>
+<h1>Gemini CLI 对接 Graphiti MCP：实战指南</h1>
+<p>在开始配置之前，请确保完成以下准备工作：</p>
+<ol>
+<li><p><strong>安装 Gemini CLI</strong>：</p>
+<blockquote><code># 通过 Homebrew (macOS)</code><br>
+<code>brew install gemini</code><br>
+<code># 或通过 npm</code><br>
+<code>npm install -g @gemini-cli/core</code></blockquote></li>
+<li><p><strong>获取并启动 Graphiti MCP Server</strong>：
+您可以选择以下任一方式启动 Graphiti 服务。</p>
+<ul>
+<li><strong>Docker (推荐)</strong>：<blockquote><code># 在 Graphiti 项目根目录</code><br>
+<code>docker-compose up -d</code></blockquote></li>
+<li><strong>源码启动</strong>：<blockquote><code># 确保已安装 uv</code><br>
+<code>uv run graphiti_mcp_server.py --transport sse --model gpt-4o</code></blockquote></li>
+</ul>
+</li>
+<li><p><strong>配置环境变量</strong>：
+Graphiti 需要访问 OpenAI API 和 Neo4j 数据库，请确保以下环境变量已正确设置：</p>
+<blockquote><code>export OPENAI_API_KEY=&quot;sk-...&quot;</code><br>
+<code>export NEO4J_PASSWORD=&quot;your-neo4j-password&quot;</code></blockquote></li>
+<li><p><strong>确认服务端口</strong>：
+启动后，Graphiti 默认在 <code>localhost:8000</code> 暴露服务。您可以通过访问以下端点来确认服务是否正常运行：</p>
+<ul>
+<li><strong>SSE 端点</strong>: <code>http://localhost:8000/sse</code></li>
+<li><strong>WebSocket 端点</strong>: <code>http://localhost:8000/ws</code></li>
+</ul>
+</li>
+</ol>
+<h2>3. 配置方法 A：Gemini CLI 本地启动 Graphiti (stdio)</h2>
+<p>这种方法让 Gemini CLI 托管 Graphiti 进程，适合快速本地集成。</p>
+<p>打开 Gemini CLI 的配置文件 <code>~/.gemini/settings.json</code>，并添加以下 <code>mcpServers</code> 配置：</p>
+<blockquote><code>{</code><br>
+<code>  &quot;mcpServers&quot;: {</code><br>
+<code>    &quot;graphiti&quot;: {</code><br>
+<code>      &quot;command&quot;: &quot;uv&quot;,</code><br>
+<code>      &quot;args&quot;: [&quot;run&quot;, &quot;graphiti_mcp_server.py&quot;, &quot;--model&quot;, &quot;gpt-4o&quot;, &quot;--transport&quot;, &quot;stdio&quot;],</code><br>
+<code>      &quot;cwd&quot;: &quot;/ABSOLUTE/PATH/TO/graphiti-mcp-server&quot;,</code><br>
+<code>      &quot;env&quot;: {</code><br>
+<code>        &quot;OPENAI_API_KEY&quot;: &quot;sk-...&quot;,</code><br>
+<code>        &quot;NEO4J_PASSWORD&quot;: &quot;...&quot;</code><br>
+<code>      },</code><br>
+<code>      &quot;trust&quot;: true</code><br>
+<code>    }</code><br>
+<code>  }</code><br>
+<code>}</code></blockquote><ul>
+<li><strong><code>command</code> &amp; <code>args</code></strong>: 定义了启动 Graphiti 服务的命令。</li>
+<li><strong><code>cwd</code></strong>: <strong>必须</strong>填写 Graphiti MCP Server 项目的<strong>绝对路径</strong>。</li>
+<li><strong><code>env</code></strong>: 用于传递必要的环境变量。</li>
+<li><strong>优点</strong>: 配置简单，零端口冲突，无需额外网络设置。</li>
+</ul>
+<p>配置完成后，重新打开一个新的 <code>gemini</code> 终端。输入 <code>/mcp</code> 命令，如果看到 <code>graphiti</code> 服务已连接，则表示配置成功。</p>
+<h2>4. 配置方法 B：Gemini CLI 连接常驻 Graphiti 服务 (SSE)</h2>
+<p>如果 Graphiti 已经作为一个独立服务在运行，可以使用此方法连接。</p>
+<p>同样，在 <code>~/.gemini/settings.json</code> 中添加配置：</p>
+<blockquote><code>{</code><br>
+<code>  &quot;mcpServers&quot;: {</code><br>
+<code>    &quot;graphiti&quot;: {</code><br>
+<code>      &quot;url&quot;: &quot;http://127.0.0.1:8000/sse&quot;,</code><br>
+<code>      &quot;timeout&quot;: 8000,</code><br>
+<code>      &quot;trust&quot;: true</code><br>
+<code>    }</code><br>
+<code>  }</code><br>
+<code>}</code></blockquote><ul>
+<li><strong><code>url</code></strong>: 这是关键字段。请确保使用 <code>url</code> 而不是 <code>httpUrl</code>，这会告诉 Gemini CLI 使用 <code>GET</code> 方法和 <code>text/event-stream</code> 类型进行连接，以兼容 SSE。</li>
+<li><strong><code>timeout</code></strong>: 建议设置一个较长的超时时间（如 8000ms），以适应可能存在的网络延迟。</li>
+<li><strong><code>headers</code></strong>: 如果您的远程服务需要认证，可以在此添加 <code>Authorization</code> 头，例如：<code>&quot;headers&quot;: { &quot;Authorization&quot;: &quot;Bearer your-token&quot; }</code>。</li>
+</ul>
+<p><strong>验证连接</strong>:</p>
+<ol>
+<li><p><strong>测试 SSE 流</strong>:</p>
+<p><code>curl -N http://127.0.0.1:8000/sse | head</code></p><p>如果能看到持续输出的心跳事件（如 <code>event: ping</code>），说明 SSE 服务正常。</p>
+</li>
+<li><p><strong>在 Gemini CLI 中检查</strong>:
+启动 <code>gemini</code>，然后运行 <code>/mcp desc graphiti</code>。如果成功列出了 Graphiti 提供的工具列表，则连接成功。</p>
+</li>
+</ol>
+<h2>5. 常见错误 &amp; 解决方案</h2>
+<p><img src="__TABLE_-714d080__" alt="Table"></p><h2>6. 快速排查脚本</h2>
+<p>当遇到问题时，以下命令可以帮助您快速定位：</p>
+<ol>
+<li><p><strong>检查 Graphiti 进程和端口占用</strong>:</p>
+<blockquote><code># 查看哪个进程在使用 8000 端口</code><br>
+<code>lsof -Pni :8000</code></blockquote></li>
+<li><p><strong>测试 SSE 连通性</strong>:</p>
+<blockquote><code># 持续监听 SSE 事件流</code><br>
+<code>curl -N http://127.0.0.1:8000/sse | head</code></blockquote></li>
+<li><p><strong>开启 Gemini CLI 调试模式</strong>:</p>
+<blockquote><code># 启动时附加 --debug 参数，查看详细日志</code><br>
+<code>gemini --debug</code></blockquote></li>
+</ol>
+<h2>7. 一句话总结</h2>
+<p>整个对接过程的核心可以概括为：<strong>启动 Graphiti 服务 → 在 <code>~/.gemini/settings.json</code> 中正确填写 <code>url</code> 或 <code>command</code> → 重启 Gemini CLI</strong>。完成这三步，您就可以在终端中无缝使用 Graphiti 提供的强大工具集了。</p>
+
+</body>
+</html>

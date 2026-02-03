@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统计推断基础：从数据到决策 | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2025-01-24
+tags: [ai]
+legacy: true</h2>
+<h1>统计推断基础：从数据到决策</h1>
+<p>典型的统计分析遵循以下步骤：</p>
+<ol>
+<li><strong>定义问题：</strong> 我们想要揭示的具体真相是什么？（例如，&quot;新药的真实有效率是多少？&quot;）</li>
+<li><strong>规划数据收集：</strong> 我们将如何收集相关数据？（例如，设计临床试验或调查。）</li>
+<li><strong>分析数据：</strong> 使用统计模型分析数据并做出推断。</li>
+<li><strong>评估不确定性：</strong> 量化我们推断的可靠程度。</li>
+</ol>
+<p>&quot;模型&quot;的概念在这里至关重要。模型是关于产生我们数据的随机过程的一组假设。如果我们模型的假设有缺陷，我们的结论就会不可靠。正如一位教授恰当地说道：<em>&quot;如果我收集班上所有学生的鞋码来预测他们的 GPA，这几乎是不可能的。&quot;</em> 这突出了一个基本规则：数据必须与问题相关。再复杂的分析也无法从不相关的数据中提取有意义的答案。</p>
+<p>统计结论的可靠性也在很大程度上取决于样本量。考虑一个声称新的 250 美元跑鞋显著提高性能的说法。如果《纽约时报》的数据集包含 50 万次跑步时间，涵盖 50 种不同的鞋子，并且始终将这款鞋排名第一，证据就很有说服力。庞大的数据量本身就说明了问题。相反，如果只有少数跑者穿这款鞋跑得更快，很容易就是巧合。大样本为我们的发现提供了可信度，而小样本需要更谨慎的解释。</p>
+<h2>用伯努利分布建模二元结果</h2>
+<p>最简单但最基础的统计模型是 <strong>伯努利模型 (Bernoulli model)</strong>，它描述只有两种可能结果的随机现象。伯努利随机变量只能取值 1（&quot;成功&quot;）或 0（&quot;失败&quot;）。例子随处可见：抛硬币（正面/反面）、考试结果（通过/不通过）或患者康复（治愈/未治愈）。</p>
+<p>伯努利分布由单一参数 <code>p</code> 定义，即&quot;成功&quot;的概率。我们写作：
+$P(\mathrm{结果}=1) = p$ 和 $P(\mathrm{结果}=0) = 1-p$。
+当我们说随机变量 $X$ 服从参数为 $p$ 的伯努利分布时，我们写作 $X \sim \mathrm{Bernoulli}(p)$。</p>
+<p>伯努利模型是统计学的基石。许多复杂模型都基于它构建。例如，如果我们想知道新药的真实治愈率（<code>p</code>），我们可以将每个患者的结果（$R_i$）建模为伯努利变量：如果治愈则 $R_i=1$，否则为 0。在 100 人试验中治愈患者的总数是这些伯努利变量的和，服从二项分布 $Binomial(n=100, p)$。</p>
+<p>将结果编码为 0/1 也简化了计算。伯努利变量的一个关键性质是其期望值（或均值）等于其成功概率：$E[R_i] = 1 \cdot p + 0 \cdot (1-p) = p$。</p>
+<p>这意味着如果我们有 $n$ 个独立观察，样本均值 $\hat p = \frac{1}{n}\sum_{i=1}^n R_i$ 就是我们样本中成功的比例。这个样本比例是我们对真实概率 $p$ 的自然估计。</p>
+<p><strong>例子：接吻研究</strong>
+一项有趣的研究观察接吻情侣是否倾向于将头偏向右侧或左侧。研究人员收集了 $n=124$ 对情侣的数据，向右偏记录为&quot;1&quot;，向左偏记录为&quot;0&quot;。在这个数据集中，80 对情侣向右偏。</p>
+<p>我们对向右偏情侣比例的估计是：
+$\hat p = 80/124 \approx 0.645$</p>
+<p>这表明大约 64.5% 的情侣向右偏。这个数字大于 50%，但它是<em>显著</em>大于 50% 吗？这是真正的倾向还是我们样本中的随机巧合？伯努利模型为回答这个问题提供了框架，我们稍后会探讨。</p>
+<h2>i.i.d. 假设：统计学的基石</h2>
+<p>在构建模型时，首先要问的问题之一是数据是否可以被视为 <strong>i.i.d.（独立同分布，independent and identically distributed）</strong>。这个假设是许多经典统计定理的基础。</p>
+<h3>独立性 (Independence)</h3>
+<p>独立性意味着每个观察都与其他观察无关；一次试验的结果不会影响另一次试验的结果。</p>
+<ul>
+<li><strong>好例子：</strong> 连续投掷公平骰子，或随机拨号电话调查的回应。</li>
+<li><strong>坏例子：</strong> 每日股价（今天的价格与昨天的相关）、社交媒体上的&quot;点赞&quot;（朋友的行为会相互影响）或同一家庭成员的血压读数（共同的遗传和生活方式）。</li>
+</ul>
+<p>当独立性被违反时，大数定律和中心极限定理等标准工具不能直接应用。需要更高级的模型（如时间序列、网络模型或混合效应模型）。</p>
+<h3>同分布 (Identically Distributed)</h3>
+<p>这意味着所有观察都是从相同的潜在概率分布生成的，具有相同的参数。</p>
+<ul>
+<li><strong>好例子：</strong> 重复投掷同一枚硬币，正面概率始终为 0.5。从大型全国人口中随机抽样进行政治民调。</li>
+<li><strong>坏例子：</strong> 在接吻研究中，如果在机场不同时间收集数据，人口统计（因此行为）可能会改变，违反假设。类似地，如果关于惯用手偏好的研究混合了左撇子和右撇子而没有考虑到这一点，数据就不是来自单一、相同的分布。</li>
+</ul>
+<p>在实践中，如果我们识别出具有不同特征的不同子群体，我们应该使用更复杂的技术，如分层建模，而不是假设单一、均匀的分布。</p>
+<p>i.i.d. 假设是一个强大的简化。良好的实验设计——使用随机化、盲法和仔细抽样——往往旨在创造数据可以合理地被视为 i.i.d. 的条件。</p>
+<h2>样本均值的性质</h2>
+<p>样本均值（或样本平均）是最基本的统计量。对于 i.i.d. 数据，它作为总体均值的自然估计器。对于我们的伯努利样本，样本均值是 $\hat p$。</p>
+<h3>期望（无偏性）</h3>
+<p>样本均值 $\hat p$ 的期望值是真实的总体比例 $p$。
+$$E[\hat p] ;=; E!\Big[\frac{1}{n}\sum_{i=1}^n R_i\Big] ;=; \frac{1}{n}\sum_{i=1}^n E[R_i] ;=; \frac{1}{n}\cdot n p ;=; p.$$
+这个性质使 $\hat p$ 成为 $p$ 的<strong>无偏估计器</strong>。平均而言，我们的估计会命中真实值。</p>
+<h3>方差（精度）</h3>
+<p>当然，任何单次实验都不会完全匹配期望。样本均值的方差告诉我们它预期在真实值周围波动多少。对于方差为 $Var(R_i) = p(1-p)$ 的独立 $R_i$，$\hat p$ 的方差是：
+$$\operatorname{Var}(\hat p) ;=; \operatorname{Var}!\Big(\frac{1}{n}\sum_{i=1}^n R_i\Big) ;=; \frac{1}{n^2}\sum_{i=1}^n \operatorname{Var}(R_i) ;=; \frac{1}{n^2}\cdot n,p(1-p) ;=; \frac{p(1-p)}{n}.$$
+这个公式极其重要。它表明我们估计的方差随着样本量 $n$ 的增加而减少。这是大样本威力的数学基础：它们产生更稳定和精确的估计。</p>
+<h3>大数定律和中心极限定理</h3>
+<p>这些性质导致了统计学中两个最重要的定理：</p>
+<ol>
+<li><strong>大数定律 (Law of Large Numbers, LLN)：</strong> 当样本量 $n$ 无限增大时，样本均值 $\hat p$ 收敛于真实总体均值 $p$。这保证了有足够的数据，我们的估计将任意接近真相。</li>
+<li><strong>中心极限定理 (Central Limit Theorem, CLT)：</strong> 对于足够大的样本量 $n$，样本均值 $\hat p$ 的分布近似为正态分布，无论原始数据的分布如何。
+ $$\hat p \approx N!\Big(p,;\frac{p(1-p)}{n}\Big)$$
+ CLT 是一个强大的工具，因为正态分布已被充分理解，允许我们计算概率并为我们的估计构造置信区间。</li>
+</ol>
+<h3>例子：低温电子显微镜 (Cryo-EM)</h3>
+<p>i.i.d. 数据平均的威力在低温电子显微镜中得到了完美的体现，这是一种确定生物分子 3D 结构的革命性技术。科学家冷冻并拍摄数十万个单独的蛋白质颗粒，但每个图像都非常嘈杂。</p>
+<p><img src="/blog/images/legacy/2025-05-27-133802HS2DtK.png" alt="典型的原始显微图：成千上万的蛋白质颗粒被埋在随机噪声的海洋中。"></p>
+<p>为了重构结构，图像被对齐然后平均。因为每个图像中的噪声是随机和独立的，它在平均过程中相互抵消。然而，蛋白质的微弱潜在信号是一致的，并在平均中得到强化。</p>
+<p><img src="/blog/images/legacy/2025-05-27-134144UY3L1Y.png" alt="对齐后的 2D 类别平均。微弱的颗粒，当平均后，显示出清晰的环状结构。"></p>
+<p>这是我们讨论的原理的直接应用：</p>
+<ul>
+<li><strong>独立性：</strong> 每个图像中的噪声是随机的，与其他图像无关。</li>
+<li><strong>同分布：</strong> 所有颗粒都是相同的蛋白质，所以潜在信号是相同的。</li>
+<li><strong>大数定律：</strong> 通过平均数万张图像，随机噪声平均为零。</li>
+<li><strong>方差缩减：</strong> 最终图像中噪声的方差减少了 $n$ 倍，使信噪比大大提高。</li>
+</ul>
+<p><img src="/blog/images/legacy/2025-05-27-134219I9Pul9.png" alt="Cryo-EM 工作流程：对齐 → 平均 → 迭代 → 重构 3D 图。"></p>
+<p>结果是分子的高分辨率 3D 图，这一成就因统计学平均的基本原理而成为可能。</p>
+<p><img src="/blog/images/legacy/2025-05-27-134257qN7BvW.png" alt="最终 3D 重构的切片，密度按强度着色。"></p>
+<h2>理论与模拟：量化误差的两种方法</h2>
+<p>我们如何量化估计 $\hat p$ 中的不确定性？我们有两个主要工具：理论公式和计算模拟。</p>
+<h3>1. 解析方法（理论）</h3>
+<p>使用概率论，我们可以推导误差度量的精确公式。如我们所见，$\hat p$ 的标准差，称为<strong>标准误差</strong>，是 $\sigma_{\hat p} = \sqrt{p(1-p)/n}$。这给我们一个估计误差规模的直接度量。</p>
+<p>我们可以使用这个，通常结合中心极限定理，来回答概率问题。例如，&quot;我们的估计 $\hat p$ 与真实值 $p$ 相差超过 10% 的概率是多少？&quot;这可以表示为 $P(|\hat p - p| &gt; 0.1)$。对于大的 $n$，我们可以使用正态分布来近似这个。</p>
+<p>这种解析方法很强大，因为它给我们关于不确定性的精确、定量答案。</p>
+<h3>2. 数值方法（模拟）</h3>
+<p>当理论公式过于复杂或难以处理时，我们可以使用蒙特卡罗模拟。想法是使用计算机在特定假设下（如假设真实 $p=0.5$）模拟我们的实验数千次。</p>
+<p>对于接吻研究，我们可以模拟 100,000 次实验，每次有 124 对&quot;情侣&quot;。在每次实验中，我们生成 124 个随机 0/1 值（$p=0.5$）并计算模拟的 $\hat p$。通过绘制这 100,000 个模拟 $\hat p$ 值的直方图，我们得到一个经验分布，显示如果真实比例为 50%，我们可以期望的结果范围。</p>
+<p>如果我们实际观察的值（$\hat p = 0.645$）落在这个直方图的很低密度区域（即在尾部），这表明我们的初始假设（$p=0.5$）可能是错误的。</p>
+<p>模拟是直观和灵活的，但它取决于我们正确建模数据生成过程的能力，并需要大量计算来精确估计非常小的概率。</p>
+<h2>假设检验与统计显著性</h2>
+<p>让我们回到接吻研究。我们观察到的比例是 $\hat p = 0.645$。这是否是强有力的证据来断定人们有向右偏的偏好？这是<strong>假设检验</strong>的问题。</p>
+<p>框架如下：</p>
+<ol>
+<li><p><strong>陈述假设：</strong></p>
+<ul>
+<li><strong>零假设 ($H_0$)：</strong> 这是&quot;无效应&quot;或&quot;无差异&quot;的情景。这里，$H_0: p = 0.5$（向右或向左偏没有偏好）。</li>
+<li><strong>备择假设 ($H_1$)：</strong> 这是我们想要证明的。这里，$H_1: p &gt; 0.5$（偏向右的偏好）。</li>
+</ul>
+</li>
+<li><p><strong>计算检验统计量和 p 值：</strong>
+我们的检验统计量是&quot;成功&quot;（向右偏）的数量，即 $X=80$。<strong>p 值</strong>量化这个结果有多极端。它定义为<em>假设零假设为真，观察到至少与我们数据一样极端结果的概率</em>。</p>
+<p>在这种情况下：$p\text{-值} = P(X \ge 80 \mid p=0.5)$。</p>
+<p>如果这个 p 值非常小，意味着在&quot;无偏好&quot;假设下我们观察到的数据极不可能。这将导致我们拒绝零假设，支持备择假设。</p>
+</li>
+</ol>
+<p>为了建立直觉，我们可以运行模拟。我们假设零假设为真（$p=0.5$）并多次模拟实验。</p>
+<pre><code class="language-python"><span class="line">import numpy as np</span>
+<span class="line">import matplotlib.pyplot as plt</span>
+<span class="line"></span>
+<span class="line"># ---------------- user-adjustable parameters ----------------</span>
+<span class="line">p_true   = 0.5       # probability under H0 (no preference)</span>
+<span class="line">n_sample = 124       # couples per experiment</span>
+<span class="line">N_sim    = 100_000   # how many experiments to simulate</span>
+<span class="line">obs_hatp = 0.645     # the real sample proportion we observed</span>
+<span class="line"># ------------------------------------------------------------</span>
+<span class="line"></span>
+<span class="line">rng   = np.random.default_rng(seed=2025)</span>
+<span class="line">data  = rng.binomial(1, p_true, size=(N_sim, n_sample))</span>
+<span class="line">hat_p = data.mean(axis=1)</span>
+<span class="line"></span>
+<span class="line"># empirical p-value: proportion of experiments where hat_p ≥ observed value</span>
+<span class="line">p_empirical = np.mean(hat_p &gt;= obs_hatp)</span>
+<span class="line"></span>
+<span class="line"># ---------- plot ----------</span>
+<span class="line">plt.figure(figsize=(6,4))</span>
+<span class="line">plt.hist(hat_p, bins=40, density=True, edgecolor=&quot;black&quot;, alpha=0.9, color=&quot;#F5A623&quot;)</span>
+<span class="line">plt.axvline(obs_hatp, ls=&quot;--&quot;, lw=2, color=&quot;#FF6F00&quot;, label=fr&quot;$\hat p_{{obs}}={obs_hatp}$&quot;)</span>
+<span class="line">plt.title(fr&quot;Monte-Carlo distribution of $\hat p$ ($n={n_sample},\,p={p_true}$)&quot;)</span>
+<span class="line">plt.xlabel(r&quot;sample proportion $\hat p$&quot;)</span>
+<span class="line">plt.ylabel(&quot;density&quot;)</span>
+<span class="line">plt.legend()</span>
+<span class="line">plt.tight_layout()</span>
+<span class="line">plt.show()</span>
+<span class="line"></span>
+<span class="line">print(f&quot;Empirical P(hat_p ≥ {obs_hatp}) = {p_empirical:.5f}&quot;)</span></code></pre>
+<p><img src="/blog/images/legacy/2025-05-27-141307jig87U.png" alt="接吻研究的模拟结果"></p>
+<p>直方图显示了来自 100,000 次模拟实验的样本比例分布，其中真实偏好为 50/50。我们观察到的 0.645 值远在右尾。</p>
+<blockquote>
+<p><strong>模拟右尾概率</strong></p>
+<p>$\widehat{P}(\hat p\ge 0.645);=;0.00084;;(\text{约 }0.084%)$</p>
+</blockquote>
+<p>这个模拟 p 值极小。它告诉我们，如果真的没有偏好，我们看到这种偏向右侧的结果的概率不到千分之一。因此，我们有强有力的统计证据拒绝零假设，并得出结论：接吻时向右偏确实存在真实偏好。</p>
+<p>假设检验的替代方法是构造<strong>置信区间</strong>。$p$ 的 95% 置信区间可能是，例如，<code>[0.56, 0.72]</code>。这给我们 $p$ 真实值的合理范围。由于这个区间不包含 0.5，它导致与我们假设检验相同的结论：真实比例很可能大于 50%。</p>
+<h2>收集好数据的原则</h2>
+<p>任何统计结论的质量都基本上受限于数据的质量。**&quot;垃圾进，垃圾出&quot;**的原则至关重要。以下是收集可靠数据的关键考虑因素。</p>
+<ol>
+<li><p><strong>对照实验 vs. 观察性研究：</strong> 尽可能选择对照实验。通过随机分配受试者到治疗组（如接受新药）和对照组（如接受安慰剂），我们可以隔离治疗效果并最小化混杂偏差。随机化是确保 i.i.d. 假设成立的强大工具。</p>
+</li>
+<li><p><strong>代表性抽样：</strong> 对于观察性研究，目标是获得一个作为总体微型复制品的样本。简单随机抽样是理想的，但分层抽样等策略可能更有效。关键是避免选择偏差。仅通过在线论坛进行的调查可能过度代表特定人群，无法推广到整个人口。</p>
+</li>
+<li><p><strong>样本量规划：</strong> 在开始研究之前，明智的做法是进行效应分析来估计所需的样本量。这确保研究足够大以检测有意义的效应，而不会在收集过多数据上浪费资源。</p>
+</li>
+<li><p><strong>避免依赖性：</strong> 数据收集过程本身不应引入依赖性。调查受访者不应讨论答案，实验对象应彼此隔离。如果依赖性不可避免（如时间序列数据），必须用适当的模型来解释它们。</p>
+</li>
+<li><p><strong>伦理和实际约束：</strong> 现实世界的数据收集常常受到伦理和后勤的约束。给危重患者安慰剂可能是不道德的；完美的随机样本可能太昂贵。在这些情况下，我们必须在约束内找到最佳设计，并在报告结果时对数据限制保持透明。</p>
+</li>
+</ol>
+<h2>结论</h2>
+<p>统计学不仅仅是公式的集合；它是一种关于不确定性和从世界中学习的原则性思维方式。从框定问题和设计实验到建立模型和量化不确定性，每一步都至关重要。通过理解核心假设（如 i.i.d.）和估计器的基本性质，我们可以建立对结论的信心。</p>
+<p>从简单伯努利试验到复杂现实问题（如 Cryo-EM 重构）的旅程都建立在这些基本思想之上。当我们继续探索更高级的模型时，我们必须始终回到这些第一原理：理解你的数据来源，明确你的假设，并诚实面对结论的局限性。精心设计的数据收集，配合合理的分析，是将信息转化为洞察的关键。</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

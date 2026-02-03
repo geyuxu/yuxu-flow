@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoGen Multi-Agent System Practice Reflection From Heavy-Weight Contextual Programming to Lightweight AI Assistant | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2025-07-24
+tags: [ai]
+legacy: true</h2>
+<h1>AutoGen Multi-Agent System Practice Reflection From Heavy-Weight Contextual Programming to Lightweight AI Assistant</h1>
+<p>My core objective was to address a key pain point of current AI code assistants: they are often &quot;one-shot&quot; and lack a continuous focus on code quality and subsequent optimization. I wanted my system to simulate a miniature development team.</p>
+<h3>1.1. System Design: A Trinity of AI Developers</h3>
+<p>I designed three highly specialized agents:</p>
+<ol>
+<li><strong>CoderAgent:</strong> Responsible for generating the initial Python code based on user requirements. Its core duty is to implement functionality quickly.</li>
+<li><strong>QualityAnalyzerAgent:</strong> Responsible for reviewing the code generated by <code>CoderAgent</code>. It uses static analysis tools (like <code>pylint</code>) to check for style issues, potential errors, and non-standard practices, then provides specific modification suggestions.</li>
+<li><strong>OptimizerAgent:</strong> After the code is functionally correct and meets quality standards, this agent examines it from a higher level, suggesting improvements related to algorithmic efficiency, code structure, and readability.</li>
+</ol>
+<p>To enable these three agents to collaborate &quot;intelligently,&quot; I chose AutoGen&#39;s powerful <code>GroupChat</code> mode. By setting <code>speaker_selection_method</code> to <code>&quot;auto&quot;</code>, I expected the system to act like a project manager, automatically selecting the most appropriate agent to speak based on the current conversation context.</p>
+<h3>1.2. Technical Implementation: Assembling the Team with AutoGen</h3>
+<p>Here is the core code snippet for the system setup:</p>
+<pre><code class="language-python"><span class="line">import autogen</span>
+<span class="line"></span>
+<span class="line"># Configure the LLM</span>
+<span class="line">config_list = autogen.config_list_from_json(...) </span>
+<span class="line">llm_config = {&quot;config_list&quot;: config_list}</span>
+<span class="line"></span>
+<span class="line"># 1. Define the agents</span>
+<span class="line">coder = autogen.AssistantAgent(</span>
+<span class="line">    name=&quot;CoderAgent&quot;,</span>
+<span class="line">    system_message=&quot;You are a helpful AI assistant that writes Python code to solve tasks. Return the code in a markdown code block.&quot;,</span>
+<span class="line">    llm_config=llm_config,</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line">quality_analyzer = autogen.AssistantAgent(</span>
+<span class="line">    name=&quot;QualityAnalyzerAgent&quot;,</span>
+<span class="line">    system_message=&quot;You are a quality assurance expert. You review the given Python code for style, errors, and best practices. Suggest specific improvements.&quot;,</span>
+<span class="line">    llm_config=llm_config,</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line">optimizer = autogen.AssistantAgent(</span>
+<span class="line">    name=&quot;OptimizerAgent&quot;,</span>
+<span class="line">    system_message=&quot;You are a performance optimization expert. You analyze the Python code for performance bottlenecks and suggest refactoring for better efficiency and readability.&quot;,</span>
+<span class="line">    llm_config=llm_config,</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line">user_proxy = autogen.UserProxyAgent(</span>
+<span class="line">    name=&quot;UserProxy&quot;,</span>
+<span class="line">    human_input_mode=&quot;TERMINATE&quot;,</span>
+<span class="line">    code_execution_config={&quot;work_dir&quot;: &quot;coding&quot;},</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line"># 2. Set up the GroupChat with automatic speaker selection</span>
+<span class="line"># Using &quot;auto&quot; mode lets the LLM decide the next speaker</span>
+<span class="line">groupchat = autogen.GroupChat(</span>
+<span class="line">    agents=[user_proxy, coder, quality_analyzer, optimizer],</span>
+<span class="line">    messages=[],</span>
+<span class="line">    max_round=15,</span>
+<span class="line">    speaker_selection_method=&quot;auto&quot; </span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line">manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)</span>
+<span class="line"></span>
+<span class="line"># 3. Initiate the task</span>
+<span class="line">user_proxy.initiate_chat(</span>
+<span class="line">    manager,</span>
+<span class="line">    message=&quot;Write a Python function to find the nth Fibonacci number, then analyze and optimize it.&quot;</span>
+<span class="line">)</span></code></pre>
+<p>With the <code>speaker_selection_method=&quot;auto&quot;</code> setting, my ideal workflow was: <code>UserProxy</code> -&gt; <code>CoderAgent</code> -&gt; <code>QualityAnalyzerAgent</code> -&gt; <code>OptimizerAgent</code> -&gt; <code>UserProxy</code>. It looked perfect, didn&#39;t it? However, reality delivered a harsh lesson.</p>
+<h2>2. The &quot;Heaviness&quot; in Practice: When Idealism Meets Reality</h2>
+<p>Once the system was running, I quickly felt a persistent sense of &#39;heaviness.&#39; This feeling wasn&#39;t from a single issue but a combination of several factors.</p>
+<h3>2.1. Interaction Latency and the Efficiency Black Hole</h3>
+<p>For a simple Fibonacci function, the entire process took several minutes. Each handoff between agents is a complete LLM call. The <code>GroupChat</code>&#39;s process for deciding the next speaker also requires an LLM inference of its own. This meant that completing one simple task could involve 5-10, or even more, LLM calls.</p>
+<p>In my daily development work, I need code completions and suggestions in seconds, not the result of an AI team &quot;holding a meeting&quot; that I have to wait for after making a cup of coffee. This high latency is fatal for high-frequency, real-time development assistance scenarios.</p>
+<h3>2.2. Uncontrollable &quot;Emergent Intelligence&quot;</h3>
+<p><code>speaker_selection_method=&quot;auto&quot;</code> is a double-edged sword. It did introduce &#39;intelligence,&#39; but it also brought chaos. I observed several typical problems:</p>
+<ul>
+<li><strong>Dialogue Loops:</strong> <code>CoderAgent</code> and <code>QualityAnalyzerAgent</code> could get stuck in a back-and-forth &#39;tug-of-war,&#39; with one making changes and the other finding new issues, preventing the process from ever reaching the optimization stage.</li>
+<li><strong>Incorrect Scheduling:</strong> Sometimes, right after <code>CoderAgent</code> finished writing the code, <code>OptimizerAgent</code> would &#39;jump the gun&#39; and start talking about optimization, skipping the quality analysis step and disrupting the intended workflow.</li>
+<li><strong>Premature Termination:</strong> The system might hand control back to the <code>UserProxy</code> and consider the task complete without sufficient optimization.</li>
+</ul>
+<p>This unpredictability turned a tool that was supposed to boost efficiency into a &#39;black box&#39; that required careful guidance and observation.</p>
+<h3>2.3. Complex State Management and Context Passing</h3>
+<p>One of the core challenges of a multi-agent system is state management. In this experiment, the &#39;state&#39; was the piece of code being iterated on. Ideally, <code>QualityAnalyzerAgent</code> should analyze the latest code from <code>CoderAgent</code>.</p>
+<p>But the state of a <code>GroupChat</code> is maintained through an ever-growing message history. As the number of conversation rounds increases, the context window expands rapidly. This not only increases token costs but can also cause subsequent agents to &#39;lose focus&#39; due to information overload, ignoring critical code versions or modification suggestions. I had to meticulously craft prompts, repeatedly reminding agents to &quot;please focus on the code in the previous turn&#39;s message,&quot; which was a burden in itself.</p>
+<h3>2.4. High Configuration and Debugging Costs</h3>
+<p>Building this system required me to spend a significant amount of time on &#39;meta-work&#39;:</p>
+<ul>
+<li><strong>Prompt Engineering:</strong> Writing precise <code>system_message</code> for each agent to define its role, capabilities, and communication style.</li>
+<li><strong>Flow Design:</strong> Thinking about how to design termination conditions and guide the conversation flow.</li>
+<li><strong>Debugging:</strong> When the system didn&#39;t behave as expected, I had to read the entire conversation history to guess whether the problem was with an agent&#39;s prompt or the selector&#39;s decision logic. This debugging difficulty is far greater than with traditional code.</li>
+</ul>
+<p>These upfront investment and subsequent maintenance costs are clearly disproportionate for solving a problem at the level of &#39;writing a Fibonacci function.&#39;</p>
+<h2>3. Reflection: Which Scenarios Truly Require the &quot;Heavy Artillery&quot;?</h2>
+<p>This failed attempt was not without value; it gave me a deeper understanding of the nature and application boundaries of multi-agent systems.</p>
+<p><strong>The core strengths of multi-agent systems lie in:</strong></p>
+<ul>
+<li><strong>Specialization and Modularity:</strong> The ability to break down a large, ambiguous task and assign parts to &#39;experts&#39; in different fields, achieving a separation of concerns.</li>
+<li><strong>Simulating Complex Workflows:</strong> They are excellent for simulating real-world processes that require multi-role collaboration, such as product development or scientific research.</li>
+<li><strong>&#39;Emergence&#39; and Creativity:</strong> Free-form discussions between agents can sometimes lead to unexpected and creative solutions.</li>
+</ul>
+<p><strong>So, what scenarios are suitable for this kind of &#39;heavyweight&#39; system?</strong></p>
+<ol>
+<li><strong>Exploratory and Research Tasks:</strong> For example, &quot;Investigate the latest advancements in autonomous driving technology and generate an analysis report including a technical summary, key players, and future trends.&quot; Such tasks lack a fixed process, require multiple complex steps like information gathering, integration, and analysis, and have a certain demand for creativity in the final output.</li>
+<li><strong>End-to-End Automation Projects:</strong> For example, &quot;Automatically generate a project skeleton, write core code, and configure deployment scripts based on a user requirements document.&quot; These tasks have long cycles, multiple steps, and can be executed asynchronously. A multi-agent system can act like an autonomous project team, working silently in the background.</li>
+<li><strong>Complex Decision-Making and Simulation:</strong> For example, simulating a market environment where &#39;Consumer Agents,&#39; &#39;Competitor Agents,&#39; and &#39;Marketing Agents&#39; interact to predict the effectiveness of a marketing strategy.</li>
+</ol>
+<p><strong>And for the following scenarios, we should decisively opt for a &#39;lightweight&#39; approach:</strong></p>
+<ul>
+<li><strong>High-frequency, real-time interactive tasks:</strong> Such as code completion, real-time Q&amp;A, or text polishing.</li>
+<li><strong>Deterministic, linear tasks:</strong> If a task can be clearly broken down into A-&gt;B-&gt;C steps, then forcing it into a free-discussion <code>GroupChat</code> is like using a sledgehammer to crack a nut.</li>
+<li><strong>Scenarios that are extremely sensitive to latency and cost.</strong></li>
+</ul>
+<h2>4. Returning to Simplicity: A Blueprint for Lightweight AI Assistants</h2>
+<p>Since the heavyweight multi-agent system wasn&#39;t suitable for my daily development needs, what is a better alternative? The answer is to return to simplicity, leveraging other patterns provided by AutoGen or shifting our mindset.</p>
+<h3>4.1. Solution 1: Two-Stage Agent Pipeline (Sequential Pipeline)</h3>
+<p>If your process is deterministic, like &#39;code first, then review,&#39; you can organize the agents in a sequential manner. AutoGen&#39;s <code>register_nested_chats</code> feature is perfect for this scenario.</p>
+<pre><code class="language-python"><span class="line"># This is a conceptual example to demonstrate how to build a sequential pipeline.</span>
+<span class="line"># After the CoderAgent completes its task, its result is automatically passed </span>
+<span class="line"># as input to the QualityAnalyzerAgent.</span>
+<span class="line"></span>
+<span class="line"># Assuming CoderAgent and QualityAnalyzerAgent are already defined</span>
+<span class="line"></span>
+<span class="line"># Nested chat setup</span>
+<span class="line">review_chat = autogen.GroupChat(</span>
+<span class="line">    agents=[quality_analyzer, user_proxy],</span>
+<span class="line">    messages=[],</span>
+<span class="line">    max_round=2,</span>
+<span class="line">    speaker_selection_method=&quot;manual&quot; # Or another controllable method</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line"># Register the nested chat to form a pipeline</span>
+<span class="line">coder.register_nested_chats(</span>
+<span class="line">    [{&quot;recipient&quot;: quality_analyzer, &quot;message&quot;: &quot;Please review the following code.&quot;, &quot;summary_method&quot;: &quot;last_msg&quot;}],</span>
+<span class="line">    trigger=user_proxy,</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line">user_proxy.initiate_chat(coder, message=&quot;Write a Python function for quick sort.&quot;)</span></code></pre>
+<p>In this pattern, the control flow is a deterministic <code>User -&gt; Coder -&gt; QualityAnalyzer</code>. It retains the advantage of agent specialization but eliminates the unpredictability and high coordination cost of the auto-selecting <code>GroupChat</code>.</p>
+<h3>4.2. Solution 2: Single Agent with Tools</h3>
+<p>This is a more mainstream and practical paradigm for building AI assistants today, and it&#39;s in the same vein as OpenAI&#39;s Function Calling/Tool Use.</p>
+<p><strong>The core idea is:</strong> Instead of creating multiple agents to converse with each other, create one &#39;omnipotent&#39; <code>AssistantAgent</code> and encapsulate capabilities like &#39;quality analysis&#39; and &#39;code optimization&#39; as <strong>tools</strong> it can call.</p>
+<pre><code class="language-python"><span class="line">import pylint.lint</span>
+<span class="line">import io</span>
+<span class="line">from pylint.reporters.text import TextReporter</span>
+<span class="line"></span>
+<span class="line"># 1. Define the tool function</span>
+<span class="line">def lint_code(code: str) -&gt; str:</span>
+<span class="line">    &quot;&quot;&quot;Runs pylint on the given Python code and returns the report.&quot;&quot;&quot;</span>
+<span class="line">    pylint_opts = [&#39;--disable=all&#39;, &#39;--enable=E,W&#39;]</span>
+<span class="line">    reporter = TextReporter(io.StringIO())</span>
+<span class="line">    pylint.lint.Run([io.StringIO(code)], reporter=reporter, exit=False, args=pylint_opts)</span>
+<span class="line">    return reporter.out.getvalue()</span>
+<span class="line"></span>
+<span class="line"># 2. Create an agent with tool-calling capabilities</span>
+<span class="line">super_assistant = autogen.AssistantAgent(</span>
+<span class="line">    name=&quot;SuperAssistant&quot;,</span>
+<span class="line">    system_message=&quot;You are a super-assistant for Python development. You can write code and use tools to check its quality.&quot;,</span>
+<span class="line">    llm_config=llm_config,</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line"># 3. Create a UserProxyAgent and register the tool</span>
+<span class="line">user_proxy = autogen.UserProxyAgent(</span>
+<span class="line">    name=&quot;UserProxy&quot;,</span>
+<span class="line">    human_input_mode=&quot;TERMINATE&quot;,</span>
+<span class="line">    code_execution_config=False, # We aren&#39;t executing code, just calling tools</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line">user_proxy.register_function(</span>
+<span class="line">    function_map={</span>
+<span class="line">        &quot;lint_code&quot;: lint_code</span>
+<span class="line">    }</span>
+<span class="line">)</span>
+<span class="line"></span>
+<span class="line"># 4. Let the agent use the tool</span>
+<span class="line"># In the LLM&#39;s prompt, it will be informed that the lint_code tool is available.</span>
+<span class="line"># The LLM will decide when it&#39;s appropriate to generate a request to call this tool.</span></code></pre>
+<p><strong>The advantages of this pattern are overwhelming:</strong></p>
+<ul>
+<li><strong>Low Latency:</strong> No communication overhead between multiple agents.</li>
+<li><strong>High Controllability:</strong> The flow is driven by the LLM&#39;s decision to call a tool, which is more predictable than a free-form conversation between agents.</li>
+<li><strong>Easy to Extend and Maintain:</strong> Adding new capabilities only requires adding a new tool function, not designing a new agent and its complex interaction logic.</li>
+</ul>
+<h2>Conclusion: Finding the Balance Between Complexity and Practicality</h2>
+<p>My journey from ambitious design to pragmatic retreat taught me a profound lesson: <strong>the first principle of technology selection is always &#39;fitness for purpose.&#39;</strong> Multi-agent systems are a powerful and fascinating paradigm, but they are not a silver bullet for every problem. To chase a &#39;cool-looking&#39; architecture while ignoring real-world efficiency, cost, and controllability is a classic case of technical self-indulgence.</p>
+<p>For those of us building AI applications, our goal shouldn&#39;t be to build the most complex system, but the one that best solves the problem at hand. Within a powerful framework like AutoGen, <code>GroupChat</code> is just one of many tools. Learning to make wise choices between &#39;multi-agent collaboration,&#39; &#39;sequential pipelines,&#39; and &#39;single-agent + tools&#39; based on the nature of the task is the hallmark of a mature AI engineer.</p>
+<p>In the future, collaboration between humans and AI, and between AI and AI, will undoubtedly deepen. Our task is to maintain a clear head amidst the constant emergence of new technologies and find that optimal balance point between technology and value.</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro-News-Bot: Building an AI-Driven Automated News Aggregation and Publishing System | Yuxu Ge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .name-block {
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* Content */
+        .content {
+            margin-left: 320px;
+            padding: 3rem 4rem;
+            max-width: 900px;
+        }
+
+        .back-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            color: var(--dark-grey);
+        }
+
+        .back-link:hover {
+            color: var(--vermilion);
+        }
+
+        /* Article */
+        article h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+            color: var(--black);
+        }
+
+        article h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--black);
+        }
+
+        article h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--black);
+        }
+
+        article p {
+            margin-bottom: 1rem;
+            color: var(--dark-grey);
+        }
+
+        article ul,
+        article ol {
+            margin: 1rem 0 1rem 1.5rem;
+            color: var(--dark-grey);
+        }
+
+        article li {
+            margin-bottom: 0.5rem;
+        }
+
+        article strong {
+            color: var(--black);
+        }
+
+        article code {
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            background: #e8e8e8;
+            padding: 0.15em 0.4em;
+            border-radius: 3px;
+        }
+
+        article pre {
+            margin: 1rem 0;
+            border-radius: 6px;
+            overflow-x: auto;
+            background: #2d2d2d;
+            padding: 1rem;
+        }
+
+        article pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.75em;
+            white-space: pre !important;
+            counter-reset: line;
+            display: block;
+            color: #ccc;
+        }
+
+        article pre code .line {
+            counter-increment: line;
+        }
+
+        article pre code .line::before {
+            content: counter(line);
+            display: inline-block;
+            width: 2.5em;
+            margin-right: 1em;
+            text-align: right;
+            color: #666;
+            user-select: none;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-start;
+            padding: 0.35rem 0.5rem;
+            background: #3a3a3a;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .code-toolbar+pre {
+            margin-top: 0;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .copy-btn {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover,
+        .copy-btn:active {
+            background: #777;
+        }
+
+        .copy-btn.copied {
+            background: #2a2;
+        }
+
+        article blockquote {
+            border-left: 3px solid var(--vermilion);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #666;
+            font-style: italic;
+        }
+
+        article hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 2rem 0;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        article th,
+        article td {
+            border: 1px solid #ddd;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        article th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        article img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #888;
+        }
+
+        .error {
+            color: var(--vermilion);
+        }
+
+        /* Language Selector */
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .lang-selector-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .lang-selector-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .lang-select {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--vermilion);
+        }
+
+        .lang-status {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: auto;
+        }
+
+        .lang-status.translating {
+            color: var(--vermilion);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lang-status.translating::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f0f0f0;
+            border-top-color: var(--vermilion);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .lang-status.cached {
+            color: #4CAF50;
+        }
+
+        .lang-original-btn {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .lang-original-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .lang-selector {
+                flex-wrap: wrap;
+            }
+            .lang-status {
+                width: 100%;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* KaTeX math styles */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.5rem 0;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+
+        /* Jupyter Notebook Styles */
+        .notebook-container {
+            margin-top: 1rem;
+        }
+
+        .notebook-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .notebook-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .notebook-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nb-cell {
+            margin-bottom: 1.5rem;
+        }
+
+        .nb-cell-code .nb-source {
+            background: #2d2d2d;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .nb-cell-code .nb-source pre {
+            margin: 0;
+            padding: 1rem;
+            color: #ccc;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        .nb-cell-code .nb-source code {
+            background: none;
+            padding: 0;
+        }
+
+        .nb-output {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .nb-output pre {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.85em;
+            color: #222;
+        }
+
+        .nb-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .nb-output table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .nb-output th,
+        .nb-output td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        .nb-output th {
+            background: #e8e8e8;
+            font-weight: 600;
+        }
+
+        .nb-cell-markdown {
+            padding: 0;
+        }
+
+        .nb-cell-markdown h1:first-child {
+            margin-top: 0;
+        }
+
+        /* Document Download Button */
+        .doc-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--black);
+            color: var(--off-white);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .doc-download:hover {
+            opacity: 0.8;
+            color: var(--off-white);
+        }
+
+        .doc-download svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* PDF Viewer */
+        .pdf-container {
+            margin-top: 1rem;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* Text File Display */
+        .text-container {
+            margin-top: 1rem;
+        }
+
+        .text-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "SF Mono", Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--dark-grey);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Word Document Display */
+        .word-container {
+            margin-top: 1rem;
+        }
+
+        .word-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+        }
+
+        .word-content p {
+            margin-bottom: 1rem;
+        }
+
+        .word-content h1,
+        .word-content h2,
+        .word-content h3 {
+            color: var(--black);
+            margin: 1.5rem 0 1rem;
+        }
+
+        .word-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .word-content th,
+        .word-content td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+        }
+
+        .word-content img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Excel Display */
+        .excel-container {
+            margin-top: 1rem;
+        }
+
+        .excel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .excel-tab {
+            padding: 0.5rem 1rem;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .excel-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .excel-content {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .excel-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-content th,
+        .excel-content td {
+            border: 1px solid #ddd;
+            padding: 0.4rem 0.6rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .excel-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-content tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* PowerPoint Display */
+        .ppt-container {
+            margin-top: 1rem;
+        }
+
+        .ppt-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f5f5f5;
+        }
+
+        /* CSV Display (uses excel styles) */
+        .csv-container {
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            article h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <main class="content">
+            <a href="/blog/" class="back-link">← Back to Blog</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector" id="lang-selector" style="display: none;">
+                <span class="lang-selector-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                    </svg>
+                    Language
+                </span>
+                <select class="lang-select" id="lang-select">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="ru">🇷🇺 Русский</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+                <button class="lang-original-btn" id="lang-original-btn" style="display: none;">Show Original</button>
+                <span class="lang-status" id="lang-status"></span>
+            </div>
+
+            <article>
+<hr>
+<h2>date: 2024-01-01
+tags: [ai]
+legacy: true</h2>
+<h1>Astro-News-Bot: Building an AI-Driven Automated News Aggregation and Publishing System</h1>
+<p>During the initial architecture design, I followed several core principles:</p>
+<ol>
+<li><strong>Modularity</strong>: Each function (crawling, deduplication, AI processing, publishing) should be an independent module, easy to maintain and replace</li>
+<li><strong>Automation</strong>: The entire process requires no manual intervention, achieving &quot;set once, run forever&quot;</li>
+<li><strong>Idempotency</strong>: Repeated task execution produces no side effects</li>
+<li><strong>Scalability</strong>: Easy to add new news sources or processing steps</li>
+</ol>
+<h3>Technical Architecture</h3>
+<p>Based on these principles, I designed a linear data processing pipeline:</p>
+<pre><code><span class="line">RSS Sources → Fetcher → Vector Dedup → AI Summary → Markdown Generation → Git Publishing → Blog Deployment</span></code></pre>
+<p>Core module structure:</p>
+<pre><code><span class="line">astro-news-bot/</span>
+<span class="line">├── news_bot/</span>
+<span class="line">│   ├── fetcher.py      # News fetching</span>
+<span class="line">│   ├── dedup.py        # Vector deduplication</span>
+<span class="line">│   ├── summarizer.py   # AI summarization</span>
+<span class="line">│   ├── writer.py       # Markdown generation</span>
+<span class="line">│   ├── selector.py     # News filtering</span>
+<span class="line">│   ├── publisher.py    # Git publishing</span>
+<span class="line">│   └── job.py          # Workflow orchestration</span>
+<span class="line">├── config.json         # Configuration file</span>
+<span class="line">├── requirements.txt    # Dependencies</span>
+<span class="line">└── run_daily_news.sh  # Execution script</span></code></pre>
+<h3>Data Flow Design</h3>
+<ol>
+<li><strong>News Fetching</strong> → Multi-source crawling → <code>raw_{date}.json</code></li>
+<li><strong>Vector Deduplication</strong> → Semantic similarity filtering → <code>dedup_{date}.json</code>  </li>
+<li><strong>AI Summarization</strong> → GPT-4o generates Chinese summaries → <code>summary_{date}.json</code></li>
+<li><strong>Markdown Generation</strong> → Organized by category → <code>news_{date}.md</code></li>
+<li><strong>Git Publishing</strong> → Push to blog repository → Trigger automatic deployment</li>
+</ol>
+<h2>Core Technical Implementation</h2>
+<h3>1. Vector Deduplication: Beyond Simple Title Matching</h3>
+<p>In the early stages, I used article titles or URLs for deduplication, but quickly discovered issues:</p>
+<ul>
+<li>Different news sources use different titles for the same event</li>
+<li>URLs may differ due to tracking parameters</li>
+</ul>
+<p>The solution is <strong>semantic-based vector deduplication</strong>:</p>
+<pre><code class="language-python"><span class="line"># dedup.py core implementation</span>
+<span class="line">from sentence_transformers import SentenceTransformer</span>
+<span class="line">import numpy as np</span>
+<span class="line">from sklearn.metrics.pairwise import cosine_similarity</span>
+<span class="line"></span>
+<span class="line">class NewsDeduplicator:</span>
+<span class="line">    def __init__(self, similarity_threshold=0.85):</span>
+<span class="line">        self.model = SentenceTransformer(&#39;all-MiniLM-L6-v2&#39;)</span>
+<span class="line">        self.threshold = similarity_threshold</span>
+<span class="line">        </span>
+<span class="line">    def deduplicate(self, articles):</span>
+<span class="line">        if not articles:</span>
+<span class="line">            return []</span>
+<span class="line">            </span>
+<span class="line">        # Extract title text</span>
+<span class="line">        titles = [article[&#39;title&#39;] for article in articles]</span>
+<span class="line">        </span>
+<span class="line">        # Generate vector embeddings</span>
+<span class="line">        embeddings = self.model.encode(titles)</span>
+<span class="line">        </span>
+<span class="line">        # Calculate similarity matrix</span>
+<span class="line">        similarity_matrix = cosine_similarity(embeddings)</span>
+<span class="line">        </span>
+<span class="line">        # Deduplication logic</span>
+<span class="line">        to_keep = []</span>
+<span class="line">        for i, article in enumerate(articles):</span>
+<span class="line">            is_duplicate = False</span>
+<span class="line">            for j in to_keep:</span>
+<span class="line">                if similarity_matrix[i][j] &gt; self.threshold:</span>
+<span class="line">                    is_duplicate = True</span>
+<span class="line">                    break</span>
+<span class="line">            if not is_duplicate:</span>
+<span class="line">                to_keep.append(i)</span>
+<span class="line">                </span>
+<span class="line">        return [articles[i] for i in to_keep]</span></code></pre>
+<p>This method effectively identifies articles that &quot;say the same thing in different ways,&quot; far more accurate than keyword matching.</p>
+<h3>2. AI Summarization and Classification: The Art of Prompt Engineering</h3>
+<p>The quality of AI summarization and classification directly determines the final output value. The key isn&#39;t which LLM to choose, but how to design <strong>Prompts</strong>:</p>
+<pre><code class="language-python"><span class="line"># summarizer.py core Prompt</span>
+<span class="line">SUMMARY_PROMPT = &quot;&quot;&quot;</span>
+<span class="line">You are a professional tech news editor specializing in organizing news summaries for developers.</span>
+<span class="line"></span>
+<span class="line">Please generate for the following news:</span>
+<span class="line">1. A Chinese summary of no more than 100 words, summarizing core information</span>
+<span class="line">2. Select the most appropriate category from: Artificial Intelligence, Mobile Technology, Autonomous Driving, Cloud Computing, Chip Technology, Venture Capital, Cybersecurity, Blockchain, Scientific Research, Other Tech</span>
+<span class="line"></span>
+<span class="line">News content:</span>
+<span class="line">Title: {title}</span>
+<span class="line">Description: {description}</span>
+<span class="line">Source: {source}</span>
+<span class="line"></span>
+<span class="line">Please return in JSON format:</span>
+<span class="line">{{</span>
+<span class="line">  &quot;summary&quot;: &quot;Summary content&quot;,</span>
+<span class="line">  &quot;category&quot;: &quot;Category name&quot;,</span>
+<span class="line">  &quot;tags&quot;: [&quot;Tag1&quot;, &quot;Tag2&quot;, &quot;Tag3&quot;]</span>
+<span class="line">}}</span>
+<span class="line">&quot;&quot;&quot;</span>
+<span class="line"></span>
+<span class="line">class NewsSummarizer:</span>
+<span class="line">    def __init__(self):</span>
+<span class="line">        self.client = OpenAI()</span>
+<span class="line">        </span>
+<span class="line">    def process_article(self, article):</span>
+<span class="line">        prompt = SUMMARY_PROMPT.format(**article)</span>
+<span class="line">        </span>
+<span class="line">        response = self.client.chat.completions.create(</span>
+<span class="line">            model=&quot;gpt-4o&quot;,</span>
+<span class="line">            messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: prompt}],</span>
+<span class="line">            max_tokens=500,</span>
+<span class="line">            temperature=0.3</span>
+<span class="line">        )</span>
+<span class="line">        </span>
+<span class="line">        return json.loads(response.choices[0].message.content)</span></code></pre>
+<p>Through clear roles, detailed instructions, and output format requirements, we achieve stable, high-quality AI output.</p>
+<h3>3. GitOps Publishing: Reliable Automated Deployment</h3>
+<p>Why choose Git instead of API operations on the blog backend?</p>
+<ul>
+<li><strong>Atomicity and Traceability</strong>: Every content update is a Git commit, providing clear change records</li>
+<li><strong>Decoupling and Security</strong>: The bot only needs Git repository write permissions, no need to expose blog backend credentials</li>
+<li><strong>Leverage Existing CI/CD</strong>: Reuse Git-triggered CI/CD from platforms like Vercel/Netlify</li>
+</ul>
+<pre><code class="language-python"><span class="line"># publisher.py core implementation</span>
+<span class="line">import subprocess</span>
+<span class="line">import os</span>
+<span class="line"></span>
+<span class="line">class NewsPublisher:</span>
+<span class="line">    def __init__(self, blog_repo_path):</span>
+<span class="line">        self.repo_path = blog_repo_path</span>
+<span class="line">        </span>
+<span class="line">    def publish(self, commit_message):</span>
+<span class="line">        try:</span>
+<span class="line">            # Switch to blog directory</span>
+<span class="line">            os.chdir(self.repo_path)</span>
+<span class="line">            </span>
+<span class="line">            # Pull latest code</span>
+<span class="line">            subprocess.run([&#39;git&#39;, &#39;pull&#39;], check=True)</span>
+<span class="line">            </span>
+<span class="line">            # Add new files</span>
+<span class="line">            subprocess.run([&#39;git&#39;, &#39;add&#39;, &#39;.&#39;], check=True)</span>
+<span class="line">            </span>
+<span class="line">            # Check for changes</span>
+<span class="line">            result = subprocess.run([&#39;git&#39;, &#39;diff&#39;, &#39;--cached&#39;, &#39;--exit-code&#39;], </span>
+<span class="line">                                  capture_output=True)</span>
+<span class="line">            if result.returncode == 0:</span>
+<span class="line">                print(&quot;No changes to commit&quot;)</span>
+<span class="line">                return</span>
+<span class="line">                </span>
+<span class="line">            # Commit and push</span>
+<span class="line">            subprocess.run([&#39;git&#39;, &#39;commit&#39;, &#39;-m&#39;, commit_message], check=True)</span>
+<span class="line">            subprocess.run([&#39;git&#39;, &#39;push&#39;], check=True)</span>
+<span class="line">            </span>
+<span class="line">            print(f&quot;Successfully published: {commit_message}&quot;)</span>
+<span class="line">            </span>
+<span class="line">        except subprocess.CalledProcessError as e:</span>
+<span class="line">            print(f&quot;Git operation failed: {e}&quot;)</span></code></pre>
+<h2>Astro Blog Integration Modifications</h2>
+<p>To achieve seamless integration between <code>astro-news-bot</code> and the Astro blog, minimal but crucial modifications to the blog project are needed:</p>
+<h3>1. Define News Content Collection</h3>
+<pre><code class="language-typescript"><span class="line">// src/content/config.ts</span>
+<span class="line">import { defineCollection, z } from &#39;astro:content&#39;;</span>
+<span class="line">import { glob } from &#39;astro/loaders&#39;;</span>
+<span class="line"></span>
+<span class="line">const news = defineCollection({</span>
+<span class="line">  loader: glob({ base: &#39;./src/content/news&#39;, pattern: &#39;**/*.md&#39; }),</span>
+<span class="line">  schema: z.object({</span>
+<span class="line">    title: z.string(),</span>
+<span class="line">    description: z.string().optional(),</span>
+<span class="line">    date: z.string().optional(),</span>
+<span class="line">    pubDate: z.string().optional(),</span>
+<span class="line">    tags: z.array(z.string()).optional(),</span>
+<span class="line">    layout: z.string().optional(),</span>
+<span class="line">  }),</span>
+<span class="line">});</span>
+<span class="line"></span>
+<span class="line">export const collections = {</span>
+<span class="line">  &#39;news&#39;: news,</span>
+<span class="line">  // ... other collections</span>
+<span class="line">};</span></code></pre>
+<h3>2. Create LatestNews Component</h3>
+<pre><code class="language-astro"><span class="line">---</span>
+<span class="line">// src/components/LatestNews.astro</span>
+<span class="line">import { getCollection } from &#39;astro:content&#39;;</span>
+<span class="line"></span>
+<span class="line">const newsEntries = await getCollection(&#39;news&#39;);</span>
+<span class="line"></span>
+<span class="line">let latestNews = null;</span>
+<span class="line">if (newsEntries &amp;&amp; newsEntries.length &gt; 0) {</span>
+<span class="line">  latestNews = newsEntries</span>
+<span class="line">    .filter(entry =&gt; entry.data &amp;&amp; (entry.data.date || entry.data.pubDate))</span>
+<span class="line">    .sort((a, b) =&gt; {</span>
+<span class="line">      const dateA = new Date(a.data.date || a.data.pubDate);</span>
+<span class="line">      const dateB = new Date(b.data.date || b.data.pubDate);</span>
+<span class="line">      return dateB.getTime() - dateA.getTime();</span>
+<span class="line">    })</span>
+<span class="line">    .slice(0, 1)[0];</span>
+<span class="line">}</span>
+<span class="line">---</span>
+<span class="line"></span>
+<span class="line">{latestNews &amp;&amp; (</span>
+<span class="line">  &lt;div class=&quot;latest-news&quot;&gt;</span>
+<span class="line">    &lt;h3&gt;📰 Latest News&lt;/h3&gt;</span>
+<span class="line">    &lt;div class=&quot;news-item&quot;&gt;</span>
+<span class="line">      &lt;h4&gt;{latestNews.data.title}&lt;/h4&gt;</span>
+<span class="line">      &lt;p&gt;{latestNews.data.description}&lt;/p&gt;</span>
+<span class="line">      &lt;a href={`/news/${latestNews.data.date || latestNews.data.pubDate}`}&gt;</span>
+<span class="line">        Read More →</span>
+<span class="line">      &lt;/a&gt;</span>
+<span class="line">    &lt;/div&gt;</span>
+<span class="line">  &lt;/div&gt;</span>
+<span class="line">)}</span>
+<span class="line"></span>
+<span class="line">&lt;style&gt;</span>
+<span class="line">  .latest-news {</span>
+<span class="line">    border: 1px solid #e1e5e9;</span>
+<span class="line">    border-radius: 8px;</span>
+<span class="line">    padding: 1.5rem;</span>
+<span class="line">    margin: 1rem 0;</span>
+<span class="line">    background: #f8fafc;</span>
+<span class="line">  }</span>
+<span class="line">  </span>
+<span class="line">  .news-item h4 {</span>
+<span class="line">    margin: 0 0 0.5rem 0;</span>
+<span class="line">    color: #1a1a1a;</span>
+<span class="line">  }</span>
+<span class="line">  </span>
+<span class="line">  .news-item p {</span>
+<span class="line">    color: #666;</span>
+<span class="line">    margin: 0 0 1rem 0;</span>
+<span class="line">  }</span>
+<span class="line">  </span>
+<span class="line">  .news-item a {</span>
+<span class="line">    color: #2563eb;</span>
+<span class="line">    text-decoration: none;</span>
+<span class="line">    font-weight: 500;</span>
+<span class="line">  }</span>
+<span class="line">&lt;/style&gt;</span></code></pre>
+<h3>3. Fix Dynamic Route Rendering</h3>
+<p>Due to structural changes in entry objects with glob loader in Astro 5.x, adaptation is needed:</p>
+<pre><code class="language-astro"><span class="line">---</span>
+<span class="line">// src/pages/news/[date].astro</span>
+<span class="line">import { getCollection, getEntry } from &#39;astro:content&#39;;</span>
+<span class="line"></span>
+<span class="line">export async function getStaticPaths() {</span>
+<span class="line">  const newsEntries = await getCollection(&#39;news&#39;);</span>
+<span class="line">  </span>
+<span class="line">  return newsEntries</span>
+<span class="line">    .filter(entry =&gt; entry.data &amp;&amp; (entry.data.date || entry.data.pubDate))</span>
+<span class="line">    .map(entry =&gt; ({</span>
+<span class="line">      params: { </span>
+<span class="line">        date: entry.data.date || entry.data.pubDate </span>
+<span class="line">      },</span>
+<span class="line">      props: { </span>
+<span class="line">        entryId: entry.id,  // Use entry.id instead of slug</span>
+<span class="line">        dateParam: entry.data.date || entry.data.pubDate</span>
+<span class="line">      }</span>
+<span class="line">    }));</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">const { entryId } = Astro.props;</span>
+<span class="line">const post = await getEntry(&#39;news&#39;, entryId);</span>
+<span class="line"></span>
+<span class="line">if (!post) {</span>
+<span class="line">  throw new Error(`No news entry found for entryId: ${entryId}`);</span>
+<span class="line">}</span>
+<span class="line">---</span>
+<span class="line"></span>
+<span class="line">&lt;html&gt;</span>
+<span class="line">  &lt;body&gt;</span>
+<span class="line">    &lt;main&gt;</span>
+<span class="line">      &lt;h1&gt;{post.data.title}&lt;/h1&gt;</span>
+<span class="line">      &lt;!-- Use pre-rendered content --&gt;</span>
+<span class="line">      &lt;div set:html={post.rendered.html}&gt;&lt;/div&gt;</span>
+<span class="line">    &lt;/main&gt;</span>
+<span class="line">  &lt;/body&gt;</span>
+<span class="line">&lt;/html&gt;</span></code></pre>
+<p>Key modification points:</p>
+<ul>
+<li>Use <code>entry.id</code> instead of <code>entry.slug</code> (slug is undefined in glob loader)</li>
+<li>Use <code>post.rendered.html</code> to get pre-rendered content</li>
+<li>Get complete entry object via <code>getEntry</code> during page rendering</li>
+</ul>
+<h2>Diverse Execution Methods</h2>
+<p>To adapt to different deployment environments, I designed multiple execution methods:</p>
+<h3>1. Direct Execution (Development &amp; Debugging)</h3>
+<pre><code class="language-bash"><span class="line"># Complete workflow</span>
+<span class="line">python -m news_bot.job --date $(date +%Y-%m-%d)</span>
+<span class="line"></span>
+<span class="line"># Dry run mode (skip publishing)</span>
+<span class="line">python -m news_bot.job --date 2025-07-25 --dry-run</span></code></pre>
+<h3>2. Shell Script Execution</h3>
+<pre><code class="language-bash"><span class="line">#!/bin/bash</span>
+<span class="line"># run_daily_news.sh</span>
+<span class="line"></span>
+<span class="line">cd &quot;$(dirname &quot;$0&quot;)&quot;</span>
+<span class="line">source .env</span>
+<span class="line"></span>
+<span class="line"># Create log directory</span>
+<span class="line">mkdir -p ~/logs</span>
+<span class="line"></span>
+<span class="line"># Execute news processing workflow</span>
+<span class="line">DATE=$(date +%Y-%m-%d)</span>
+<span class="line">echo &quot;=== Starting news processing for $DATE ===&quot; &gt;&gt; ~/logs/news_bot.log</span>
+<span class="line"></span>
+<span class="line">python -m news_bot.job --date $DATE &gt;&gt; ~/logs/news_bot.log 2&gt;&amp;1</span>
+<span class="line"></span>
+<span class="line">echo &quot;=== Completed at $(date -Iseconds) ===&quot; &gt;&gt; ~/logs/news_bot.log</span></code></pre>
+<h3>3. Daemon Mode (Recommended)</h3>
+<pre><code class="language-bash"><span class="line"># Start daemon (complete background execution)</span>
+<span class="line">./start_daemon.sh start</span>
+<span class="line"></span>
+<span class="line"># Check running status  </span>
+<span class="line">./start_daemon.sh status</span>
+<span class="line"></span>
+<span class="line"># View logs</span>
+<span class="line">./start_daemon.sh logs</span>
+<span class="line"></span>
+<span class="line"># Graceful stop</span>
+<span class="line">./stop_daemon.sh</span></code></pre>
+<h3>4. Cron Scheduled Tasks</h3>
+<pre><code class="language-bash"><span class="line"># Edit crontab</span>
+<span class="line">crontab -e</span>
+<span class="line"></span>
+<span class="line"># Execute daily at 8:05</span>
+<span class="line">5 8 * * * /Users/geyuxu/repo/astro-news-bot/run_daily_news.sh</span></code></pre>
+<h2>Operations Experience and Best Practices</h2>
+<h3>Configuration Management</h3>
+<pre><code class="language-json"><span class="line">{</span>
+<span class="line">  &quot;output_config&quot;: {</span>
+<span class="line">    &quot;blog_content_dir&quot;: &quot;/Users/geyuxu/repo/blog/geyuxu.com/src/content/news&quot;,</span>
+<span class="line">    &quot;filename_format&quot;: &quot;news_{date}.md&quot;,</span>
+<span class="line">    &quot;use_blog_dir&quot;: true</span>
+<span class="line">  },</span>
+<span class="line">  &quot;git_config&quot;: {</span>
+<span class="line">    &quot;target_branch&quot;: &quot;gh-pages&quot;,</span>
+<span class="line">    &quot;auto_switch_branch&quot;: true,</span>
+<span class="line">    &quot;push_to_remote&quot;: true</span>
+<span class="line">  },</span>
+<span class="line">  &quot;news_config&quot;: {</span>
+<span class="line">    &quot;max_articles_per_day&quot;: 6,</span>
+<span class="line">    &quot;token_budget_per_day&quot;: 4000,</span>
+<span class="line">    &quot;similarity_threshold&quot;: 0.85</span>
+<span class="line">  },</span>
+<span class="line">  &quot;llm_config&quot;: {</span>
+<span class="line">    &quot;model&quot;: &quot;gpt-4o&quot;,</span>
+<span class="line">    &quot;max_tokens&quot;: 500,</span>
+<span class="line">    &quot;temperature&quot;: 0.3</span>
+<span class="line">  },</span>
+<span class="line">  &quot;scheduler_config&quot;: {</span>
+<span class="line">    &quot;enabled&quot;: true,</span>
+<span class="line">    &quot;timezone&quot;: &quot;Asia/Shanghai&quot;,</span>
+<span class="line">    &quot;cron_expression&quot;: &quot;0 8 * * *&quot;</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+<h3>Cost Control</h3>
+<ul>
+<li>Daily processing: ~6 articles</li>
+<li>Estimated token consumption: ~4000 tokens/day</li>
+<li>OpenAI cost: ~$0.01-0.05/day</li>
+</ul>
+<h3>Log Management</h3>
+<pre><code class="language-bash"><span class="line"># View real-time logs</span>
+<span class="line">tail -f logs/daemon.log</span>
+<span class="line"></span>
+<span class="line"># View scheduler logs</span>
+<span class="line">tail -f logs/scheduler.log</span>
+<span class="line"></span>
+<span class="line"># View today&#39;s execution records</span>
+<span class="line">grep &quot;$(date +%Y-%m-%d)&quot; ~/logs/news_bot.log</span></code></pre>
+<h2>Project Value and Results</h2>
+<h3>Test Validation Results</h3>
+<p>Latest test (2025-07-26):</p>
+<ul>
+<li>✅ <strong>Fetcher</strong>: Retrieved 31 tech news articles (RSS sources)</li>
+<li>✅ <strong>Deduplicator</strong>: Vector deduplication, retained 31 unique articles</li>
+<li>✅ <strong>Summarizer</strong>: AI summary generation, used 10,681 tokens</li>
+<li>✅ <strong>Writer</strong>: Generated 188-line Markdown with 7 tech categories</li>
+<li>✅ <strong>Publisher</strong>: Successfully committed and pushed to blog repository</li>
+</ul>
+<h3>News Classification System</h3>
+<p>The system automatically categorizes news into 9 tech domains:</p>
+<ul>
+<li>🤖 Artificial Intelligence</li>
+<li>📱 Mobile Technology  </li>
+<li>🚗 Autonomous Driving</li>
+<li>☁️ Cloud Computing</li>
+<li>💾 Chip Technology</li>
+<li>💰 Venture Capital</li>
+<li>🔒 Cybersecurity</li>
+<li>⛓️ Blockchain</li>
+<li>🔬 Scientific Research</li>
+</ul>
+<h3>Output Format Example</h3>
+<pre><code class="language-markdown"><span class="line">---</span>
+<span class="line">title: Daily News Digest · 2025-07-26</span>
+<span class="line">pubDate: &#39;2025-07-26&#39;</span>
+<span class="line">description: In 2025, the US semiconductor market experienced significant changes...</span>
+<span class="line">tags: [News, Daily, Chip Technology, Autonomous Driving, Mobile Technology]</span>
+<span class="line">layout: news</span>
+<span class="line">---</span>
+<span class="line"></span>
+<span class="line">## Chip Technology</span>
+<span class="line"></span>
+<span class="line">- **A timeline of the US semiconductor market in 2025**</span>
+<span class="line">  In 2025, the US semiconductor market experienced significant changes, including leadership transitions at traditional semiconductor companies and volatile chip export policies.</span>
+<span class="line">  *Tags: Semiconductor · US Market · Policy Changes*</span>
+<span class="line">  [Read Original](https://techcrunch.com/2025/07/25/...) | Source: TechCrunch</span>
+<span class="line"></span>
+<span class="line">## Autonomous Driving</span>
+<span class="line"></span>
+<span class="line">- **Tesla is reportedly bringing robotaxi service to San Francisco**</span>
+<span class="line">  Tesla plans to launch a limited version of its autonomous taxi service in San Francisco. Unlike the Austin service, this test will have employees in the driver&#39;s seat for safety.</span>
+<span class="line">  *Tags: Tesla · Autonomous Driving · Taxi Service*</span>
+<span class="line">  [Read Original](https://techcrunch.com/2025/07/25/...) | Source: TechCrunch</span></code></pre>
+<h2>Future Plans</h2>
+<ol>
+<li><strong>Smarter Source Discovery</strong>: Enable the bot to automatically discover and recommend new high-quality news sources</li>
+<li><strong>Trend Analysis &amp; Topic Aggregation</strong>: Identify hot topics within specific time periods and aggregate related articles</li>
+<li><strong>User Feedback Loop</strong>: Collect user feedback data for fine-tuning AI models</li>
+<li><strong>Open Source Plan</strong>: Clean up code and open source to help others build their own AI news bots</li>
+</ol>
+<h2>Conclusion</h2>
+<p><code>astro-news-bot</code> is a typical &quot;use technology to solve your own problems&quot; project. It organically combines AI, automation scripts, modern web development frameworks (Astro), and DevOps principles (GitOps) to build an elegant automated system.</p>
+<p>This project not only solves my information overload problem but also serves as an excellent testbed for practicing LLM applications, vector databases, GitOps, and other emerging technologies. If you want to build a similar system, I hope this article provides some inspiration and reference.</p>
+<p>Key Tech Stack:</p>
+<ul>
+<li><strong>Backend</strong>: Python + OpenAI API + SentenceTransformers</li>
+<li><strong>Frontend</strong>: Astro + TypeScript + Content Collections</li>
+<li><strong>Deployment</strong>: GitOps + Shell Scripts + Cron Jobs</li>
+<li><strong>Data</strong>: JSON + Markdown + Git</li>
+</ul>
+<p>The entire system embodies modern AI application development best practices: modular design, vectorized processing, automated deployment, and continuous operations.</p>
+
+    </article>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
+<script>
+Prism.highlightAll();
+document.querySelectorAll('article pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const toolbar = document.createElement('div');
+    toolbar.className = 'code-toolbar';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+    };
+    toolbar.appendChild(btn);
+    pre.parentNode.insertBefore(toolbar, pre);
+});
+</script>
+</body>
+</html>

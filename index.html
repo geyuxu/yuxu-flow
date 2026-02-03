@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yuxu Ge | Senior AI Architect</title>
+    <meta name="description"
+        content="Yuxu Ge - Senior Software Architect (12y+) transitioning into Embodied AI & Robotics. MSc Candidate at University of York. Building systems that bridge enterprise engineering with machine intelligence.">
+    <style>
+        :root {
+            --black: #111;
+            --dark-grey: #444;
+            --off-white: #f4f4f4;
+            --vermilion: #C41E3A;
+            --vermilion-dim: rgba(196, 30, 58, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: var(--off-white);
+        }
+
+        a {
+            color: var(--vermilion);
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        a:hover {
+            opacity: 0.75;
+        }
+
+        /* ===== SPLIT LAYOUT ===== */
+        .layout {
+            min-height: 100vh;
+        }
+
+        /* ===== LEFT SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: var(--black);
+            color: var(--off-white);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-top {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Avatar */
+        .avatar {
+            display: block;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--vermilion);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .avatar:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Brand / Domain */
+        .brand {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--dark-grey);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Name with Horse Emblem */
+        .name-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--off-white);
+        }
+
+        /* Horse Character Emblem */
+        .horse-emblem {
+            font-size: 1.5rem;
+            color: var(--vermilion);
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .title-role {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.25rem;
+            font-weight: 400;
+        }
+
+        /* Contact Block */
+        .contact-block {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 160px;
+            color: var(--off-white);
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .social-links a:hover {
+            color: var(--vermilion);
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .social-links .orcid-link {
+            font-size: 0.68rem;
+            width: 160px;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #555;
+        }
+
+        /* ===== RIGHT CONTENT AREA ===== */
+        .content {
+            margin-left: 320px;
+            padding: 4rem 6rem 4rem 5rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-bottom: 4rem;
+        }
+
+        .hero-subtitle {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-bio {
+            font-size: 1.15rem;
+            color: var(--dark-grey);
+            max-width: 680px;
+            margin-bottom: 1.5rem;
+        }
+
+        .seasonal-greeting {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--vermilion);
+            padding: 0.5rem 0 0.5rem 1rem;
+            background: transparent;
+            border-left: 3px solid var(--vermilion);
+        }
+
+        .greeting-horse {
+            font-size: 1.1rem;
+        }
+
+        /* Section Styling */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--dark-grey);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* The Stack */
+        .stack-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stack-item {
+            padding: 1rem 1.25rem;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: var(--black);
+            font-weight: 500;
+            transition: border-color 0.2s ease;
+        }
+
+        .stack-item:hover {
+            border-color: var(--vermilion);
+        }
+
+        .stack-item span {
+            display: block;
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 400;
+            margin-top: 0.25rem;
+        }
+
+        /* Selected Work */
+        .work-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .work-item {
+            padding: 1.5rem;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .work-item:hover {
+            border-color: var(--vermilion);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .work-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .work-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--vermilion);
+            padding: 0.25rem 0.5rem;
+            background: var(--vermilion-dim);
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .work-year {
+            font-size: 0.8rem;
+            color: #888;
+            font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+        }
+
+        .work-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+        }
+
+        .work-desc {
+            font-size: 0.95rem;
+            color: var(--dark-grey);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .work-link {
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .work-link svg {
+            width: 14px;
+            height: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .work-link:hover svg {
+            transform: translateX(3px);
+        }
+
+        /* Latest Blog */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .blog-card {
+            display: block;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .blog-card:hover {
+            border-color: var(--vermilion);
+            opacity: 1;
+        }
+
+        .blog-card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--black);
+            margin-bottom: 0.35rem;
+            line-height: 1.4;
+        }
+
+        .blog-card-meta {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .blog-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--vermilion);
+        }
+
+        .blog-more:hover {
+            opacity: 0.75;
+        }
+
+        .blog-more svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Photo Strip */
+        .photo-strip {
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            border-top: 1px solid #eee;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-strip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0 1rem;
+        }
+
+        .photo-strip-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--dark-grey);
+        }
+
+        .photo-strip-link {
+            font-size: 0.75rem;
+            color: var(--dark-grey);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .photo-strip-link svg {
+            width: 14px;
+            height: 14px;
+            animation: arrow-bounce 1.5s ease-in-out infinite;
+        }
+
+        .photo-strip-link:hover svg {
+            animation: none;
+            transform: translateX(3px);
+        }
+
+        @keyframes arrow-bounce {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(4px);
+            }
+        }
+
+        .photo-strip-window {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+        }
+
+        .photo-strip-track {
+            display: inline-block;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        .photo-strip-item {
+            display: inline-block;
+            width: 120px;
+            height: 80px;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            margin-right: 8px;
+            vertical-align: middle;
+            transition: transform 0.2s ease;
+        }
+
+        .photo-strip-item:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .photo-strip-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1);
+            transition: filter 0.3s ease;
+        }
+
+        .photo-strip-item:hover img {
+            filter: grayscale(0%);
+        }
+
+        /* Footer */
+        .content-footer {
+            padding-top: 2rem;
+            border-top: 1px solid #ddd;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .sidebar-top {
+                gap: 0;
+            }
+
+            .contact-block {
+                margin-top: 1.5rem;
+            }
+
+            .social-links {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem;
+            }
+
+            .social-links a,
+            .social-links .orcid-link {
+                width: auto;
+                padding: 0.5rem;
+                font-size: 0;
+                gap: 0;
+            }
+
+            .social-links svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .social-links .hide-mobile {
+                display: none;
+            }
+
+            .sidebar-footer {
+                margin-top: 1rem;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            .hero {
+                margin-bottom: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.75rem;
+                word-wrap: break-word;
+            }
+
+            .hero-bio {
+                max-width: 100%;
+                font-size: 1rem;
+            }
+
+            .stack-grid,
+            .blog-grid,
+            .work-list {
+                grid-template-columns: 1fr !important;
+            }
+
+            .work-item {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .avatar {
+                width: 80px;
+                height: 80px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .title-role {
+                font-size: 0.8rem;
+            }
+
+            .content {
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.5rem;
+            }
+
+            .hero-bio {
+                font-size: 0.95rem;
+            }
+
+            .section-header {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Tag Styles */
+        .tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            background: #e5e5e5;
+            color: var(--dark-grey);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .tag:hover {
+            background: var(--vermilion);
+            color: white;
+        }
+
+        /* Post Metadata */
+        .blog-card-footer {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* Badge Styles */
+        .tag-notebook {
+            background: linear-gradient(135deg, #F37626 0%, #E66100 100%);
+            color: white;
+        }
+
+        .tag-notebook:hover {
+            background: linear-gradient(135deg, #E66100 0%, #D45500 100%);
+        }
+
+        .tag-pdf {
+            background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
+            color: white;
+        }
+
+        .tag-pdf:hover {
+            background: linear-gradient(135deg, #C62828 0%, #B71C1C 100%);
+        }
+
+        .tag-word {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .tag-word:hover {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+        }
+
+        .tag-text {
+            background: linear-gradient(135deg, #607D8B 0%, #455A64 100%);
+            color: white;
+        }
+
+        .tag-text:hover {
+            background: linear-gradient(135deg, #455A64 0%, #37474F 100%);
+        }
+
+        .tag-excel {
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+        }
+
+        .tag-excel:hover {
+            background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
+        }
+
+        .tag-powerpoint {
+            background: linear-gradient(135deg, #FF5722 0%, #E64A19 100%);
+            color: white;
+        }
+
+        .tag-powerpoint:hover {
+            background: linear-gradient(135deg, #E64A19 0%, #D84315 100%);
+        }
+
+        .tag-csv {
+            background: linear-gradient(135deg, #009688 0%, #00796B 100%);
+            color: white;
+        }
+
+        .tag-csv:hover {
+            background: linear-gradient(135deg, #00796B 0%, #00695C 100%);
+        }
+
+        .tag-image {
+            background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+            color: white;
+        }
+
+        .tag-image:hover {
+            background: linear-gradient(135deg, #C2185B 0%, #AD1457 100%);
+        }
+
+        .tag-video {
+            background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+        }
+
+        .tag-video:hover {
+            background: linear-gradient(135deg, #D32F2F 0%, #C62828 100%);
+        }
+
+        .tag-audio {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+            color: white;
+        }
+
+        .tag-audio:hover {
+            background: linear-gradient(135deg, #7B1FA2 0%, #6A1B9A 100%);
+        }
+
+        .tag-json {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .tag-json:hover {
+            background: linear-gradient(135deg, #F57C00 0%, #EF6C00 100%);
+        }
+
+        .tag-html {
+            background: linear-gradient(135deg, #3F51B5 0%, #303F9F 100%);
+            color: white;
+        }
+
+        .tag-html:hover {
+            background: linear-gradient(135deg, #303F9F 0%, #283593 100%);
+        }
+
+        .tag-code {
+            background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+            color: white;
+        }
+
+        .tag-code:hover {
+            background: linear-gradient(135deg, #0097A7 0%, #00838F 100%);
+        }
+
+        .tag-xml,
+        .tag-yaml {
+            background: linear-gradient(135deg, #795548 0%, #5D4037 100%);
+            color: white;
+        }
+
+        .tag-xml:hover,
+        .tag-yaml:hover {
+            background: linear-gradient(135deg, #5D4037 0%, #4E342E 100%);
+        }
+
+        .tag-latex {
+            background: linear-gradient(135deg, #673AB7 0%, #512DA8 100%);
+            color: white;
+        }
+
+        .tag-latex:hover {
+            background: linear-gradient(135deg, #512DA8 0%, #4527A0 100%);
+        }
+
+        .tag-rtf {
+            background: linear-gradient(135deg, #607D8B 0%, #455A64 100%);
+            color: white;
+        }
+
+        .tag-rtf:hover {
+            background: linear-gradient(135deg, #455A64 0%, #37474F 100%);
+        }
+
+        .tag-odt {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .tag-odt:hover {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+        }
+
+        .tag-ods {
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+        }
+
+        .tag-ods:hover {
+            background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
+        }
+
+        .tag-odp {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+        }
+
+        .tag-odp:hover {
+            background: linear-gradient(135deg, #F57C00 0%, #EF6C00 100%);
+        }
+
+        .blog-card-desc {
+            font-size: 0.85rem;
+            color: var(--dark-grey);
+            margin: 0.35rem 0;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Games Section */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1.25rem 1rem;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .game-card:hover {
+            border-color: var(--vermilion);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .game-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .game-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--black);
+        }
+
+        .game-desc {
+            font-size: 0.75rem;
+            color: #888;
+            text-align: center;
+        }
+
+        .games-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--vermilion);
+        }
+
+        .games-more svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .work-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--vermilion);
+            margin-top: 1rem;
+        }
+
+        .work-more svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- ===== LEFT SIDEBAR ===== -->
+        <aside class="sidebar" id="sidebar-content"></aside>
+        <script src="/components/sidebar.js?v=20260128"></script>
+
+        <!-- ===== RIGHT CONTENT AREA ===== -->
+        <main class="content">
+
+            <!-- Hero -->
+            <div id="hero-section"></div>
+
+            <!-- Dynamic Sections -->
+            <div id="dynamic-sections"></div>
+
+            <!-- Photo Strip -->
+            <section class="photo-strip">
+                <div class="photo-strip-header">
+                    <span class="photo-strip-title">Life Moments</span>
+                    <a href="/gallery/" class="photo-strip-link">
+                        View Gallery
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+                <!-- Window for masking overflow -->
+                <div class="photo-strip-window" id="photo-strip-window">
+                    <!-- Track that moves -->
+                    <div class="photo-strip-track" id="photo-strip-track"></div>
+                </div>
+            </section>
+
+            <footer class="content-footer">
+                Built with precision. No frameworks, just standards.
+            </footer>
+
+        </main>
+
+    </div>
+
+    <script>
+        // Helper to render Blog section
+        function renderBlog(section, allPosts) {
+            const cols = section.cols || 2;
+            const rows = section.rows || 4;
+            const count = cols * rows;
+            const sorted = allPosts.sort((a, b) => b.date.localeCompare(a.date)).slice(0, count);
+
+            // Type Badge Definitions
+            const typeBadges = {
+                'notebook': '<span class="tag tag-notebook">Jupyter</span>',
+                'pdf': '<span class="tag tag-pdf">PDF</span>',
+                'word': '<span class="tag tag-word">Word</span>',
+                'text': '<span class="tag tag-text">TXT</span>',
+                'excel': '<span class="tag tag-excel">Excel</span>',
+                'powerpoint': '<span class="tag tag-powerpoint">PPT</span>',
+                'csv': '<span class="tag tag-csv">CSV</span>',
+                'image': '<span class="tag tag-image">IMG</span>',
+                'video': '<span class="tag tag-video">VIDEO</span>',
+                'audio': '<span class="tag tag-audio">AUDIO</span>',
+                'json': '<span class="tag tag-json">JSON</span>',
+                'html': '<span class="tag tag-html">HTML</span>',
+                'code': '<span class="tag tag-code">CODE</span>',
+                'xml': '<span class="tag tag-xml">XML</span>',
+                'yaml': '<span class="tag tag-yaml">YAML</span>',
+                'latex': '<span class="tag tag-latex">LaTeX</span>',
+                'rtf': '<span class="tag tag-rtf">RTF</span>',
+                'odt': '<span class="tag tag-odt">ODT</span>',
+                'ods': '<span class="tag tag-ods">ODS</span>',
+                'odp': '<span class="tag tag-odp">ODP</span>'
+            };
+
+            const items = sorted.map(p => {
+                // Determine type badge
+                let typeBadge = '';
+
+                // Priority: Explicit type -> Extension match -> Fallback
+                if (p.type && typeBadges[p.type]) {
+                    typeBadge = typeBadges[p.type];
+                } else if (p.ext && typeBadges[p.ext]) {
+                    typeBadge = typeBadges[p.ext];
+                } else {
+                    // Determine from slug extension if not explicit
+                    const ext = p.slug.split('.').pop().toLowerCase();
+                    if (typeBadges[ext]) {
+                        typeBadge = typeBadges[ext];
+                    } else if (p.slug.endsWith('.ipynb')) {
+                        typeBadge = typeBadges['notebook'];
+                    }
+                }
+
+                // Render tags (limit to 3)
+                const tagsHtml = (p.tags || []).slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('');
+
+                return `
+            <a href="/blog/post.html?p=${p.slug}" class="blog-card">
+                <div class="blog-card-title">${p.title}</div>
+                <div class="blog-card-meta">${p.date}</div>
+                <div class="blog-card-desc">${p.description || ''}</div>
+                <div class="blog-card-footer">
+                    ${typeBadge}
+                    ${tagsHtml}
+                </div>
+            </a>
+        `}).join('');
+
+            return `
+            <section>
+                <h3 class="section-header">${section.title}</h3>
+                <div class="blog-grid" style="grid-template-columns: repeat(${cols}, 1fr)">${items}</div>
+                 <a href="/blog/" class="blog-more">
+                    View all posts
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </section>
+        `;
+        }
+
+        // Helper to render Stack section
+        function renderStack(section) {
+            const cols = section.cols || 2;
+            const rows = section.rows || 2;
+            const count = cols * rows;
+            const stackItems = section.items.slice(0, count);
+            const items = stackItems.map(item => `
+            <div class="stack-item">
+                ${item.label}
+                <span>${item.value}</span>
+            </div>
+        `).join('');
+            return `
+            <section>
+                <h3 class="section-header">${section.title}</h3>
+                <div class="stack-grid" style="grid-template-columns: repeat(${cols}, 1fr)">${items}</div>
+            </section>
+        `;
+        }
+
+        // Helper to render Work section
+        function renderWork(section, workConfig) {
+            const cols = section.cols || 2;
+            const rows = section.rows || 2;
+            const count = cols * rows;
+            const workItems = workConfig.items.slice(0, count);
+            const items = workItems.map(item => {
+                const isGitHub = item.link.includes('github.com');
+                const linkText = isGitHub ? 'View on GitHub' : 'View Project';
+                return `
+            <article class="work-item">
+                <div class="work-meta">
+                    <span class="work-tag">${item.tag}</span>
+                    <span class="work-year">${item.year}</span>
+                </div>
+                <h4 class="work-title">${item.title}</h4>
+                <p class="work-desc">${item.description}</p>
+                <a href="${item.link}" target="_blank" rel="noopener" class="work-link">
+                    ${linkText}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </article>
+        `}).join('');
+            return `
+            <section>
+                <h3 class="section-header">${section.title}</h3>
+                <div class="work-list" style="grid-template-columns: repeat(${cols}, 1fr)">${items}</div>
+                <a href="/work/" class="work-more">
+                    View all work
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </section>
+        `;
+        }
+
+        // Helper to render Hero section
+        function renderHero(hero) {
+            return `
+            <section class="hero">
+                <h2 class="hero-subtitle">${hero.subtitle}</h2>
+                <p class="hero-bio">${hero.bio}</p>
+                <div class="seasonal-greeting">
+                    ${hero.greeting}
+                </div>
+            </section>
+        `;
+        }
+
+        // Helper to render Games section
+        function renderGames(section, gamesConfig) {
+            const cols = section.cols || 4;
+            const rows = section.rows || 1;
+            const count = cols * rows;
+            const gameItems = gamesConfig.items.slice(0, count);
+            // Color palette for game icons
+            const colors = ['#edc53f', '#4CAF50', '#9C27B0', '#2196F3', '#FF5722', '#009688', '#E91E63', '#673AB7'];
+            const items = gameItems.map((item, index) => `
+            <a href="${item.href}" class="game-card">
+                <div class="game-icon" style="background: ${colors[index % colors.length]}">${item.icon}</div>
+                <div class="game-name">${item.title}</div>
+                <div class="game-desc">${item.desc}</div>
+            </a>
+        `).join('');
+            return `
+            <section>
+                <h3 class="section-header">${section.title}</h3>
+                <div class="games-grid" style="grid-template-columns: repeat(${cols}, 1fr)">${items}</div>
+                <a href="/games/" class="games-more">
+                    All games
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </section>
+        `;
+        }
+
+        // Main Content Loader
+        Promise.all([
+            fetch('/home-config.json').then(r => r.json()),
+            fetch('/blog/posts.json').then(r => r.json()),
+            fetch('/work/config.json').then(r => r.json()),
+            fetch('/games/config.json').then(r => r.json())
+        ]).then(([config, posts, workConfig, gamesConfig]) => {
+            // 0. Render Hero
+            if (config.hero) {
+                document.getElementById('hero-section').innerHTML = renderHero(config.hero);
+            }
+
+            // 1. Render Dynamic Sections including Blog
+            if (config.sections) {
+                const dynamicContainer = document.getElementById('dynamic-sections');
+                const sectionsHtml = config.sections.map(section => {
+                    if (section.type === 'blog') return renderBlog(section, posts);
+                    if (section.type === 'stack') return renderStack(section);
+                    if (section.type === 'work') return renderWork(section, workConfig);
+                    if (section.type === 'games') return renderGames(section, gamesConfig);
+                    return '';
+                }).join('');
+                dynamicContainer.innerHTML = sectionsHtml;
+            }
+        })
+            .catch(err => {
+                console.error('Error loading content:', err);
+            });
+    </script>
+
+    <script>
+        // Infinite Scroll Photo Gallery
+        fetch('/gallery/photos.json')
+            .then(r => r.json())
+            .then(photos => {
+                if (!photos.length) return;
+
+                const track = document.getElementById('photo-strip-track');
+
+                // 1. Flatten and Shuffle
+                let allImages = photos.flatMap(p => p.images);
+                // Fisher-Yates shuffle
+                for (let i = allImages.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allImages[i], allImages[j]] = [allImages[j], allImages[i]];
+                }
+
+                // 2. Ensure enough content to loop seamlessly (fill screen well)
+                // Duplicate images if we don't have enough to plausibly fill a wide screen.
+                // We target having a unique set of reasonable length.
+                while (allImages.length > 0 && allImages.length < 20) {
+                    allImages = [...allImages, ...allImages];
+                }
+
+                // Cap at a reasonable unique set size (e.g., 30 items)
+                const uniqueSet = allImages.slice(0, 30);
+
+                // 3. Render: Set A + Set B (Duplicate of A)
+                function createItems(images) {
+                    return images.map(img => `
+                        <a href="/gallery/?photo=${encodeURIComponent(img)}" class="photo-strip-item">
+                            <img src="${encodeURI(img)}" alt="Photo" loading="lazy">
+                        </a>
+                    `).join('');
+                }
+
+                track.innerHTML = createItems(uniqueSet) + createItems(uniqueSet);
+
+                // 4. Animation Logic
+                let scrollPos = 0;
+                const speed = 0.5; // Pixels per frame
+                let animationId;
+
+                // Fixed item width (120px) + margin-right (8px) = 128px
+                const itemFullWidth = 128;
+                const singleSetWidth = uniqueSet.length * itemFullWidth;
+
+                function animate() {
+                    scrollPos += speed;
+
+                    // Seamless Loop Reset
+                    // When we have scrolled exactly the width of the unique set,
+                    // we are now looking at the start of the duplicate set, which is visually identical.
+                    if (scrollPos >= singleSetWidth) {
+                        scrollPos = 0;
+                    }
+
+                    track.style.transform = `translateX(-${scrollPos}px)`;
+                    animationId = requestAnimationFrame(animate);
+                }
+
+                // Start animation
+                animationId = requestAnimationFrame(animate);
+
+                // Pause on hover
+                track.addEventListener('mouseenter', () => cancelAnimationFrame(animationId));
+                track.addEventListener('mouseleave', () => animationId = requestAnimationFrame(animate));
+            })
+            .catch(err => console.error('Error loading photos:', err));
+    </script>
+
+</body>
+
+</html>
