@@ -27,6 +27,7 @@ import { main as buildOfficePdfMain } from "./build-office-pdf.ts";
 import { main as buildTexPdfMain } from "./build-tex-pdf.ts";
 import { main as buildPostsJsonMain } from "./build-posts-json.ts";
 import { main as buildPhotosJsonMain } from "./build-photos-json.ts";
+import { main as buildVideosJsonMain } from "./build-videos-json.ts";
 import { main as buildStaticMain } from "./build-static.ts";
 import { main as buildMediumMain } from "./build-medium.ts";
 import { main as indexBuilderMain } from "./index-builder.ts";
@@ -386,6 +387,11 @@ async function build(options: {
     buildPhotosJsonMain();
     console.log("");
   }
+
+  // Build videos.json
+  console.log("--- Building Videos ---");
+  buildVideosJsonMain();
+  console.log("");
 
   // Build search index
   if (config.features.vectorSearch && Deno.env.get("OPENAI_API_KEY")) {

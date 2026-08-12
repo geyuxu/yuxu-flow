@@ -11,7 +11,7 @@
 import { join, dirname, basename, relative } from "@std/path";
 import { crypto } from "@std/crypto";
 import { encodeHex } from "jsr:@std/encoding@^1/hex";
-import { Voy } from "npm:voy-search@0.6.3/voy_search.js";
+import { Voy } from "./voy-loader.ts";
 import { getConfig, getPostsDir, getProjectRoot, getCacheDir } from "./config.ts";
 
 const config = getConfig();
